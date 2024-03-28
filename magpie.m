@@ -1,20 +1,20 @@
-function [Om,Q,Nx,Ny,biHarm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type)
+function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,NormaliseOn)
 % MAGPIE What does this do?
-%   [Om,Q,Nx,Ny,biHarm] = MAGPIE (density, Youngs, poisson, dim, h, BCs, Number_of_modes, plot_type)
+%   [Om,Q,Nx,Ny,biHarm] = MAGPIE (rho,E,nu,Lx,Ly,Lz,h,K0y,R0y,Kx0,Rx0,KLy,RLy,KxL,RxL,Nmodes)
 %   A function that returns:
 %           Om      : Angular modal frequencies
 %           Q       : A matrix of column eigenvector(s)
 %           Nx      : Grid points along the x-axis
 %           Ny      : Grid points along the y-axis
 %           biHarm  : Biharmonic Matrix for the plate
-%           Dm      : the eigenvalues of the biharmonic matrix 
+%           Dm      : the eigenvalues of the biharmonic matrix
 %
 %   Arguments:
 %       rho          %-- density [kg/m^3]
 %       E            %-- Young's mod [Pa]
 %       nu           %-- poisson's ratio
 %
-%       3 element array  representing  [x,y,z] dimensions of plate
+%       3 element array  representing  x,yz dimensions of plate
 %       ldim = [Lx,  %-- length along x [m]
 %               Ly,  %-- length along y [m]
 %               Lz]  %-- thickness [m]
@@ -43,18 +43,11 @@ function [Om,Q,Nx,Ny,biHarm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type)
 %           E       = 1.01e+11 ;        %-- Young's mod [Pa]
 %           rho     = 8765 ;            %-- density [kg/m^3]
 %           nu      = 0.3 ;             %-- poisson's ratio
-%           Nm  = 16;               %-- number of modes to compute
+%           Nm      = 16;               %-- number of modes to compute
 %           h       = sqrt(Lx*Ly)*0.01; %--
 %           BCs = ones(4,2) * 1e15      %-- elastic constants around the edges
 %
 %           [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho, E, nu, ldim, h, BCs, Nm,'none');
-%% Varargs
-if nargin < 8
-    plot_type = 'none';
-end
-if nargin < 7
-    Nm = 0;
-end
 %% Validation
 validateattributes(rho,      {'double'}, {'nonempty'});
 validateattributes(E,        {'double'}, {'nonempty'});
@@ -62,7 +55,7 @@ validateattributes(nu,       {'double'}, {'nonempty'});
 validateattributes(ldim,     {'double'}, {'numel', 3});
 validateattributes(h,        {'double'}, {'nonempty'});
 validateattributes(BCs,      {'double'}, {'size', [4,2]});
-validateattributes(Nm,   {'numeric'}, {'integer','nonnegative'});
+% validateattributes(Nmodes,   {'numeric'}, {'integer','positive'});
 validatestring(plot_type,["chladni","3D","none"]);
 
 %% Unpack array variables
@@ -88,6 +81,16 @@ end
 [Q,Dm] = eigs(biHarm,Nmodes,'smallestabs') ;
 [~,indSort] = sort(diag((Dm))) ;
 Q = Q(:,indSort) ;
+
+if NormaliseOn == 1
+    %-- normalise modes
+    for nQ = 1 : Nmodes
+        Qtemp   = Q(:,nQ) ;
+        Qnorm   = trapzIntcalc(Qtemp.*Qtemp,h,Nx,Ny) ;
+        Qtemp   = Qtemp / sqrt(Qnorm) ;
+        Q(:,nQ) = Qtemp ;
+    end
+end
 
 Dm    = diag(Dm) ;
 Om    = sqrt(abs(Dm))*sqrt(D/rho/Lz) ;

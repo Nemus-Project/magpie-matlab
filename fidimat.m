@@ -1,92 +1,91 @@
-function FDMat = fidimat(arg1,arg2,arg3,arg4)
+function outM = fidimat(arg1,arg2,arg3,arg4)
   % FIDIMAT Generate Finite Difference Spatial Sparcity Matrices
-  %   FDMat = FIDIMAT(l,ord) Generate stencil FDMat with order given by ord 
-  %           for a 1D system length l. Boundary condition defaults to simply supported
+  %   FIDIMAT(l,m,ord,bctype) A function to generate the biharmonic
+  %   coefficients for 2D given the number of ALL grid points given by l and m.
   %
-  %   FDMat = FIDIMAT(l,m,ord) Generate stencil FDMat with order given by ord 
-  %           for a 2D system of size [l m]. Boundary condition defaults to simply supported
+  %   bctype denotes boundary condition
   %
-  %   FDMat = FIDIMAT(l,m,ord,bctype) Generate stencil FDMat with order given 
-  %           by ord for a 2D system of size [l m] with specified boundary conditions bctype.
+  %         Returns a Sparse matrix BH
   %
-  %
-  %         m       % number of total grid points X axis
-  %         l       % number of total grid points Y axis
-  %         ord     % order of the matrix (string)
   %         bctype  % boundary condition type: 1: simply supported, 2: clamped
+  %         l       % number of total grid points Y axis
+  %         m       % number of total grid points X axis
+  %         ord     % order of the matrix (string)
   %
   %                 % Valid order inputs
-  %                   ['x-','x+','x.','xx','xxxx',
-  %                   'y-','y+','y.','yy','yyyy',                  
-  %                   'grad','xy','xxyy','laplace','biharm','I'];
+  %                 % 'x-', 'x+', 'xx', 'xxxx', 'laplace', 'biharm'
 
-  %% Variable Arguement Length Check
+  % Arguement check
   if nargin<2
-    error('Not enough input arguments')
+    error('Not enough input arguements')
 
-  elseif nargin==2     
-      ord = convertCharsToStrings(arg2);   
+  elseif nargin==2
+
+    if ischar(arg2)
+      ord = arg2;
       l = arg1;
       m = 1;
       bctype = 1;
+    else
+      bctype = arg2;
+      ord = 'xx';
+      l = arg1;
+      m = 1;
+    end
+
   elseif nargin==3
 
-    if ischar(arg2) || isstring(arg2)
-      ord = convertCharsToStrings(arg2);
+    if ischar(arg2)
+      ord = arg2;
       l = arg1;
       m = 1;
       bctype = arg3;
-    else
-      ord = convertCharsToStrings(arg3);
+    elseif ischar(arg3)
+      ord = arg3;
       l = arg1;
       m = arg2;
-      bctype = 1;  
+      bctype = 1;
+    else
+      bctype = arg3;
+      ord = 'xx';
+      l = arg1;
+      m = arg2;
     end
+
   elseif nargin==4
     l = arg1;
     m = arg2;
-    ord = convertCharsToStrings(arg3);
+    ord = arg3;
     bctype = arg4;
 
   elseif nargin>1
-    error('Too many input arguments')
+    error('Too many input arguements')
+
   end
-
-  %% Validate Arguments
-  valid_orders = ["x-","x+","x.","xx","xxxx", ... 
-                  "y-","y+","y.","yy","yyyy", ...
-                  "grad","xy","xxyy","laplace","biharm","I"];
-
-  validateattributes(l,      {'numeric'}, {'integer','positive'});
-  validateattributes(m,      {'numeric'}, {'integer','positive'});
-  ord = validatestring    (ord,    valid_orders);
-  validateattributes(bctype, {'numeric'}, {'integer','positive', '<', 3});
-
-  %% Set Identity Matrices
 
   Iy = speye(l); % identity matrix for y axis
   Ix = speye(m); % identity matrix for x axis
   ss = l*m;
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  %% 1D Case
+  %%%%% 1D Case
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  % if only one dimension is stipulated the function will return only
-  % a 1D FD matrix. In this case input is by the letter x
+  %% if only one dimension is stipulated the function will return only
+  %% a 1D FD matrix. In this case input is by the letter x
 
   if m == 1
 
     switch ord
 
     case 'x-'
-      FDMat = spdiags([-ones(l,1),ones(l,1)],-1:0,speye(l));
+      outM = spdiags([-ones(l,1),ones(l,1)],-1:0,speye(l));
 
     case 'x+'
-      FDMat = spdiags([-ones(l,1),ones(l,1)],0:1,speye(l));
+      outM = spdiags([-ones(l,1),ones(l,1)],0:1,speye(l));
 
     case 'x.'
-      FDMat = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
+      outM = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
 
     case 'xx'
 
@@ -95,28 +94,26 @@ function FDMat = fidimat(arg1,arg2,arg3,arg4)
       % if bctype == 0
       %   XX([1 end],:) = 0;
       % end
-      FDMat = XX;
+      outM = XX;
 
     case 'xxxx'
       XX = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
       XX(1,2) = (bctype-1)*2; XX(l,l-1) = (bctype-1)*2;
-      FDMat = XX;
-      FDMat = XX^2;
+      outM = XX;
+      outM = XX^2;
 
     case 'I'
       I = speye(ss);
       I([1 end],:) = 0;
-      FDMat = I;
+      outM = I;
 
-    case {"grad","xy","xxyy","laplace","biharm"}
-        error('%s is not a valid order for a 1D scheme', ord);
     otherwise
-      error('something went wrong, check your arguments');
+      error('something went wrong, check your arguements');
 
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% 2D Case
+    %%%%% 2D Case
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else
     % if two dimension arguements are given then the matri will out put the
@@ -130,81 +127,119 @@ function FDMat = fidimat(arg1,arg2,arg3,arg4)
 
     case 'y-'
       Y = spdiags([-ones(l,1),ones(l,1)],-1:0,speye(l));
-      FDMat = kron(Ix,Y);
+      outM = kron(Ix,Y);
 
     case 'y+'
       Y = spdiags([ones(l,1),-ones(l,1)],0:1,speye(l));
-      FDMat = kron(Ix,Y);
+      outM = kron(Ix,Y);
 
     case 'y.'
-      Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)], -1:1 ,speye(l));
-      FDMat = kron(Ix,Y);
+      Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
+      outM = kron(Ix,Y);
 
     case 'yy'
       YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
       YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
-      YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
-      FDMat = kron(Ix,YY);
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+      else
+        %YY(1:l:l*m,)
+      end
+
+      outM = kron(Ix,YY);
 
     case 'yyyy'
       YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
       YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
       YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
-      FDMat = kron(Ix,YY)^2;
+      outM = kron(Ix,YY)^2;
 
     case 'x-'
       X = spdiags([-ones(m,1),ones(m,1)],-1:0,speye(m));
-      FDMat = kron(X,Iy);
+      outM = kron(X,Iy);
 
     case 'x+'
       X = spdiags([ones(m,1),-ones(m,1)],0:1,speye(m));
-      FDMat = kron(X,Iy);
+      outM = kron(X,Iy);
 
     case 'x.'
       X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
-      FDMat = kron(X,Iy);
+      outM = kron(X,Iy);
 
     case 'xx'
       XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
       XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
-      XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
-      FDMat = kron(XX,Iy);
+      
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+      else
+
+      end
+
+      outM = kron(XX,Iy);
 
     case 'xxxx'
       XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
       XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
-      XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
-      FDMat = kron(XX,Iy)^2;
-    
-    case 'grad'
+      
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+      else
+
+      end
+
+      outM = kron(XX,Iy)^2;
+
+    case {'grad','nabla'}
       Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
       X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
-      FDMat = kron(X,Iy) + kron(Ix,Y);
+      outM = kron(X,Iy) + kron(Ix,Y);
 
     case 'xy'
       Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
       X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
-      FDMat = kron(X,Iy) * kron(Ix,Y);
-      
+      outM = kron(X,Iy) * kron(Ix,Y);
+
     case 'xxyy'
       YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
       YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
-      YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+      
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+      else
+
+      end
 
       XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
       XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
-      XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+      
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+      else
 
-      FDMat = kron(Ix,YY)*kron(XX,Iy);
+      end
 
-    case 'laplace'
+      outM = kron(Ix,YY)*kron(XX,Iy);
+
+    case {'laplace','nabla2'}
 
       XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,Ix);
-      XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+      else
+
+      end
+    
       YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,Iy);
-      YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+      else
+
+      end
+
       LA = kron(XX,Iy) + kron(Ix,YY);
-      FDMat = LA;
+      outM = LA;
 
     case 'biharm'
 
@@ -212,16 +247,28 @@ function FDMat = fidimat(arg1,arg2,arg3,arg4)
       %% Building Bi-Harmonic
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,Ix);
-      XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+      else
+
+      end
+    
       YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,Iy);
-      YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+
+      if (bctype == 1 || bctype == 2) % simply supported OR clamped
+        YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+      else
+
+      end
+      
       LA = kron(XX,Iy) + kron(Ix,YY);
       BH = LA*LA;
-      FDMat = BH;
+      outM = BH;
 
     case 'I'
       I = speye(ss);
-      FDMat = I;
+      outM = I;
 
     otherwise
       error('something went wrong, check your arguements');
@@ -229,7 +276,10 @@ function FDMat = fidimat(arg1,arg2,arg3,arg4)
     end
 
     % set the correct points to 0
-    FDMat(:,[1:l+1, ss-l:ss]) = 0;FDMat([1:l+1, ss-l:ss],:) = 0;
-    FDMat(:,[2*l:l:ss, (2*l)+1:l:ss]) = 0; FDMat([2*l:l:ss, (2*l)+1:l:ss],:) = 0;
+    if (bctype == 1 || bctype == 2) % simply supported OR clamped
+     outM(:,[1:l+1, ss-l:ss]) = 0;outM([1:l+1, ss-l:ss],:) = 0;
+     outM(:,[2*l:l:ss, (2*l)+1:l:ss]) = 0; outM([2*l:l:ss, (2*l)+1:l:ss],:) = 0;
+    else
 
+    end
   end

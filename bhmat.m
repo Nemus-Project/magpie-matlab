@@ -4,7 +4,7 @@ function biHarm = bhmat(BCs,Nxy,h,Lz,E,nu)
 %
 %   Arguments:
 %       BCS          %-- density [kg/m^3]
-%       Nxy          %-- Number of grad points [Nx Ny]
+%       Nxy          %-- Number of grid points [Nx Ny]
 %       h            %-- Grid spacing
 %       Lz           %-- plate thickness
 %       E            %-- Young's mod [Pa]
