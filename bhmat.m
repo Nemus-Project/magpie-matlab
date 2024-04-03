@@ -18,6 +18,8 @@ validateattributes(Nxy,      {'double'}, {'numel', 2, 'positive','integer'});
 % validateattributes(E,        {'double'}, {'nonempty'});
 % validateattributes(nu,       {'double'}, {'nonempty'});
 
+method = 'old';
+
 %% Unpack Variables
 pack_BCs = num2cell(BCs);
 [K0y, Kx0, KLy, KxL, R0y, Rx0, RLy, RxL] = pack_BCs{:};
@@ -36,27 +38,17 @@ a2 = ones(Ny-1,1) ;
 [D00u00,D00u10,D00u20,D00u01,D00u02,D00u11] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
 [D01u01,D01u11,D01u21,D01u00,D01u02,D01u03,D01u12,D01u10] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
 [D02u02,D02u12,D02u22,D02u01,D02u03,D02u04,D02u00,D02u13,D02u11] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[D0Nu0N,D0Nu1N,D0Nu2N,D0Nu0Nm1,D0Nu0Nm2,D0Nu1Nm1] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
 [D0Nm1u0Nm1,D0Nm1u1Nm1,D0Nm1u2Nm1,D0Nm1u0N,D0Nm1u0Nm2,D0Nm1u0Nm3,D0Nm1u1Nm2,D0Nm1u1N] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+[D0Nu0N,D0Nu1N,D0Nu2N,D0Nu0Nm1,D0Nu0Nm2,D0Nu1Nm1] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
 %%
 %%-- Blk11
 D0 = D02u02*a0; D1 = D02u03*a1; D2 = D02u04*a2 ; Dm1 = D02u01*a1; Dm2 = D02u00*a2 ;
 
-Blk11               = sparse(diag(D0) + diag(D1,1) + diag(Dm1,-1) + diag(D2,2) + diag(Dm2,-2)) ;
-Blk11(1,1)          = D00u00 ;
-Blk11(1,2)          = D00u01 ;
-Blk11(1,3)          = D00u02 ;
-Blk11(2,1)          = D01u00 ;
-Blk11(2,2)          = D01u01 ;
-Blk11(2,3)          = D01u02 ;
-Blk11(2,4)          = D01u03 ;
-Blk11(end,end)      = D0Nu0N ;
-Blk11(end,end-1)    = D0Nu0Nm1 ;
-Blk11(end,end-2)    = D0Nu0Nm2 ;
-Blk11(end-1,end)    = D0Nm1u0N ;
-Blk11(end-1,end-1)  = D0Nm1u0Nm1 ;
-Blk11(end-1,end-2)  = D0Nm1u0Nm2 ;
-Blk11(end-1,end-3)  = D0Nm1u0Nm3 ;
+Blk11                = sparse(diag(D0) + diag(D1,1) + diag(Dm1,-1) + diag(D2,2) + diag(Dm2,-2)) ;
+Blk11(1,[1,2,3])  = [D00u00,D00u01,D00u02] ;
+Blk11(2,[1,2,3,4])  = [D01u00, D01u01,D01u02,D01u03]  ;
+Blk11(end-1,[end-3,end-2,end-1,end])    = [D0Nm1u0Nm3,D0Nm1u0Nm2,D0Nm1u0Nm1,D0Nm1u0N ];
+Blk11(end,[end-2,end-1,end]) = [D0Nu0Nm2,D0Nu0Nm1,D0Nu0N] ;
 
 %%
 %%%-- Blk12
@@ -396,633 +388,940 @@ biHarm = biHarm/h^4 ;
 
 a0 = ones(Ny+1,1); a1 = ones(Ny,1); a2 = ones(Ny-1,1);
 
-%% dm2Ny  % pad zeros at the end
-[~,~,~,~,~,~,D20u00,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D21u01,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,D22u02,~,~,~,~,~,~,~,~] = D22_coeffs ;
-[~,~,~,~,~,~,D2Nu0N,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,D2Nm1u0Nm1,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
-
-dm2Ny0 = D22u02*a0;
-dm2Ny0([1,2,Ny,Ny+1]) = [D20u00,D21u01,D2Nm1u0Nm1,D2Nu0N];
-
-[~, ~, D10u30, ~, ~, ~, ~, ~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D11u31,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D12u32,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
-[~, ~, D1Nu3N, ~, ~, ~, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,D1Nm1u3Nm1,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+switch method
+
+    case 'old'
+        %% dm2Ny  % pad zeros at the end
+        [~,~,~,~,~,~,D20u00,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D21u01,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,D22u02,~,~,~,~,~,~,~,~] = D22_coeffs ;
+        [~,~,~,~,~,~,D2Nu0N,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,D2Nm1u0Nm1,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+
+        dm2Ny0 = D22u02*a0;
+        dm2Ny0([1,2,Ny,Ny+1]) = [D20u00,D21u01,D2Nm1u0Nm1,D2Nu0N];
+
+        [~,~, D10u30,~,~,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D11u31,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D12u32,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~, D1Nu3N,~,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,D1Nm1u3Nm1,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+
+        dm2Ny1 = D12u32*a0;
+        dm2Ny1([1,2,Ny,Ny+1]) = [D10u30,D11u31,D1Nm1u3Nm1,D1Nu3N];
+
+        [~,~,D00u20,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,D01u21,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [~,~,D02u22,~,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [~,~,D0Nu2N,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [~,~,D0Nm1u2Nm1,~,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+
+        dm2Ny2 = D02u22*a0;
+        dm2Ny2([1,2,Ny,Ny+1]) = [D00u20, D01u21, D0Nm1u2Nm1, D0Nu2N];
+
+        Dm2Ny = [repmat(dm2Ny0,Nx-3,1);dm2Ny1;dm2Ny2];
+
+        assert(all(abs(diag(Blk31,0) - dm2Ny0) <= eps), "d01 incorrect");
+        assert(all(abs(diag(BlkMm1Mm3,0) - dm2Ny1) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMMm2,0) - dm2Ny2) <= eps), "d0Mm1 incorrect");
+
+        %% dmNym1 % pad zeros at the end
+        [~,~,~,~,~,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D11u00,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D12u01,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~,~,~,~,~, D1Nu0Nm1] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D1Nm1u0Nm2] = D11_coeffs(R0y,RxL,h,D,nu) ;
+
+
+        dmNym10 = D12u01*a1;
+        dmNym10([1,Ny-1,Ny]) = [D11u00,D1Nm1u0Nm2,D1Nu0Nm1];
+
+        [~,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D21u10,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,D22u11,~,~,~,~,~,~,~,~,~,~,~] = D22_coeffs ;
+        [~,~,~,~,~,~,~,~,D2Nu1Nm1] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~,D2Nm1u1Nm2] = D21_coeffs(RxL,h,D,nu) ;
+
+        dmNym11 = D22u11*a1;
+        dmNym11([1,Ny-1,Ny]) = [D21u10,D2Nm1u1Nm2,D2Nu1Nm1];
+
+        [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D11u20,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D12u21,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~,~,~,~,~,D1Nm1u2Nm2,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        [~,~,~,~,~,~, D1Nu2Nm1,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        
+        dmNym1M1 = D12u21*a1;
+        dmNym1M1([1,Ny-1,Ny]) = [D11u20,D1Nm1u2Nm2,D1Nu2Nm1];
+
+        [~,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D01u10] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D02u11] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [~,~,~,~,~,D0Nu1Nm1] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,D0Nm1u1Nm2,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+
+        dmNym1M = D02u11*a1;
+        dmNym1M([1,Ny-1,Ny]) = [D01u10,D0Nm1u1Nm2,D0Nu1Nm1];
+
+        assert(all(abs(diag(Blk21,-1) - dmNym10) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk32,-1) - dmNym11) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMMm1,-1) - dmNym1M) <= eps), "d0Mm1 incorrect");
+
+        DmNym1 = [dmNym10;0;repmat([dmNym11;0],Nx-3,1);dmNym1M1;0;dmNym1M];
+
+        %% dmNy   % pad zeros at the end
+
+        [~,~,~, D10u00,~,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,D11u01,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D12u02,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~, D1Nu0N,~,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,D1Nm1u0Nm1,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+
+        dmNy0 = D12u02*a0;
+        dmNy0([1,2,Ny,Ny+1]) = [D10u00,D11u01,D1Nm1u0Nm1,D1Nu0N];
+
+        [~,~,~,D20u10,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,D21u11,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,~,D22u12,~,~,~,~,~,~,~] = D22_coeffs ;
+        [~,~,~,D2Nu1N,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,D2Nm1u1Nm1,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+
+        dmNy1 = D22u12*a0;
+        dmNy1([1,2,Ny,Ny+1]) = [D20u10,D21u11,D2Nm1u1Nm1,D2Nu1N];
+
+        [~, D10u20,~,~,~,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D11u21,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D12u22,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~, D1Nu2N,~,~,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,D1Nm1u2Nm1,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+
+        dmNyM1 = D12u22*a0;
+        dmNyM1([1,2,Ny,Ny+1]) = [D10u20,D11u21,D1Nm1u2Nm1,D1Nu2N];
+
+        [~,D00u10,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [~,D01u11,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [~,D02u12,~,~,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [~,D0Nu1N,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [~,D0Nm1u1Nm1,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+
+        dmNyM = D02u12*a0;
+        dmNyM([1,2,Ny,Ny+1]) = [D00u10,D01u11,D0Nm1u1Nm1,D0Nu1N];
+
+        DmNy = [dmNy0;repmat(dmNy1,(Nx-3),1);dmNyM1;dmNyM];
+
+        assert(all(abs(diag(Blk21,0) - dmNy0) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk32,0) - dmNy1) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMMm1,0) - dmNyM) <= eps), "d0Mm1 incorrect");
+        %assert(all(abs(diag(biHarm,Ny+1) - DmNy) <= eps), "D0 incorrect");
+
+
+        %% dmNyp1 % pad zeros at the
+        [~,~,~,~,~,~,~, D10u01] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D11u02] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~,D12u03] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D1Nm1u0N,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-dm2Ny1 = D12u32*a0;
-dm2Ny1([1,2,Ny,Ny+1]) = [D10u30,D11u31,D1Nm1u3Nm1,D1Nu3N];
+        dmNy10 = D12u03*a1;
+        dmNy10([1,2,Ny]) = [D10u01,D11u02,D1Nm1u0N];
 
-[~,~,D00u20,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,D01u21,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,~,D02u22,~,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,~,D0Nu2N,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,~,D0Nm1u2Nm1,~,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D20u11] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~,D21u12] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D22u13,~,~,~] = D22_coeffs ;
+        [~,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D2Nm1u1N,~] = D21_coeffs(RxL,h,D,nu) ;
 
-dm2Ny2 = D02u22*a0;
-dm2Ny2([1,2,Ny,Ny+1]) = [D00u20, D01u21, D0Nm1u2Nm1, D0Nu2N];
 
-Dm2Ny = [repmat(dm2Ny0,Nx-3,1);dm2Ny1;dm2Ny2];
-
-assert(all((diag(Blk31,0) - dm2Ny0) <= eps), "d01 incorrect");
-assert(all((diag(BlkMm1Mm3,0) - dm2Ny1) <= eps), "d02 incorrect");
-assert(all((diag(BlkMMm2,0) - dm2Ny2) <= eps), "d0Mm1 incorrect");
+        dmNy11 = D22u13*a1;
+        dmNy11([1,2,Ny]) = [D20u11,D21u12,D2Nm1u1N];
+        
+        [~,~,~,~,~,~,D10u21,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D11u22,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D12u23,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D1Nm1u2N,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        
+        
+        dmNy1M1 = D12u23*a1;
+        dmNy1M1([1,2,Ny]) = [D10u21,D11u22,D1Nm1u2N];
 
-%% dmNym1 % pad zeros at the end
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,D11u00,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,D12u01,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, ~, D1Nu0Nm1] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,D1Nm1u0Nm2] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        [~,~,~,~,~,D00u11] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D01u12,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D02u13,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [~,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,D0Nm1u1N] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
-
-dmNym10 = D12u01*a1;
-dmNym10([1,Ny-1,Ny]) = [D11u00,D1Nm1u0Nm2,D1Nu0Nm1];
+        dmNy1M = D02u13*a1;
+        dmNy1M([1,2,Ny]) = [D00u11,D01u12,D0Nm1u1N];
 
-[~,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,D21u10,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,D22u11,~,~,~,~,~,~,~,~,~,~,~] = D22_coeffs ;
-[~,~,~,~,~,~,~,~,D2Nu1Nm1] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~,D2Nm1u1Nm2] = D21_coeffs(RxL,h,D,nu) ;
+        assert(all(abs(diag(Blk21,1) - dmNy10) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk32,1) - dmNy11) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMMm1,1) - dmNy1M) <= eps), "d0Mm1 incorrect");
 
+        DmNy1 = [0;dmNy10;repmat([0;dmNy11],Nx-3,1);0;dmNy1M1;0;dmNy1M;0];
 
-dmNym11 = D22u11*a1;
-dmNym11([1,Ny-1,Ny]) = [D21u10,D2Nm1u1Nm2,D2Nu1Nm1];
+        %% dm2   % pad zeros at the end
+        [~,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D02u00,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [~,~,~,~,D0Nu0Nm2,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,D0Nm1u0Nm3,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
-[~,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D01u10] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,D02u11] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,~,~,~,~,D0Nu1Nm1] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,D0Nm1u1Nm2,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
-dmNym1M = D02u11*a1;
-dmNym1M([1,Ny-1,Ny]) = [D01u10,D0Nm1u1Nm2,D0Nu1Nm1];
+        dm20 = D02u00*a2;
+        dm20([Ny-2,Ny-1])  = [D0Nm1u0Nm3,D0Nu0Nm2];
 
-assert(all((diag(Blk21,-1) - dmNym10) <= eps), "d01 incorrect");
-assert(all((diag(Blk32,-1) - dmNym11) <= eps), "d02 incorrect");
-assert(all((diag(BlkMMm1,-1) - dmNym1M) <= eps), "d0Mm1 incorrect");
+        [~,~,~,~,~,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,D12u10,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~,~,~, D1Nu1Nm2,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,D1Nm1u1Nm3,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-DmNym1 = [dmNym10;0;repmat([dmNym11;0],Nx-2,1);dmNym1M];
+        dm21 = D12u10*a2 ;
+        dm21([Ny-2,Ny-1])  = [D1Nm1u1Nm3,D1Nu1Nm2];
 
-%% dmNy   % pad zeros at the end
+        [~,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [D22u20,~,~,~,~,~,~,~,~,~,~,~,~] = D22_coeffs ;
+        [~,~,D2Nu2Nm2,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,D2Nm1u2Nm3,~,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
-[~, ~, ~, D10u00, ~, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,D11u01,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,D12u02,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, D1Nu0N, ~, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,D1Nm1u0Nm1,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-dmNy0 = D12u02*a0;
-dmNy0([1,2,Ny,Ny+1]) = [D10u00,D11u01,D1Nm1u0Nm1,D1Nu0N];
+        dm22 = D22u20*a2;
+        dm22([Ny-2,Ny-1])  = [D2Nm1u2Nm3,D2Nu2Nm2];
 
-[~,~,~,D20u10,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,D21u11,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,~,D22u12,~,~,~,~,~,~,~] = D22_coeffs ;
-[~,~,~,D2Nu1N,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,~,D2Nm1u1Nm1,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,D12u10,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~,~,~, D1Nu1Nm2,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,~,D1Nm1u1Nm3,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
 
-dmNy1 = D22u12*a0;
-dmNy1([1,2,Ny,Ny+1]) = [D20u10,D21u11,D2Nm1u1Nm1,D2Nu1N];
 
-[~, D10u20, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,D11u21,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D12u22,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
-[~, D1Nu2N, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,D1Nm1u2Nm1,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        dm2M1 = D12u10*a2 ;
+        dm2M1([Ny-2,Ny-1]) = [D1Nm1u1Nm3,D1Nu1Nm2];
 
-dmNyM1 = D12u22*a0;
-dmNyM1([1,2,Ny,Ny+1]) = [D10u20,D11u21,D1Nm1u2Nm1,D1Nu2N];
+        [~,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D02u00,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [~,~,~,~,D0Nu0Nm2,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,D0Nm1u0Nm3,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
-[~,D00u10,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,D01u11,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,D02u12,~,~,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,D0Nu1N,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,D0Nm1u1Nm1,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+        dm2M = D02u00*a2;
+        dm2M([Ny-2,Ny-1]) = [D0Nm1u0Nm3,D0Nu0Nm2];
 
-dmNyM = D02u12*a0;
-dmNyM([1,2,Ny,Ny+1]) = [D00u10,D01u11,D0Nm1u1Nm1,D0Nu1N];
+        assert(all(abs(diag(Blk11,-2) - dm20) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,-2) - dm21) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,-2) - dm22) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,-2) - dm2M1) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,-2) - dm2M) <= eps), "d0M incorrect");
 
-DmNy = [dmNy0;repmat(dmNy1,(Nx-3),1);dmNyM1;dmNyM];
+        Dm2 = [dm20;0;0;dm21;0;0;repmat([dm22;0;0],Nx+1-4,1);dm2M1;0;0;dm2M];
 
-assert(all((diag(Blk21,0) - dmNy0) <= eps), "d01 incorrect");
-assert(all((diag(Blk32,0) - dmNy1) <= eps), "d02 incorrect");
-assert(all((diag(BlkMMm1,0) - dmNyM) <= eps), "d0Mm1 incorrect");
-%assert(all((diag(biHarm,Ny+1) - DmNy) <= eps), "D0 incorrect");
+        %% dm1   % pad zeros at the end
 
 
-%% dmNyp1 % pad zeros at the
-[~, ~, ~, ~, ~, ~, ~, D10u01] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,D11u02] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~,D12u03] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,D1Nm1u0N,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        [~,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,D01u00,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [~,~,~,D02u01,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [~,~,~,D0Nu0Nm1,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,D0Nm1u0Nm2,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
-dmNy10 = D12u03*a1;
-dmNy10([1,2,Ny]) = [D10u01,D11u02,D1Nm1u0N];
+        dm10 = D02u01*a1;
+        dm10([1,Ny-1,Ny]) = [D01u00, D0Nm1u0Nm2, D0Nu0Nm1];
 
-[~,~,~,~,~,~,~,~,D20u11] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~,D21u12] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,D22u13,~,~,~] = D22_coeffs ;
-[~,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,D2Nm1u1N,~] = D21_coeffs(RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,D11u10,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,D12u11,~,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~,~, D1Nu1Nm1,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,D1Nm1u1Nm2,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
 
-dmNy11 = D22u13*a1;
-dmNy11([1,2,Ny]) = [D20u11,D21u12,D2Nm1u1N];
+        dm11 = D12u11*a1;
+        dm11([1,Ny-1,Ny]) = [D11u10, D1Nm1u1Nm2, D1Nu1Nm1];
 
-[~,~,~,~,~,D00u11] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D01u12,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D02u13,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,D0Nm1u1N] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,D21u20,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,D22u21,~,~,~,~,~,~,~,~,~,~] = D22_coeffs ;
+        [~,D2Nu2Nm1,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,D2Nm1u2Nm2,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
-dmNy1M = D02u13*a1;
-dmNy1M([1,2,Ny]) = [D00u11,D01u12,D0Nm1u1N];
 
-assert(all((diag(Blk21,1) - dmNy10) <= eps), "d01 incorrect");
-assert(all((diag(Blk32,1) - dmNy11) <= eps), "d02 incorrect");
-assert(all((diag(BlkMMm1,1) - dmNy1M) <= eps), "d0Mm1 incorrect");
+        dm12 = D22u21*a1;
+        dm12([1,Ny-1,Ny]) = [D21u20, D2Nm1u2Nm2, D2Nu2Nm1];
 
-DmNy1 = [0;dmNy10;repmat([0;dmNy11],Nx-2,1);0;dmNy1M;0];
+        [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,D11u10,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,D12u11,~,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~,~, D1Nu1Nm1,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,D1Nm1u1Nm2,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
 
-%% dm2   % pad zeros at the end
-[~,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D02u00,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[~,~,~,~,D0Nu0Nm2,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,D0Nm1u0Nm3,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
+        dm1M1 = D12u11*a1;
+        dm1M1([1,Ny-1,Ny]) = [D11u10, D1Nm1u1Nm2, D1Nu1Nm1];
 
-dm20 = D02u00*a2;
-dm20([Ny-2,Ny-1])  = [D0Nm1u0Nm3,D0Nu0Nm2];
+        [~,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,D01u00,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [~,~,~,D02u01,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [~,~,~,D0Nu0Nm1,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,D0Nm1u0Nm2,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,~,D12u10,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, ~, ~, D1Nu1Nm2, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,D1Nm1u1Nm3,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-dm21 = D12u10*a2 ;
-dm21([Ny-2,Ny-1])  = [D1Nm1u1Nm3,D1Nu1Nm2];
+        dm1M = D02u01*a1;
+        dm1M([1,Ny-1,Ny]) = [D01u00, D0Nm1u0Nm2, D0Nu0Nm1];
 
-[~,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[D22u20,~,~,~,~,~,~,~,~,~,~,~,~] = D22_coeffs ;
-[~,~,D2Nu2Nm2,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,D2Nm1u2Nm3,~,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        assert(all(abs(diag(Blk11,-1) - dm10) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,-1) - dm11) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,-1) - dm12) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,-1) - dm1M1) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,-1) - dm1M) <= eps), "d0M incorrect");
 
+        Dm1 = [dm10;0;dm11;0;repmat([dm12;0],Nx+1-4,1);dm1M1;0;dm1M];
 
-dm22 = D22u20*a2;
-dm22([Ny-2,Ny-1])  = [D2Nm1u2Nm3,D2Nu2Nm2];
+        %% d00
+        
+        [D00u00,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [D01u01,~,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [D02u02,~,~,~,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [D0Nu0N,~,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
+        [D0Nm1u0Nm1,~,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[~,~,~,~,D12u10,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
-[~, ~, ~, ~, ~, D1Nu1Nm2, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[~,~,D1Nm1u1Nm3,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        d00 = D02u02*a0;
+        d00([1,2,Ny,Ny+1]) = [D00u00, D01u01, D0Nm1u0Nm1, D0Nu0N];
 
+        [D10u10,~,~,~,~,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [D11u11,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [D12u12,~,~,~,~,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [D1Nu1N,~,~,~,~,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [D1Nm1u1Nm1,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-dm2M1 = D12u10*a2 ;
-dm2M1([Ny-2,Ny-1]) = [D1Nm1u1Nm3,D1Nu1Nm2];
 
-[~,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D02u00,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,~,~,~,D0Nu0Nm2,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,D0Nm1u0Nm3,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+        d01 = D12u12*a0;
+        d01([1,2,Ny,Ny+1]) = [D10u10, D11u11, D1Nm1u1Nm1, D1Nu1N];
 
-dm2M = D02u00*a2;
-dm2M([Ny-2,Ny-1]) = [D0Nm1u0Nm3,D0Nu0Nm2];
+        [D20u20,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [D21u21,~,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D22u22,~,~,~,~,~,~] = D22_coeffs ;
+        [D2Nu2N,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [D2Nm1u2Nm1,~,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
-assert(all((diag(Blk11,-2) - dm20) <= eps), "d00 incorrect");
-assert(all((diag(Blk22,-2) - dm21) <= eps), "d01 incorrect");
-assert(all((diag(Blk33,-2) - dm22) <= eps), "d02 incorrect");
-assert(all((diag(BlkMm1Mm1,-2) - dm2M1) <= eps), "d0Mm1 incorrect");
-assert(all((diag(BlkMM,-2) - dm2M) <= eps), "d0M incorrect");
 
-Dm2 = [dm20;0;0;dm21;0;0;repmat([dm22;0;0],Nx+1-4,1);dm2M1;0;0;dm2M];
+        d02 = D22u22*a0;
+        d02([1,2,Ny,Ny+1]) = [D20u20, D21u21, D2Nm1u2Nm1, D2Nu2N];
 
-%% dm1   % pad zeros at the end
 
+        [D10u10,~,~,~,~,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [D11u11,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [D12u12,~,~,~,~,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [D1Nu1N,~,~,~,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [D1Nm1u1Nm1,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
 
-[~,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,D01u00,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[~,~,~,D02u01,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[~,~,~,D0Nu0Nm1,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,D0Nm1u0Nm2,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
-dm10 = D02u01*a1;
-dm10([1,Ny-1,Ny]) = [D01u00, D0Nm1u0Nm2, D0Nu0Nm1];
+        d0Mm = D12u12*a0;
+        d0Mm([1,2,Ny,Ny+1]) = [D10u10, D11u11, D1Nm1u1Nm1, D1Nu1N];
 
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,D11u10,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,D12u11,~,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, ~, D1Nu1Nm1, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,D1Nm1u1Nm2,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        [D00u00,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [D01u01,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [D02u02,~,~,~,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [D0Nu0N,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [D0Nm1u0Nm1,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
 
-dm11 = D12u11*a1;
-dm11([1,Ny-1,Ny]) = [D11u10, D1Nm1u1Nm2, D1Nu1Nm1];
+        d0M = D02u02*a0;
+        d0M([1,2,Ny,Ny+1]) = [D00u00, D01u01, D0Nm1u0Nm1, D0Nu0N];
 
-[~,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,D21u20,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,D22u21,~,~,~,~,~,~,~,~,~,~] = D22_coeffs ;
-[~,D2Nu2Nm1,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,D2Nm1u2Nm2,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        D0 = [d00;d01;repmat(d02,(Nx+1-4),1);d0Mm;d0M];
 
+        assert(all(abs(diag(Blk11,0) - d00) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,0) - d01) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,0) - d02) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,0) - d0Mm) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,0) - d0M) <= eps), "d0M incorrect");
+        % assert(all(abs(diag(biHarm,0) - D0) <= eps), "D0 incorrect");
 
-dm12 = D22u21*a1;
-dm12([1,Ny-1,Ny]) = [D21u20, D2Nm1u2Nm2, D2Nu2Nm1];
 
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,D11u10,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[~,~,~,D12u11,~,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
-[~, ~, ~, ~, D1Nu1Nm1, ~, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[~,D1Nm1u1Nm2,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        %% dp1   % pad zeros at the start
+        [~,~,~,D00u01,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,D01u02,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,D02u03,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [~,~,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,D0Nm1u0N,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
+        d10 = D02u03*a1;
+        d10([1,2,Ny]) = [D00u01, D01u02, D0Nm1u0N];
 
-dm1M1 = D12u11*a1;
-dm1M1([1,Ny-1,Ny]) = [D11u10, D1Nm1u1Nm2, D1Nu1Nm1];
+        [~,~,~,~, D10u11,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,D11u12,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,D12u13,~,~,~,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,D1Nm1u1N,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-[~,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,D01u00,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,~,~,D02u01,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,~,~,D0Nu0Nm1,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,D0Nm1u0Nm2,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+        d11 = D12u13*a1;
+        d11([1,2,Ny]) = [D10u11, D11u12, D1Nm1u1N];
 
+        [~,D20u21,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,D21u22,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D22u23,~,~] = D22_coeffs ;
+        [~,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,D2Nm1u2N,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
-dm1M = D02u01*a1;
-dm1M([1,Ny-1,Ny]) = [D01u00, D0Nm1u0Nm2, D0Nu0Nm1];
+        d12 = D22u23*a1;
+        d12([1,2,Ny]) = [D20u21, D21u22, D2Nm1u2N];
 
-assert(all((diag(Blk11,-1) - dm10) <= eps), "d00 incorrect");
-assert(all((diag(Blk22,-1) - dm11) <= eps), "d01 incorrect");
-assert(all((diag(Blk33,-1) - dm12) <= eps), "d02 incorrect");
-assert(all((diag(BlkMm1Mm1,-1) - dm1M1) <= eps), "d0Mm1 incorrect");
-assert(all((diag(BlkMM,-1) - dm1M) <= eps), "d0M incorrect");
+        [~,~,~,~, D10u11,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,D11u12,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,D12u13,~,~,~,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,D1Nm1u1N,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
 
-Dm1 = [dm10;0;dm11;0;repmat([dm12;0],Nx+1-4,1);dm1M1;0;dm1M];
 
-%% d00
-[~,~,~,~,~] = biharmdiag(BCs,h,D,nu);
+        d1M1 = D12u13*a1;
+        d1M1([1,2,Ny]) = [D10u11, D11u12, D1Nm1u1N];
 
-[D00u00,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[D01u01,~,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[D02u02,~,~,~,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[D0Nu0N,~,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[D0Nm1u0Nm1,~,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+        [~,~,~,D00u01,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,D01u02,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,D02u03,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [~,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,D0Nm1u0N,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
-d00 = D02u02*a0;
-d00([1,2,Ny,Ny+1]) = [D00u00, D01u01, D0Nm1u0Nm1, D0Nu0N];
 
-[D10u10, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[D11u11,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[D12u12,~,~,~,~,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[D1Nu1N, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[D1Nm1u1Nm1,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        d1M = D02u03*a1;
+        d1M([1,2,Ny]) = [D00u01, D01u02, D0Nm1u0N];
 
+        D1 = [d10;0;d11;0;repmat([d12;0],Nx+1-4,1);d1M1;0;d1M];
 
-d01 = D12u12*a0;
-d01([1,2,Ny,Ny+1]) = [D10u10, D11u11, D1Nm1u1Nm1, D1Nu1N];
+        assert(all(abs(diag(Blk11,1) - d10) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,1) - d11) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,1) - d12) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,1) - d1M1) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,1) - d1M) <= eps), "d0M incorrect");
 
-[D20u20,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[D21u21,~,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D22u22,~,~,~,~,~,~] = D22_coeffs ;
-[D2Nu2N,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[D2Nm1u2Nm1,~,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        %% dp2   % pad zeros at the start
+        [~,~,~,~,D00u02,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D01u03,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D02u04,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+        [~,~,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
 
+        d20 = D02u04*a2;
+        d20([1,2]) = [D00u02,D01u03];
 
-d02 = D22u22*a0;
-d02([1,2,Ny,Ny+1]) = [D20u20, D21u21, D2Nm1u2Nm1, D2Nu2N];
+        [~,~,~,~,~, D10u12,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,D11u13,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,D12u14,~,~,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
+        d21 = D12u14*a2;
+        d21([1,2]) = [D10u12,D11u13];
 
-[D10u10, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[D11u11,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[D12u12,~,~,~,~,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
-[D1Nu1N, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[D1Nm1u1Nm1,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        [~,~,D20u22,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,D21u23,~,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~,~,D22u24] = D22_coeffs ;
+        [~,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
+        d22 = D22u24*a2;
+        d22([1,2]) = [D20u22,D21u23];
 
-d0Mm = D12u12*a0;
-d0Mm([1,2,Ny,Ny+1]) = [D10u10, D11u11, D1Nm1u1Nm1, D1Nu1N];
+        [~,~,~,~,~, D10u12,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,D11u13,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,D12u14,~,~,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
 
-[D00u00,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[D01u01,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[D02u02,~,~,~,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[D0Nu0N,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[D0Nm1u0Nm1,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
+        d2M1 = D12u14*a2;
+        d2M1([1,2]) = [D10u12,D11u13];
 
-d0M = D02u02*a0;
-d0M([1,2,Ny,Ny+1]) = [D00u00, D01u01, D0Nm1u0Nm1, D0Nu0N];
+        [~,~,~,~,D00u02,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D01u03,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D02u04,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
+        [~,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
-D0 = [d00;d01;repmat(d02,(Nx+1-4),1);d0Mm;d0M];
+        d2M = D02u04*a2;
+        d2M([1,2]) = [D00u02,D01u03];
 
-assert(all((diag(Blk11,0) - d00) <= eps), "d00 incorrect");
-assert(all((diag(Blk22,0) - d01) <= eps), "d01 incorrect");
-assert(all((diag(Blk33,0) - d02) <= eps), "d02 incorrect");
-assert(all((diag(BlkMm1Mm1,0) - d0Mm) <= eps), "d0Mm1 incorrect");
-assert(all((diag(BlkMM,0) - d0M) <= eps), "d0M incorrect");
-% assert(all((diag(biHarm,0) - D0) <= eps), "D0 incorrect");
+        assert(all(abs(diag(Blk11,2) - d20) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,2) - d21) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,2) - d22) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,2) - d2M1) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,2) - d2M) <= eps), "d0M incorrect");
 
+        D2 = [d20;0;0;d21;0;0;repmat([d22;0;0],Nx+1-4,1);d2M1;0;0;d2M];
 
-%% dp1   % pad zeros at the start
-[~,~,~,D00u01,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,D01u02,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[~,~,~,~,D02u03,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[~,~,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,D0Nm1u0N,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+        %% dpNym1 % pad zeros at the start
+        [~,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D01u10] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D02u11] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [~,~,~,~,~,D0Nu1Nm1] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,D0Nm1u1Nm2,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
-d10 = D02u03*a1;
-d10([1,2,Ny]) = [D00u01, D01u02, D0Nm1u0N];
+        dpNym10 = D02u11*a1;
+        dpNym10([1,Ny-1,Ny]) = [D01u10,D0Nm1u1Nm2,D0Nu1Nm1];
 
-[~, ~, ~, ~, D10u11, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,D11u12,~,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,D12u13,~,~,~,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,D1Nm1u1N,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D11u20,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D12u21,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~,~,~,~, D1Nu2Nm1,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,D1Nm1u2Nm2,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-d11 = D12u13*a1;
-d11([1,2,Ny]) = [D10u11, D11u12, D1Nm1u1N];
+        dpNym11 = D12u21*a1;
+        dpNym11([1,Ny-1,Ny]) = [D11u20,D1Nm1u2Nm2,D1Nu2Nm1];
 
-[~,D20u21,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,D21u22,~,~,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,D22u23,~,~] = D22_coeffs ;
-[~,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,D2Nm1u2N,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D21u30,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,D22u31,~,~,~,~,~,~,~,~,~] = D22_coeffs ;
+        [~,~,~,~,~,~,~,D2Nu3Nm1,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D2Nm1u3Nm2,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
-d12 = D22u23*a1;
-d12([1,2,Ny]) = [D20u21, D21u22, D2Nm1u2N];
+        dpNym12  = D22u31*a1;
+        dpNym12([1,Ny-1,Ny]) = [D21u30,D2Nm1u3Nm2,D2Nu3Nm1];
 
-[~, ~, ~, ~, D10u11, ~, ~, ~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[~,D11u12,~,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[~,D12u13,~,~,~,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,D1Nm1u1N,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D11u00,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D12u01,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~,~,~,~,~,D1Nu0Nm1] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D1Nm1u0Nm2] = D11_coeffs(RLy,RxL,h,D,nu) ;
 
+        dpNym1M = D12u01*a1;
+        dpNym1M([1,Ny-1,Ny]) = [D11u00,D1Nm1u0Nm2,D1Nu0Nm1];
 
-d1M1 = D12u13*a1;
-d1M1([1,2,Ny]) = [D10u11, D11u12, D1Nm1u1N];
+        assert(all(abs(diag(Blk12,-1) - dpNym10) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk23,-1) - dpNym11) <= eps), "d02 incorrect");
+        assert(all(abs(diag(Blk34,-1) - dpNym12) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMm1M,-1) - dpNym1M) <= eps), "d0Mm1 incorrect");
 
-[~,~,~,D00u01,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,D01u02,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,~,~,~,D02u03,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,D0Nm1u0N,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+        DNym1 = [0;dpNym10;0;dpNym11;repmat([0;dpNym12],Nx-3,1);0;dpNym1M;0];
 
+        %% dpNy   % pad zeros at the start
+        [~,D00u10,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [~,D01u11,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [~,D02u12,~,~,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [~,D0Nu1N,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
+        [~,D0Nm1u1Nm1,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
-d1M = D02u03*a1;
-d1M([1,2,Ny]) = [D00u01, D01u02, D0Nm1u0N];
+        dpNy0 = D02u12*a0;
+        dpNy0([1,2,Ny,Ny+1]) = [D00u10,D01u11,D0Nm1u1Nm1,D0Nu1N];
 
-D1 = [d10;0;d11;0;repmat([d12;0],Nx+1-4,1);d1M1;0;d1M];
+        [~, D10u20,~,~,~,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D11u21,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D12u22,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~, D1Nu2N,~,~,~,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,D1Nm1u2Nm1,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        %%
+        dpNy1 = D12u22*a0;
+        dpNy1([1,2,Ny,Ny+1]) = [D10u20,D11u21,D1Nm1u2Nm1,D1Nu2N];
 
-assert(all((diag(Blk11,1) - d10) <= eps), "d00 incorrect");
-assert(all((diag(Blk22,1) - d11) <= eps), "d01 incorrect");
-assert(all((diag(Blk33,1) - d12) <= eps), "d02 incorrect");
-assert(all((diag(BlkMm1Mm1,1) - d1M1) <= eps), "d0Mm1 incorrect");
-assert(all((diag(BlkMM,1) - d1M) <= eps), "d0M incorrect");
 
-%% dp2   % pad zeros at the start
-[~,~,~,~,D00u02,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,D01u03,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,D02u04,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[~,~,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,D0Nm1u0Nm3,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+        [~,~,~,~,D20u30,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D21u31,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D22u32,~,~,~,~,~] = D22_coeffs ;
+        [~,~,~,~,D2Nu3N,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,D2Nm1u3Nm1,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
-d20 = D02u04*a2;
-d20([1,2,Ny-1]) = [D00u02,D01u03,D0Nm1u0Nm3];
+        dpNy2 = D22u32*a0;
+        dpNy2([1,2,Ny,Ny+1]) = [D20u30,D21u31,D2Nm1u3Nm1,D2Nu3N];
 
-[~, ~, ~, ~, ~, D10u12, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,D11u13,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,D12u14,~,~,~,~,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,D1Nm1u1Nm3,~,~,~,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        [~,~,~, D10u00,~,~,~,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,D11u01,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,D12u02,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~, D1Nu0N,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,D1Nm1u0Nm1,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
 
-d21 = D12u14*a2;
-d21([1,2,Ny-1]) = [D10u12,D11u13,D1Nm1u1Nm3];
+        dpNyM = D12u02*a0;
+        dpNyM([1,2,Ny,Ny+1]) = [D10u00,D11u01,D1Nm1u0Nm1,D1Nu0N];
 
-[~,~,D20u22,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,D21u23,~,~,~,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~,~,D22u24] = D22_coeffs ;
-[~,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,D2Nm1u2Nm3,~,~,~,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        DNy = [dpNy0;dpNy1;repmat(dpNy2,(Nx-3),1);dpNyM];
 
-d22 = D22u24*a2;
-d22([1,2,Ny-1]) = [D20u22,D21u23,D2Nm1u2Nm3];
+        assert(all(abs(diag(Blk12,0) - dpNy0) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk23,0) - dpNy1) <= eps), "d02 incorrect");
+        assert(all(abs(diag(Blk34,0) - dpNy2) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMm1M,0) - dpNyM) <= eps), "d0Mm1 incorrect");
 
-[~, ~, ~, ~, ~, D10u12, ~, ~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,D11u13,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[~,~,D12u14,~,~,~,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[~,~,D1Nm1u1Nm3,~,~,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        %% dpNyp1 % pad zeros at the start
+        [~,~,~,~,~,D00u11] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D01u12,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D02u13,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [~,~,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,D0Nm1u1N] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
+        dpNy10 = D02u13*a1 ;
+        dpNy10([1,2,Ny]) = [D00u11, D01u12, D0Nm1u1N];
 
-d2M1 = D12u14*a2;
-d2M1([1,2,Ny-1]) = [D10u12,D11u13,D1Nm1u1Nm3];
+        [~,~,~,~,~,~, D10u21,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D11u22,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D12u23,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D1Nm1u2N,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-[~,~,~,~,D00u02,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,D01u03,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,D02u04,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,D0Nm1u0Nm3,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
 
-d2M = D02u04*a2;
-d2M([1,2,Ny-1]) = [D00u02,D01u03,D0Nm1u0Nm3];
+        dpNy11 = D12u23*a1 ;
+        dpNy11([1,2,Ny]) = [D10u21, D11u22, D1Nm1u2N];
 
-assert(all((diag(Blk11,2) - d20) <= eps), "d00 incorrect");
-assert(all((diag(Blk22,2) - d21) <= eps), "d01 incorrect");
-assert(all((diag(Blk33,2) - d22) <= eps), "d02 incorrect");
-assert(all((diag(BlkMm1Mm1,2) - d2M1) <= eps), "d0Mm1 incorrect");
-assert(all((diag(BlkMM,2) - d2M) <= eps), "d0M incorrect");
+        [~,~,~,~,~,~,~,D20u31,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D21u32,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~,D22u33,~] = D22_coeffs ;
+        [~,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D2Nm1u3N,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
-D2 = [d20;0;0;d21;0;0;repmat([d22;0;0],Nx+1-4,1);d2M1;0;0;d2M];
+        dpNy12 = D22u33*a1;
+        dpNy12([1,2,Ny]) = [D20u31, D21u32, D2Nm1u3N];
 
-%% dpNym1 % pad zeros at the start
-[~,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D01u10] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,D02u11] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[~,~,~,~,~,D0Nu1Nm1] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,D0Nm1u1Nm2,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~, D10u01] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,D11u02] = D11_coeffs(RLy,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,~,~,D12u03] = D12_coeffs(RLy,h,D,nu) ;
+        [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,~,D1Nm1u0N,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
 
-dpNym10 = D02u11*a1;
-dpNym10([1,Ny-1,Ny]) = [D01u10,D0Nm1u1Nm2,D0Nu1Nm1];
+        dpNy1M = D12u03*a1;
+        dpNy1M([1,2,Ny]) = [D10u01, D11u02, D1Nm1u0N];
 
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,D11u20,D11u00,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,D12u21,D12u01,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, D1Nu2Nm1, D1Nu0Nm1] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,D1Nm1u2Nm2,~,~,D1Nm1u0Nm2] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        assert(all(abs(diag(Blk12,1) - dpNy10) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk23,1) - dpNy11) <= eps), "d02 incorrect");
+        assert(all(abs(diag(Blk34,1) - dpNy12) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMm1M,1) - dpNy1M) <= eps), "d0Mm1 incorrect");
 
-dpNym11 = D12u21*a1;
-dpNym11([1,Ny-1,Ny]) = [D11u20,D1Nm1u2Nm2,D1Nu2Nm1];
+        DNy1 = [dpNy10;0;dpNy11;0;repmat([dpNy12;0],Nx-3,1);dpNy1M];
 
-[~,~,~,~,~,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,D21u30,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,D22u31,~,~,~,~,~,~,~,~,~] = D22_coeffs ;
-[~,~,~,~,~,~,~,D2Nu3Nm1,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~,D2Nm1u3Nm2,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        %% dp2Ny  % pad zeros at the start
+        [~,~,D00u20,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,D01u21,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
+        [~,~,D02u22,~,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
+        [~,~,D0Nu2N,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
+        [~,~,D0Nm1u2Nm1,~,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
 
-dpNym12  = D22u31*a1;
-dpNym12([1,Ny-1,Ny]) = [D21u30,D2Nm1u3Nm2,D2Nu3Nm1];
+        dp2Ny0 = D02u22*a0;
+        dp2Ny0([1,2,Ny,Ny+1]) = [D00u20,D01u21,D0Nm1u2Nm1,D0Nu2N];
 
-[~,~,~,~,~,~] = D00_coeffs(KLy,RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~] = D02_coeffs(KLy,RLy,h,D,nu) ;
-[~,~,~,~,~,~] = D00_coeffs(KLy,RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~] = D01_coeffs(KLy,RLy,RxL,h,D,nu) ;
+        [~,~, D10u30,~,~,~,~,~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D11u31,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,D12u32,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
+        [~,~, D1Nu3N,~,~,~,~,~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,D1Nm1u3Nm1,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
 
-dpNym1M = D12u01*a1;
-dpNym1M([1,Ny-1,Ny]) = [D11u00,D1Nm1u0Nm2,D1Nu0Nm1];
+        dp2Ny1 = D12u32*a0;
+        dp2Ny1([1,2,Ny,Ny+1]) = [D10u30,D11u31,D1Nm1u3Nm1,D1Nu3N];
 
-assert(all((diag(Blk12,-1) - dpNym10) <= eps), "d01 incorrect");
-assert(all((diag(Blk23,-1) - dpNym11) <= eps), "d02 incorrect");
-assert(all((diag(Blk34,-1) - dpNym12) <= eps), "d0Mm1 incorrect");
-assert(all((diag(BlkMm1M,-1) - dpNym1M) <= eps), "d0Mm1 incorrect");
+        [~,~,~,~,~,D20u40,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,D21u41,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
+        [~,~,~,~,~,~,~,~,D22u42,~,~,~,~] = D22_coeffs ;
+        [~,~,~,~,~,D2Nu4N,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
+        [~,~,~,~,~,~,D2Nm1u4Nm1,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
 
-DNym1 = [0;dpNym10;0;dpNym11;repmat([0;dpNym12],Nx-3,1);0;dpNym1M;0];
+        dp2Ny2 = D22u42*a0;
+        dp2Ny2([1,2,Ny,Ny+1]) = [D20u40 ,D21u41 ,D2Nm1u4Nm1 ,D2Nu4N];
 
-%% dpNy   % pad zeros at the start
-[~,D00u10,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[~,D01u11,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[~,D02u12,~,~,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[~,D0Nu1N,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[~,D0Nm1u1Nm1,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+        D2Ny = [dp2Ny0;dp2Ny1;repmat(dp2Ny2,Nx-3,1)];
 
-dpNy0 = D02u12*a0;
-dpNy0([1,2,Ny,Ny+1]) = [D00u10,D01u11,D0Nm1u1Nm1,D0Nu1N];
+        assert(all(abs(diag(Blk13,0) - dp2Ny0) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk24,0) - dp2Ny1) <= eps), "d02 incorrect");
+        assert(all(abs(diag(Blk35,0) - dp2Ny2) <= eps), "d0Mm1 incorrect");
 
-[~, D10u20, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,D11u21,~,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D12u22,~,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, D1Nu2N, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,D1Nm1u2Nm1,~,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
-%%
-dpNy1 = D12u22*a0;
-dpNy1([1,2,Ny,Ny+1]) = [D10u20,D11u21,D1Nm1u2Nm1,D1Nu2N];
+    case 'new'
 
+        %% dm2Ny  % pad zeros at the end
 
-[~,~,~,~,D20u30,~,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,D21u31,~,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D22u32,~,~,~,~,~] = D22_coeffs ;
-[~,~,~,~,D2Nu3N,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,D2Nm1u3Nm1,~,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-2ny');
 
-dpNy2 = D22u32*a0;
-dpNy2([1,2,Ny,Ny+1]) = [D20u30,D21u31,D2Nm1u3Nm1,D2Nu3N];
+        dm2Ny0 = dc(3)*a0;
+        dm2Ny0([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
 
-[~, ~, ~, D10u00, ~, ~, ~, ~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,D11u01,~,~,~,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,D12u02,~,~,~,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
-[~, ~, ~, D1Nu0N, ~, ~, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,D1Nm1u0Nm1,~,~,~,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        dm2Ny1 = dM1(3)*a0;
+        dm2Ny1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
 
-dpNyM = D12u02*a0;
-dpNyM([1,2,Ny,Ny+1]) = [D10u00,D11u01,D1Nm1u0Nm1,D1Nu0N];
+        dm2Ny2 = dM(3)*a0;
+        dm2Ny2([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
 
-DNy = [dpNy0;dpNy1;repmat(dpNy2,(Nx-3),1);dpNyM];
+        Dm2Ny = [repmat(dm2Ny0,Nx-3,1);dm2Ny1;dm2Ny2];
 
-assert(all((diag(Blk12,0) - dpNy0) <= eps), "d01 incorrect");
-assert(all((diag(Blk23,0) - dpNy1) <= eps), "d02 incorrect");
-assert(all((diag(Blk34,0) - dpNy2) <= eps), "d0Mm1 incorrect");
-assert(all((diag(BlkMm1M,0) - dpNyM) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(Blk31,0) - dm2Ny0) <= eps), "d01 incorrect");
+        assert(all(abs(diag(BlkMm1Mm3,0) - dm2Ny1) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMMm2,0) - dm2Ny2) <= eps), "d0Mm1 incorrect");
 
-%% dpNyp1 % pad zeros at the start
-[~,~,~,~,~,D00u11] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D01u12,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D02u13,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[~,~,~,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,D0Nm1u1N] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+        %% dmNym1 % pad zeros at the end
 
-dpNy10 = D02u13*a1 ;
-dpNy10([1,2,Ny]) = [D00u11, D01u12, D0Nm1u1N];
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-ny-1');
 
-[~, ~, ~, ~, ~, ~, D10u21, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D11u22,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,D12u23,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~,D1Nm1u2N,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        dmNym10 = d1(2)*a1 ;
+        dmNym10([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
+        dmNym11 = dc(2)*a1 ;
+        dmNym11([1,Ny-1,Ny]) = [d(1), dc(end-1), dc(end)];
+        dmNym1M = dM(2)*a1;
+        dmNym1M([1,Ny-1,Ny]) = [dM(1), dM(end-1), dM(end)];
 
+        assert(all(abs(diag(Blk21,-1) - dmNym10) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk32,-1) - dmNym11) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMMm1,-1) - dmNym1M) <= eps), "d0Mm1 incorrect");
 
-dpNy11 = D12u23*a1 ;
-dpNy11([1,2,Ny]) = [D10u21, D11u22, D1Nm1u2N];
+        DmNym1 = [dmNym10;0;repmat([dmNym11;0],Nx-3,1);dmNym1M];
 
-[~,~,~,~,~,~,~,D20u31,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,D21u32,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~,D22u33,~] = D22_coeffs ;
-[~,~,~,~,~,~,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,D2Nm1u3N,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        %% dmNy   % pad zeros at the end
 
-dpNy12 = D22u33*a1;
-dpNy12([1,2,Ny]) = [D20u31, D21u32, D2Nm1u3N];
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-ny');
 
-[~, ~, ~, ~, ~, ~, ~, D10u01] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,D11u02] = D11_coeffs(RLy,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,~,~,D12u03] = D12_coeffs(RLy,h,D,nu) ;
-[~, ~, ~, ~, ~, ~, ~, ~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,~,~,~,D1Nm1u0N,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
+        dmNy0 = d0(3)*a0;
+        dmNy0([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
+        dmNy1 = d1(3)*a0;
+        dmNy1([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+        dmNyM1 = dM1(3)*a0;
+        dmNyM1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+        dmNyM = dM(3)*a0;
+        dmNyM([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
 
-dpNy1M = D12u03*a1;
-dpNy1M([1,2,Ny]) = [D10u01, D11u02, D1Nm1u0N];
+        DmNy = [dmNy0;repmat(dmNy1,(Nx-3),1);dmNyM1;dmNyM];
 
-assert(all((diag(Blk12,1) - dpNy10) <= eps), "d01 incorrect");
-assert(all((diag(Blk23,1) - dpNy11) <= eps), "d02 incorrect");
-assert(all((diag(Blk34,1) - dpNy12) <= eps), "d0Mm1 incorrect");
-assert(all((diag(BlkMm1M,1) - dpNy1M) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(Blk21,0) - dmNy0) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk32,0) - dmNy1) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMMm1,0) - dmNyM) <= eps), "d0Mm1 incorrect");
 
-DNy1 = [dpNy10;0;dpNy11;0;repmat([dpNy12;0],Nx-3,1);dpNy1M];
+        %% dmNyp1 % pad zeros at the
 
-%% dp2Ny  % pad zeros at the start
-[~,~,D00u20,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,D01u21,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
-[~,~,D02u22,~,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
-[~,~,D0Nu2N,~,~,~] = D00_coeffs(K0y,R0y,KxL,RxL,h,D,nu) ;
-[~,~,D0Nm1u2Nm1,~,~,~,~,~] = D01_coeffs(K0y,R0y,RxL,h,D,nu) ;
+        dmNy1M = D02u13*a1;
+        dmNy1M([1,2,Ny]) = [D00u11,D01u12,D0Nm1u1N];
 
-dp2Ny0 = D02u22*a0;
-dp2Ny0([1,2,Ny,Ny+1]) = [D00u20,D01u21,D0Nm1u2Nm1,D0Nu2N];
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-ny+1');
 
-[~, ~, D10u30, ~, ~, ~, ~, ~] = D10_coeffs(R0y,Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D11u31,~,~,~,~] = D11_coeffs(R0y,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,D12u32,~,~,~,~] = D12_coeffs(R0y,h,D,nu) ;
-[~, ~, D1Nu3N, ~, ~, ~, ~, ~] = D10_coeffs(R0y,KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,D1Nm1u3Nm1,~,~,~,~] = D11_coeffs(R0y,RxL,h,D,nu) ;
+        dmNy10 = d1(2)*a1 ;
+        dmNy10([1,2,Ny]) = [d1(1), d1(2), d1(end)];
+        dmNy11 = dc(2)*a1 ;
+        dmNy11([1,2,Ny]) = [d(1), dc(2), dc(end)];
+        dmNy1M = dM(2)*a1;
+        dmNy1M([1,2,Ny]) = [dM(1), dM(2), dM(end)];
 
-dp2Ny1 = D12u32*a0;
-dp2Ny1([1,2,Ny,Ny+1]) = [D10u30,D11u31,D1Nm1u3Nm1,D1Nu3N];
 
-[~,~,~,~,~,D20u40,~,~,~] = D20_coeffs(Kx0,Rx0,h,D,nu) ;
-[~,~,~,~,~,~,D21u41,~,~,~,~,~] = D21_coeffs(Rx0,h,D,nu) ;
-[~,~,~,~,~,~,~,~,D22u42,~,~,~,~] = D22_coeffs ;
-[~,~,~,~,~,D2Nu4N,~,~,~] = D20_coeffs(KxL,RxL,h,D,nu) ;
-[~,~,~,~,~,~,D2Nm1u4Nm1,~,~,~,~,~] = D21_coeffs(RxL,h,D,nu) ;
+        assert(all(abs(diag(Blk21,1) - dmNy10) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk32,1) - dmNy11) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMMm1,1) - dmNy1M) <= eps), "d0Mm1 incorrect");
 
-dp2Ny2 = D22u42*a0;
-dp2Ny2([1,2,Ny,Ny+1]) = [D20u40 ,D21u41 ,D2Nm1u4Nm1 ,D2Nu4N];
+        DmNy1 = [0;dmNy10;repmat([0;dmNy11],Nx-3,1);0;dmNy1M;0];
 
-D2Ny = [dp2Ny0;dp2Ny1;repmat(dp2Ny2,Nx-3,1)];
+        %% dm2   % pad zeros at the end
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-2');
 
-assert(all((diag(Blk13,0) - dp2Ny0) <= eps), "d01 incorrect");
-assert(all((diag(Blk24,0) - dp2Ny1) <= eps), "d02 incorrect");
-assert(all((diag(Blk35,0) - dp2Ny2) <= eps), "d0Mm1 incorrect");
+        d20 = d0(1)*a2;
+        d20([Ny-2,Ny-1]) = [d0(end-1),d0(end)];
+
+        d21 = d1(1)*a2;
+        d21([Ny-2,Ny-1]) = [d1(end-1),d1(end)];
+
+        d22 = d2(1)*a2;
+        d22([Ny-2,Ny-1]) = [d2(end-1),d2(end)];
+
+        d2M1 = dM1()*a2;
+        d2M1([Ny-2,Ny-1]) = [dM1(end-1),dM1(end)];
+
+        d2M = dM(1)*a2;
+        d2M([Ny-2,Ny-1]) = [dM(end-1),dM(end)];
+
+        assert(all(abs(diag(Blk11,-2) - dm20) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,-2) - dm21) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,-2) - dm22) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,-2) - dm2M1) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,-2) - dm2M) <= eps), "d0M incorrect");
+
+        Dm2 = [dm20;0;0;dm21;0;0;repmat([dm22;0;0],Nx+1-4,1);dm2M1;0;0;dm2M];
+
+        %% dm1   % pad zeros at the end
+
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-1');
+
+        d10 = d0(3)*a1;
+        d10([1,Ny-1,Ny]) = [d0(1),d0(end-1),d0(end)];
+        d11 = d1(3)*a1;
+        d11([1,Ny-1,Ny]) = [d1(1),d1(end-1),d1(end)];
+        d12 = d2(3)*a1;
+        d12([1,Ny-1,Ny]) = [d2(1),d2(end-1),d2(end)];
+        d1M1 = dM1(3)*a1;
+        d1M1([1,Ny-1,Ny]) = [dM1(1),dM1(end-1),dM1(end)];
+        d1M = dM(3)*a1;
+        d1M([1,Ny-1,Ny]) = [dM(1),dM(end-1),dM(end)];
+
+        assert(all(abs(diag(Blk11,-1) - dm10) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,-1) - dm11) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,-1) - dm12) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,-1) - dm1M1) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,-1) - dm1M) <= eps), "d0M incorrect");
+
+        Dm1 = [dm10;0;dm11;0;repmat([dm12;0],Nx+1-4,1);dm1M1;0;dm1M];
+
+        %% d00
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'0');
+
+        d10 = d0(3)*a0;
+        d10([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
+        d11 = d1(3)*a0;
+        d11([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+        d12 = d2(3)*a0;
+        d12([1,2,Ny,Ny+1]) = [d2(1),d2(2),d2(end-1),d2(end)];
+        d1M1 = dM1(3)*a0;
+        d1M1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+        d1M = dM(3)*a0;
+        d1M([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
+
+        D0 = [d00;d01;repmat(d02,(Nx+1-4),1);d0Mm;d0M];
+
+        assert(all(abs(diag(Blk11,0) - d00) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,0) - d01) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,0) - d02) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,0) - d0Mm) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,0) - d0M) <= eps), "d0M incorrect");
+        % assert(all(abs(diag(biHarm,0) - D0) <= eps), "D0 incorrect");
+
+
+        %% dp1   % pad zeros at the start
+
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'1');
+
+        d10 = d0(3)*a1;
+        d10([1,2,Ny]) = [d0(1),d0(2),d0(end)];
+        d11 = d1(3)*a1;
+        d11([1,2,Ny]) = [d1(1),d1(2),d1(end)];
+        d12 = d2(3)*a1;
+        d12([1,2,Ny]) = [d2(1),d2(2),d2(end)];
+        d1M1 = dM1(3)*a1;
+        d1M1([1,2,Ny]) = [dM1(1),dM1(2),dM1(end)];
+        d1M = dM(3)*a1;
+        d1M([1,2,Ny]) = [dM(1),dM(2),dM(end)];
+
+
+        D1 = [d10;0;d11;0;repmat([d12;0],Nx+1-4,1);d1M1;0;d1M];
+
+        assert(all(abs(diag(Blk11,1) - d10) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,1) - d11) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,1) - d12) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,1) - d1M1) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,1) - d1M) <= eps), "d0M incorrect");
+
+        %% dp2   % pad zeros at the start
+
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'2');
+
+        d20 = d0(3)*a2;
+        d20([1,2,Ny-1]) = [d0(1),d0(2),d0(end)];
+
+        d21 = d1(3)*a2;
+        d21([1,2,Ny-1]) = [d1(1),d1(2),d1(end)];
+
+        d22 = d2(3)*a2;
+        d22([1,2,Ny-1]) = [d2(1),d2(2),d2(end)];
+
+        d2M1 = dM1(3)*a2;
+        d2M1([1,2,Ny-1]) = [dM1(1),dM1(2),dM1(end)];
+
+        d2M = dM(3)*a2;
+        d2M([1,2,Ny-1]) = [dM(1),dM(2),dM(end)];
+
+        assert(all(abs(diag(Blk11,2) - d20) <= eps), "d00 incorrect");
+        assert(all(abs(diag(Blk22,2) - d21) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk33,2) - d22) <= eps), "d02 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,2) - d2M1) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMM,2) - d2M) <= eps), "d0M incorrect");
+
+
+
+        D2 = [d20;0;0;d21;0;0;repmat([d22;0;0],Nx+1-4,1);d2M1;0;0;d2M];
+
+        %% dpNym1 % pad zeros at the start
+
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'ny-1');
+
+        dpNym10 = d0(2)*a1 ;
+        dpNym10([1,Ny-1,Ny]) = [d0(1), d0(end-1), d0(end)];
+        dpNym11 = d1(2)*a1 ;
+        dpNym11([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
+        dpNym12 = d2(3)*a1;
+        dpNym12([1,Ny-1,Ny]) = [d2(1), d2(end-1), d2(end)];
+        dpNym1M = dM1(2)*a1;
+        dpNym1M([1,Ny-1,Ny]) = [dM1(1), dM1(end-1), dM1(end)];
+
+        assert(all(abs(diag(Blk12,-1) - dpNym10) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk23,-1) - dpNym11) <= eps), "d02 incorrect");
+        assert(all(abs(diag(Blk34,-1) - dpNym12) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMm1M,-1) - dpNym1M) <= eps), "d0Mm1 incorrect");
+
+        DNym1 = [0;dpNym10;0;dpNym11;repmat([0;dpNym12],Nx-3,1);0;dpNym1M;0];
+
+        %% dpNy   % pad zeros at the start
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'ny');
+
+        dpNy0 = d0(3)*a0 ;
+        dpNy0([1,2,Ny-1,Ny]) = [d0(1), d0(2), d0(end-1),d0(end)];
+        dpNy1 = d1(2)*a0 ;
+        dpNy1([1,2,Ny-1,Ny]) = [d1(1), d1(2), d1(end-1),d1(end)];
+        dpNy2 = d2(3)*a0;
+        dpNy2([1,2,Ny-1,Ny]) = [d2(1), d2(2), d2(end-1),d2(end)];
+        dpNyM = dM1(2)*a0;
+        dpNyM([1,2,Ny-1,Ny]) = [dM1(1), dM1(2), dM1(end-1),dM1(end)];
+
+
+        DNy = [dpNy0;dpNy1;repmat(dpNy2,(Nx-3),1);dpNyM];
+
+        assert(all(abs(diag(Blk12,0) - dpNy0) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk23,0) - dpNy1) <= eps), "d02 incorrect");
+        assert(all(abs(diag(Blk34,0) - dpNy2) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMm1M,0) - dpNyM) <= eps), "d0Mm1 incorrect");
+
+        %% dpNyp1 % pad zeros at the start
+        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'ny+1');
+
+        dpNy10 = d0(3)*a1 ;
+        dpNy10([1,2,Ny]) = [d0(1), d0(2), d0(end)];
+
+        dpNy11 = d1(2)*a1 ;
+        dpNy11([1,2,Ny]) = [d1(1), d1(2), d1(end)];
+
+        dpNy12 = d2(3)*a1;
+        dpNy12([1,2,Ny]) = [d2(1), d2(2), d2(end)];
+
+        dpNy1M = dM1(2)*a1;
+        dpNy1M([1,2,Ny]) = [dM1(1), dM1(2), dM1(end)];
+
+        assert(all(abs(diag(Blk12,1) - dpNy10) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk23,1) - dpNy11) <= eps), "d02 incorrect");
+        assert(all(abs(diag(Blk34,1) - dpNy12) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMm1M,1) - dpNy1M) <= eps), "d0Mm1 incorrect");
+
+        DNy1 = [dpNy10;0;dpNy11;0;repmat([dpNy12;0],Nx-3,1);dpNy1M];
+
+        %% dp2Ny  % pad zeros at the start
+
+        d0,d1,dc,dM1,dM =biharmdiag(BCs, h, D, nu,'2ny');
+
+        dp2Ny0 = d0(3)*a0;
+        dp2Ny0([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
+
+        dp2Ny1 = d1*a0;
+        dp2Ny1([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+
+        dp2Ny2 = dc*a0;
+        dp2Ny2([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+
+        D2Ny = [dp2Ny0;dp2Ny1;repmat(dp2Ny2,Nx-3,1)];
+
+        assert(all(abs(diag(Blk13,0) - dp2Ny0) <= eps), "d01 incorrect");
+        assert(all(abs(diag(Blk24,0) - dp2Ny1) <= eps), "d02 incorrect");
+        assert(all(abs(diag(Blk35,0) - dp2Ny2) <= eps), "d0Mm1 incorrect");
+
+end
 
 %% Zero Padding
-Dm2Ny = [Dm2Ny; zeros((Nx+1)*2,1)];
+Dm2Ny = [Dm2Ny; zeros((Ny+1)*2,1)];
 
-DmNym1 = [DmNym1; zeros((Nx+2),1)];
-DmNy = [DmNy; zeros((Nx + 1),1)];
-DmNy1 = [DmNy1; zeros((Nx),1) ];
+DmNym1 = [DmNym1; zeros((Ny + 2),1)];
+DmNy = [DmNy; zeros((Ny + 1),1)];
+DmNy1 = [DmNy1; zeros((Ny),1) ];
 
 Dm2 = [Dm2;0;0];
 Dm1 = [Dm1;0];
 D1 = [0;D1];
 D2 = [0;0;D2];
 
-DNym1 = [zeros((Nx),1);DNym1];
-DNy = [zeros((Nx+1),1);DNy]; 
-DNy1 = [zeros((Nx+2),1);DNy1];
+DNym1 = [zeros((Ny),1);DNym1];
+DNy = [zeros((Ny+1),1);DNy];
+DNy1 = [zeros((Ny+2),1);DNy1];
 
-D2Ny = [zeros((Nx+1)*2,1);D2Ny];
+D2Ny = [zeros((Ny+1)*2,1);D2Ny];
 %% diag biharmonic
 
 BHdiags = [Dm2Ny,...
@@ -1031,12 +1330,10 @@ BHdiags = [Dm2Ny,...
     DNym1, DNy, DNy1,...
     D2Ny];
 
-dn = [-(2*(Nx+1)),-(Nx+2),-(Nx+1),-(Nx), (-2:2), (Nx),(Nx+1),(Nx+2), 2*(Nx+1)];
+dn = [-(2*(Ny+1)),-(Ny+2),-(Ny+1),-(Ny), (-2:2), (Ny),(Ny+1),(Ny+2), 2*(Ny+1)];
 
 BH = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
 BH = spdiags(BHdiags, dn, BH)/h^4;
-
-spy(biHarm - BH);
 
 end
 
