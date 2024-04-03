@@ -450,7 +450,7 @@ switch method
         [~,~,~,~,~,~,~,~,~,D12u21,~,~] = D12_coeffs(RLy,h,D,nu) ;
         [~,~,~,~,~,~,~,D1Nm1u2Nm2,~,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
         [~,~,~,~,~,~, D1Nu2Nm1,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-        
+
         dmNym1M1 = D12u21*a1;
         dmNym1M1([1,Ny-1,Ny]) = [D11u20,D1Nm1u2Nm2,D1Nu2Nm1];
 
@@ -534,14 +534,14 @@ switch method
 
         dmNy11 = D22u13*a1;
         dmNy11([1,2,Ny]) = [D20u11,D21u12,D2Nm1u1N];
-        
+
         [~,~,~,~,~,~,D10u21,~] = D10_coeffs(RLy,Kx0,Rx0,h,D,nu) ;
         [~,~,~,~,~,~,~,D11u22,~,~,~] = D11_coeffs(RLy,Rx0,h,D,nu) ;
         [~,~,~,~,~,~,~,~,D12u23,~,~,~] = D12_coeffs(RLy,h,D,nu) ;
         [~,~,~,~,~,~,~,~,D1Nm1u2N,~,~] = D11_coeffs(RLy,RxL,h,D,nu) ;
         [~,~,~,~,~,~,~,~] = D10_coeffs(RLy,KxL,RxL,h,D,nu) ;
-        
-        
+
+
         dmNy1M1 = D12u23*a1;
         dmNy1M1([1,2,Ny]) = [D10u21,D11u22,D1Nm1u2N];
 
@@ -678,7 +678,7 @@ switch method
         Dm1 = [dm10;0;dm11;0;repmat([dm12;0],Nx+1-4,1);dm1M1;0;dm1M];
 
         %% d00
-        
+
         [D00u00,~,~,~,~,~] = D00_coeffs(K0y,R0y,Kx0,Rx0,h,D,nu) ;
         [D01u01,~,~,~,~,~,~,~] = D01_coeffs(K0y,R0y,Rx0,h,D,nu) ;
         [D02u02,~,~,~,~,~,~,~,~] = D02_coeffs(K0y,R0y,h,D,nu) ;
