@@ -1,4 +1,4 @@
-function [Om,Q,Nx,Ny,biHarm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type)
+function [Om,Q,Nx,Ny,biHarm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,shouldNormalise)
 % MAGPIE What does this do?
 %   [Om,Q,Nx,Ny,biHarm] = MAGPIE (density, Youngs, poisson, dim, h, BCs, Number_of_modes, plot_type)
 %   A function that returns:
@@ -92,6 +92,15 @@ Q = Q(:,indSort) ;
 Dm    = diag(Dm) ;
 Om    = sqrt(abs(Dm))*sqrt(D/rho/Lz) ;
 %freqs = Om/2/pi ;
+
+if shouldNormalise
+    for nQ = 1 : Nmodes
+        Qtemp   = Q(:,nQ) ;
+        Qnorm   = trapzIntcalc(Qtemp.*Qtemp,h,Nx,Ny) ;
+        Qtemp   = Qtemp / sqrt(Qnorm) ;
+        Q(:,nQ) = Qtemp ;
+    end
+end
 
 
 switch plot_type
