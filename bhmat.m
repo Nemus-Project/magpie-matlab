@@ -1025,7 +1025,7 @@ switch method
 
         %% dm2Ny  % pad zeros at the end
 
-        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-2ny');
+        [~,~,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-2ny');
 
         dm2Ny0 = dc(3)*a0;
         dm2Ny0([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
@@ -1044,7 +1044,7 @@ switch method
 
         %% dmNym1 % pad zeros at the end
 
-        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny-1');
+        [~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny-1');
 
         dmNym10 = d1(2)*a1 ;
         dmNym10([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
@@ -1063,7 +1063,7 @@ switch method
 
         %% dmNy   % pad zeros at the end
 
-        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny');
+        [~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny');
 
         dmNy0 = d1(3)*a0;
         dmNy0([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
@@ -1085,7 +1085,7 @@ switch method
         dmNy1M = D02u13*a1;
         dmNy1M([1,2,Ny]) = [D00u11,D01u12,D0Nm1u1N];
 
-        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny+1');
+        [~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny+1');
 
         dmNy10 = d1(2)*a1 ;
         dmNy10([1,2,Ny]) = [d1(1), d1(2), d1(end)];
@@ -1231,7 +1231,7 @@ switch method
 
         %% dpNym1 % pad zeros at the start
 
-        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'ny-1');
+        [d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,'ny-1');
 
         dpNym10 = d0(2)*a1 ;
         dpNym10([1,Ny-1,Ny]) = [d0(1), d0(end-1), d0(end)];
@@ -1250,7 +1250,7 @@ switch method
         DNym1 = [0;dpNym10;0;dpNym11;repmat([0;dpNym12],Nx-3,1);0;dpNym1M;0];
 
         %% dpNy   % pad zeros at the start
-        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'ny');
+        [d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,'ny');
 
         dpNy0 = d0(3)*a0 ;
         dpNy0([1,2,Ny,Ny+1]) = [d0(1), d0(2), d0(end-1),d0(end)];
@@ -1270,7 +1270,7 @@ switch method
         %assert(all(abs(diag(BlkMm1M,0) - dpNyM) <= eps), "d0Mm1 incorrect");
 
         %% dpNyp1 % pad zeros at the start
-        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'ny+1');
+        [d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,'ny+1');
 
         dpNy10 = d0(3)*a1 ;
         dpNy10([1,2,Ny]) = [d0(1), d0(2), d0(end)];
@@ -1293,7 +1293,7 @@ switch method
 
         %% dp2Ny  % pad zeros at the start
 
-        [d0,d1,dc,dM1,dM]  =biharmdiag(BCs, h, D, nu,'2ny');
+        [d0,d1,dc,~,~]  =biharmdiag(BCs, h, D, nu,'2ny');
 
         dp2Ny0 = d0(3)*a0;
         dp2Ny0([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
