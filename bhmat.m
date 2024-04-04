@@ -38,6 +38,8 @@ a0 = ones(Ny+1,1) ;
 a1 = ones(Ny,1) ;
 a2 = ones(Ny-1,1) ;
 
+biHarm = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+
 switch method
     case 'blk'
 
@@ -354,9 +356,6 @@ switch method
         BlkMm1Mm3(2,2)          = D11u31 ;
         BlkMm1Mm3(end,end)      = D1Nu3N ;
         BlkMm1Mm3(end-1,end-1)  = D1Nm1u3Nm1 ;
-
-
-        biHarm = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
 
 
         for m = 3 : Nx - 1
@@ -1020,6 +1019,35 @@ switch method
         %assert(all(abs(diag(Blk13,0) - dp2Ny0) <= eps), "d01 incorrect");
         %assert(all(abs(diag(Blk24,0) - dp2Ny1) <= eps), "d02 incorrect");
         %assert(all(abs(diag(Blk35,0) - dp2Ny2) <= eps), "d0Mm1 incorrect");
+        %% Zero Padding
+        Dm2Ny = [Dm2Ny; zeros((Ny+1)*2,1)];
+
+        DmNym1 = [DmNym1; zeros((Ny + 2),1)];
+        DmNy = [DmNy; zeros((Ny + 1),1)];
+        DmNy1 = [DmNy1; zeros((Ny),1) ];
+
+        Dm2 = [Dm2;0;0];
+        Dm1 = [Dm1;0];
+        D1 = [0;D1];
+        D2 = [0;0;D2];
+
+        DNym1 = [zeros((Ny),1);DNym1];
+        DNy = [zeros((Ny+1),1);DNy];
+        DNy1 = [zeros((Ny+2),1);DNy1];
+
+        D2Ny = [zeros((Ny+1)*2,1);D2Ny];
+        %% diag biharmonic
+
+        BHdiags = [Dm2Ny,...
+            DmNym1, DmNy, DmNy1,...
+            Dm2, Dm1, D0, D1, D2,...
+            DNym1, DNy, DNy1,...
+            D2Ny];
+
+        dn = [-(2*(Ny+1)),-(Ny+2),-(Ny+1),-(Ny), (-2:2), (Ny),(Ny+1),(Ny+2), 2*(Ny+1)];
+
+        
+        biHarm = ((1/h)^4) * spdiags(BHdiags, dn, biHarm);
 
     case 'diag'
 
@@ -1310,37 +1338,37 @@ switch method
         %assert(all(abs(diag(Blk24,0) - dp2Ny1) <= eps), "d02 incorrect");
         %assert(all(abs(diag(Blk35,0) - dp2Ny2) <= eps), "d0Mm1 incorrect");
 
+        %% Zero Padding
+        Dm2Ny = [Dm2Ny; zeros((Ny+1)*2,1)];
+
+        DmNym1 = [DmNym1; zeros((Ny + 2),1)];
+        DmNy = [DmNy; zeros((Ny + 1),1)];
+        DmNy1 = [DmNy1; zeros((Ny),1) ];
+
+        Dm2 = [Dm2;0;0];
+        Dm1 = [Dm1;0];
+        D1 = [0;D1];
+        D2 = [0;0;D2];
+
+        DNym1 = [zeros((Ny),1);DNym1];
+        DNy = [zeros((Ny+1),1);DNy];
+        DNy1 = [zeros((Ny+2),1);DNy1];
+
+        D2Ny = [zeros((Ny+1)*2,1);D2Ny];
+        %% diag biharmonic
+
+        BHdiags = [Dm2Ny,...
+            DmNym1, DmNy, DmNy1,...
+            Dm2, Dm1, D0, D1, D2,...
+            DNym1, DNy, DNy1,...
+            D2Ny];
+
+        dn = [-(2*(Ny+1)),-(Ny+2),-(Ny+1),-(Ny), (-2:2), (Ny),(Ny+1),(Ny+2), 2*(Ny+1)];
+
+        BH = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+        biHarm = ((1/h)^4) * spdiags(BHdiags, dn, BH);
+
 end
-
-%% Zero Padding
-Dm2Ny = [Dm2Ny; zeros((Ny+1)*2,1)];
-
-DmNym1 = [DmNym1; zeros((Ny + 2),1)];
-DmNy = [DmNy; zeros((Ny + 1),1)];
-DmNy1 = [DmNy1; zeros((Ny),1) ];
-
-Dm2 = [Dm2;0;0];
-Dm1 = [Dm1;0];
-D1 = [0;D1];
-D2 = [0;0;D2];
-
-DNym1 = [zeros((Ny),1);DNym1];
-DNy = [zeros((Ny+1),1);DNy];
-DNy1 = [zeros((Ny+2),1);DNy1];
-
-D2Ny = [zeros((Ny+1)*2,1);D2Ny];
-%% diag biharmonic
-
-BHdiags = [Dm2Ny,...
-    DmNym1, DmNy, DmNy1,...
-    Dm2, Dm1, D0, D1, D2,...
-    DNym1, DNy, DNy1,...
-    D2Ny];
-
-dn = [-(2*(Ny+1)),-(Ny+2),-(Ny+1),-(Ny), (-2:2), (Ny),(Ny+1),(Ny+2), 2*(Ny+1)];
-
-BH = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
-biHarm = ((1/h)^4) * spdiags(BHdiags, dn, BH);
 
 end
 
