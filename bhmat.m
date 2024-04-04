@@ -1110,9 +1110,6 @@ switch method
 
         %% dmNyp1 % pad zeros at the
 
-        dmNy1M = D02u13*a1;
-        dmNy1M([1,2,Ny]) = [D00u11,D01u12,D0Nm1u1N];
-
         [~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny+1');
 
         dmNy10 = d1(2)*a1 ;
@@ -1124,9 +1121,9 @@ switch method
         dmNy1M = dM(2)*a1;
         dmNy1M([1,2,Ny]) = [dM(1), dM(2), dM(end)];
 
-
         %assert(all(abs(diag(Blk21,1) - dmNy10) <= eps), "d01 incorrect");
         %assert(all(abs(diag(Blk32,1) - dmNy11) <= eps), "d02 incorrect");
+        %assert(all(abs(diag(BlkMm1Mm2,1) - dmNy1M1) <= eps), "d02 incorrect");
         %assert(all(abs(diag(BlkMMm1,1) - dmNy1M) <= eps), "d0Mm1 incorrect");
 
         DmNy1 = [0;dmNy10;repmat([0;dmNy11],Nx-3,1);0;dmNy1M1;0;dmNy1M;0];
