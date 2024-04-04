@@ -11,7 +11,7 @@ function biHarm = bhmat(BCs,Nxy,h,Lz,E,nu,method)
 %       nu           %-- poisson's ratio
 %
 if nargin < 7
-    method = 'old';
+    method = 'diag';
 end
 
 %% validate
