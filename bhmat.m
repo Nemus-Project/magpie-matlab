@@ -1,4 +1,4 @@
-function biHarm = bhmat(BCs,Nxy,h,Lz,E,nu)
+function biHarm = bhmat(BCs,Nxy,h,Lz,E,nu,method)
 % biHarm = BHMAT(BCs,Nxy,h,D,nu) compute a biharmonic for a Thin Plate
 % of size [Nx Ny]
 %
@@ -10,15 +10,18 @@ function biHarm = bhmat(BCs,Nxy,h,Lz,E,nu)
 %       E            %-- Young's mod [Pa]
 %       nu           %-- poisson's ratio
 %
+if nargin < 7
+    method = 'old';
+end 
+
 %% validate
 validateattributes(BCs,      {'double'}, {'size', [4,2]});
 validateattributes(Nxy,      {'double'}, {'numel', 2, 'positive','integer'});
-% validateattributes(h,        {'double'}, {'nonempty'});
-% validateattributes(Lz,       {'double'}, {'nonempty'});
-% validateattributes(E,        {'double'}, {'nonempty'});
-% validateattributes(nu,       {'double'}, {'nonempty'});
+validateattributes(h,        {'double'}, {'nonempty'});
+validateattributes(Lz,       {'double'}, {'nonempty'});
+validateattributes(E,        {'double'}, {'nonempty'});
+validateattributes(nu,       {'double'}, {'nonempty'});
 
-method = 'old';
 
 %% Unpack Variables
 pack_BCs = num2cell(BCs);
@@ -381,7 +384,8 @@ biHarm((Ny+1)*(Nx-1)+1:Nx*(Ny+1),(Nx-1)*(Ny+1)+1:(Ny+1)*(Nx))       = BlkMm1Mm1 
 biHarm((Ny+1)*(Nx-1)+1:Nx*(Ny+1),(Nx-2)*(Ny+1)+1:(Ny+1)*(Nx-1))     = BlkMm1Mm2 ;
 biHarm((Ny+1)*(Nx-1)+1:Nx*(Ny+1),(Nx-3)*(Ny+1)+1:(Ny+1)*(Nx-2))     = BlkMm1Mm3 ;
 
-biHarm = biHarm/h^4 ;
+ho1 = 1/h;
+biHarm = (ho1^4) * biHarm;
 
 
 %% diagonal case
@@ -1022,7 +1026,7 @@ switch method
 
         %% dm2Ny  % pad zeros at the end
 
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-2ny');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-2ny');
 
         dm2Ny0 = dc(3)*a0;
         dm2Ny0([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
@@ -1041,12 +1045,14 @@ switch method
 
         %% dmNym1 % pad zeros at the end
 
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-ny-1');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny-1');
 
         dmNym10 = d1(2)*a1 ;
         dmNym10([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
         dmNym11 = dc(2)*a1 ;
-        dmNym11([1,Ny-1,Ny]) = [d(1), dc(end-1), dc(end)];
+        dmNym11([1,Ny-1,Ny]) = [dc(1), dc(end-1), dc(end)];
+        dmNym1M1 = dM1(2)*a1;
+        dmNym1M1([1,Ny-1,Ny]) = [dM1(1), dM1(end-1), dM1(end)]; 
         dmNym1M = dM(2)*a1;
         dmNym1M([1,Ny-1,Ny]) = [dM(1), dM(end-1), dM(end)];
 
@@ -1054,16 +1060,16 @@ switch method
         assert(all(abs(diag(Blk32,-1) - dmNym11) <= eps), "d02 incorrect");
         assert(all(abs(diag(BlkMMm1,-1) - dmNym1M) <= eps), "d0Mm1 incorrect");
 
-        DmNym1 = [dmNym10;0;repmat([dmNym11;0],Nx-3,1);dmNym1M];
+        DmNym1 = [dmNym10;0;repmat([dmNym11;0],Nx-3,1);dmNym1M1;0;dmNym1M];
 
         %% dmNy   % pad zeros at the end
 
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-ny');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny');
 
-        dmNy0 = d0(3)*a0;
-        dmNy0([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
-        dmNy1 = d1(3)*a0;
-        dmNy1([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+        dmNy0 = d1(3)*a0;
+        dmNy0([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+        dmNy1 = dc(3)*a0;
+        dmNy1([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
         dmNyM1 = dM1(3)*a0;
         dmNyM1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
         dmNyM = dM(3)*a0;
@@ -1080,12 +1086,14 @@ switch method
         dmNy1M = D02u13*a1;
         dmNy1M([1,2,Ny]) = [D00u11,D01u12,D0Nm1u1N];
 
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-ny+1');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny+1');
 
         dmNy10 = d1(2)*a1 ;
         dmNy10([1,2,Ny]) = [d1(1), d1(2), d1(end)];
         dmNy11 = dc(2)*a1 ;
-        dmNy11([1,2,Ny]) = [d(1), dc(2), dc(end)];
+        dmNy11([1,2,Ny]) = [dc(1), dc(2), dc(end)];
+        dmNy1M1 = dM1(2)*a1;
+        dmNy1M1([1,2,Ny]) = [dM1(1), dM1(2), dM1(end)];
         dmNy1M = dM(2)*a1;
         dmNy1M([1,2,Ny]) = [dM(1), dM(2), dM(end)];
 
@@ -1094,25 +1102,25 @@ switch method
         assert(all(abs(diag(Blk32,1) - dmNy11) <= eps), "d02 incorrect");
         assert(all(abs(diag(BlkMMm1,1) - dmNy1M) <= eps), "d0Mm1 incorrect");
 
-        DmNy1 = [0;dmNy10;repmat([0;dmNy11],Nx-3,1);0;dmNy1M;0];
+        DmNy1 = [0;dmNy10;repmat([0;dmNy11],Nx-3,1);0;dmNy1M1;0;dmNy1M;0];
 
         %% dm2   % pad zeros at the end
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-2');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-2');
 
-        d20 = d0(1)*a2;
-        d20([Ny-2,Ny-1]) = [d0(end-1),d0(end)];
+        dm20 = d0(1)*a2;
+        dm20([Ny-2,Ny-1]) = [d0(end-1),d0(end)];
 
-        d21 = d1(1)*a2;
-        d21([Ny-2,Ny-1]) = [d1(end-1),d1(end)];
+        dm21 = d1(1)*a2;
+        dm21([Ny-2,Ny-1]) = [d1(end-1),d1(end)];
 
-        d22 = d2(1)*a2;
-        d22([Ny-2,Ny-1]) = [d2(end-1),d2(end)];
+        dm22 = dc(1)*a2;
+        dm22([Ny-2,Ny-1]) = [dc(end-1),dc(end)];
 
-        d2M1 = dM1()*a2;
-        d2M1([Ny-2,Ny-1]) = [dM1(end-1),dM1(end)];
+        dm2M1 = dM1(1)*a2;
+        dm2M1([Ny-2,Ny-1]) = [dM1(end-1),dM1(end)];
 
-        d2M = dM(1)*a2;
-        d2M([Ny-2,Ny-1]) = [dM(end-1),dM(end)];
+        dm2M = dM(1)*a2;
+        dm2M([Ny-2,Ny-1]) = [dM(end-1),dM(end)];
 
         assert(all(abs(diag(Blk11,-2) - dm20) <= eps), "d00 incorrect");
         assert(all(abs(diag(Blk22,-2) - dm21) <= eps), "d01 incorrect");
@@ -1124,18 +1132,18 @@ switch method
 
         %% dm1   % pad zeros at the end
 
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'-1');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-1');
 
-        d10 = d0(3)*a1;
-        d10([1,Ny-1,Ny]) = [d0(1),d0(end-1),d0(end)];
-        d11 = d1(3)*a1;
-        d11([1,Ny-1,Ny]) = [d1(1),d1(end-1),d1(end)];
-        d12 = d2(3)*a1;
-        d12([1,Ny-1,Ny]) = [d2(1),d2(end-1),d2(end)];
-        d1M1 = dM1(3)*a1;
-        d1M1([1,Ny-1,Ny]) = [dM1(1),dM1(end-1),dM1(end)];
-        d1M = dM(3)*a1;
-        d1M([1,Ny-1,Ny]) = [dM(1),dM(end-1),dM(end)];
+        dm10 = d0(2)*a1;
+        dm10([1,Ny-1,Ny]) = [d0(1),d0(end-1),d0(end)];
+        dm11 = d1(2)*a1;
+        dm11([1,Ny-1,Ny]) = [d1(1),d1(end-1),d1(end)];
+        dm12 = dc(2)*a1;
+        dm12([1,Ny-1,Ny]) = [dc(1),dc(end-1),dc(end)];
+        dm1M1 = dM1(2)*a1;
+        dm1M1([1,Ny-1,Ny]) = [dM1(1),dM1(end-1),dM1(end)];
+        dm1M = dM(2)*a1;
+        dm1M([1,Ny-1,Ny]) = [dM(1),dM(end-1),dM(end)];
 
         assert(all(abs(diag(Blk11,-1) - dm10) <= eps), "d00 incorrect");
         assert(all(abs(diag(Blk22,-1) - dm11) <= eps), "d01 incorrect");
@@ -1146,39 +1154,39 @@ switch method
         Dm1 = [dm10;0;dm11;0;repmat([dm12;0],Nx+1-4,1);dm1M1;0;dm1M];
 
         %% d00
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'0');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'0');
 
-        d10 = d0(3)*a0;
-        d10([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
-        d11 = d1(3)*a0;
-        d11([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
-        d12 = d2(3)*a0;
-        d12([1,2,Ny,Ny+1]) = [d2(1),d2(2),d2(end-1),d2(end)];
-        d1M1 = dM1(3)*a0;
-        d1M1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
-        d1M = dM(3)*a0;
-        d1M([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
+        d00 = d0(3)*a0;
+        d00([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
+        d01 = d1(3)*a0;
+        d01([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+        d02 = dc(3)*a0;
+        d02([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+        d0M1 = dM1(3)*a0;
+        d0M1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+        d0M = dM(3)*a0;
+        d0M([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
 
-        D0 = [d00;d01;repmat(d02,(Nx+1-4),1);d0Mm;d0M];
+        D0 = [d00;d01;repmat(d02,(Nx+1-4),1);d0M1;d0M];
 
         assert(all(abs(diag(Blk11,0) - d00) <= eps), "d00 incorrect");
         assert(all(abs(diag(Blk22,0) - d01) <= eps), "d01 incorrect");
         assert(all(abs(diag(Blk33,0) - d02) <= eps), "d02 incorrect");
-        assert(all(abs(diag(BlkMm1Mm1,0) - d0Mm) <= eps), "d0Mm1 incorrect");
+        assert(all(abs(diag(BlkMm1Mm1,0) - d0M1) <= eps), "d0Mm1 incorrect");
         assert(all(abs(diag(BlkMM,0) - d0M) <= eps), "d0M incorrect");
         % assert(all(abs(diag(biHarm,0) - D0) <= eps), "D0 incorrect");
 
 
         %% dp1   % pad zeros at the start
 
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'1');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'1');
 
         d10 = d0(3)*a1;
         d10([1,2,Ny]) = [d0(1),d0(2),d0(end)];
         d11 = d1(3)*a1;
         d11([1,2,Ny]) = [d1(1),d1(2),d1(end)];
-        d12 = d2(3)*a1;
-        d12([1,2,Ny]) = [d2(1),d2(2),d2(end)];
+        d12 = dc(3)*a1;
+        d12([1,2,Ny]) = [dc(1),dc(2),dc(end)];
         d1M1 = dM1(3)*a1;
         d1M1([1,2,Ny]) = [dM1(1),dM1(2),dM1(end)];
         d1M = dM(3)*a1;
@@ -1195,7 +1203,7 @@ switch method
 
         %% dp2   % pad zeros at the start
 
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'2');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'2');
 
         d20 = d0(3)*a2;
         d20([1,2,Ny-1]) = [d0(1),d0(2),d0(end)];
@@ -1203,8 +1211,8 @@ switch method
         d21 = d1(3)*a2;
         d21([1,2,Ny-1]) = [d1(1),d1(2),d1(end)];
 
-        d22 = d2(3)*a2;
-        d22([1,2,Ny-1]) = [d2(1),d2(2),d2(end)];
+        d22 = dc(3)*a2;
+        d22([1,2,Ny-1]) = [dc(1),dc(2),dc(end)];
 
         d2M1 = dM1(3)*a2;
         d2M1([1,2,Ny-1]) = [dM1(1),dM1(2),dM1(end)];
@@ -1224,14 +1232,14 @@ switch method
 
         %% dpNym1 % pad zeros at the start
 
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'ny-1');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'ny-1');
 
         dpNym10 = d0(2)*a1 ;
         dpNym10([1,Ny-1,Ny]) = [d0(1), d0(end-1), d0(end)];
         dpNym11 = d1(2)*a1 ;
         dpNym11([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
-        dpNym12 = d2(3)*a1;
-        dpNym12([1,Ny-1,Ny]) = [d2(1), d2(end-1), d2(end)];
+        dpNym12 = dc(2)*a1;
+        dpNym12([1,Ny-1,Ny]) = [dc(1), dc(end-1), dc(end)];
         dpNym1M = dM1(2)*a1;
         dpNym1M([1,Ny-1,Ny]) = [dM1(1), dM1(end-1), dM1(end)];
 
@@ -1243,16 +1251,16 @@ switch method
         DNym1 = [0;dpNym10;0;dpNym11;repmat([0;dpNym12],Nx-3,1);0;dpNym1M;0];
 
         %% dpNy   % pad zeros at the start
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'ny');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'ny');
 
         dpNy0 = d0(3)*a0 ;
-        dpNy0([1,2,Ny-1,Ny]) = [d0(1), d0(2), d0(end-1),d0(end)];
-        dpNy1 = d1(2)*a0 ;
-        dpNy1([1,2,Ny-1,Ny]) = [d1(1), d1(2), d1(end-1),d1(end)];
-        dpNy2 = d2(3)*a0;
-        dpNy2([1,2,Ny-1,Ny]) = [d2(1), d2(2), d2(end-1),d2(end)];
-        dpNyM = dM1(2)*a0;
-        dpNyM([1,2,Ny-1,Ny]) = [dM1(1), dM1(2), dM1(end-1),dM1(end)];
+        dpNy0([1,2,Ny,Ny+1]) = [d0(1), d0(2), d0(end-1),d0(end)];
+        dpNy1 = d1(3)*a0 ;
+        dpNy1([1,2,Ny,Ny+1]) = [d1(1), d1(2), d1(end-1),d1(end)];
+        dpNy2 = dc(3)*a0;
+        dpNy2([1,2,Ny,Ny+1]) = [dc(1), dc(2), dc(end-1),dc(end)];
+        dpNyM = dM1(3)*a0;
+        dpNyM([1,2,Ny,Ny+1]) = [dM1(1), dM1(2), dM1(end-1),dM1(end)];
 
 
         DNy = [dpNy0;dpNy1;repmat(dpNy2,(Nx-3),1);dpNyM];
@@ -1263,18 +1271,18 @@ switch method
         assert(all(abs(diag(BlkMm1M,0) - dpNyM) <= eps), "d0Mm1 incorrect");
 
         %% dpNyp1 % pad zeros at the start
-        d0,d1,dc,dM1,dM=biharmdiag(BCs, h, D, nu,'ny+1');
+        [d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'ny+1');
 
         dpNy10 = d0(3)*a1 ;
         dpNy10([1,2,Ny]) = [d0(1), d0(2), d0(end)];
 
-        dpNy11 = d1(2)*a1 ;
+        dpNy11 = d1(3)*a1 ;
         dpNy11([1,2,Ny]) = [d1(1), d1(2), d1(end)];
 
-        dpNy12 = d2(3)*a1;
-        dpNy12([1,2,Ny]) = [d2(1), d2(2), d2(end)];
+        dpNy12 = dc(3)*a1;
+        dpNy12([1,2,Ny]) = [dc(1), dc(2), dc(end)];
 
-        dpNy1M = dM1(2)*a1;
+        dpNy1M = dM1(3)*a1;
         dpNy1M([1,2,Ny]) = [dM1(1), dM1(2), dM1(end)];
 
         assert(all(abs(diag(Blk12,1) - dpNy10) <= eps), "d01 incorrect");
@@ -1286,15 +1294,15 @@ switch method
 
         %% dp2Ny  % pad zeros at the start
 
-        d0,d1,dc,dM1,dM =biharmdiag(BCs, h, D, nu,'2ny');
+        [d0,d1,dc,dM1,dM]  =biharmdiag(BCs, h, D, nu,'2ny');
 
         dp2Ny0 = d0(3)*a0;
         dp2Ny0([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
 
-        dp2Ny1 = d1*a0;
+        dp2Ny1 = d1(3)*a0;
         dp2Ny1([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
 
-        dp2Ny2 = dc*a0;
+        dp2Ny2 = dc(3)*a0;
         dp2Ny2([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
 
         D2Ny = [dp2Ny0;dp2Ny1;repmat(dp2Ny2,Nx-3,1)];
