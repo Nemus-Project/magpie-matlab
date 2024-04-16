@@ -54,7 +54,6 @@
 %           [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho, E, nu, ldim, h, BCs, Nm,'none');
 %
 function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,shouldNormalise)
-%
 
 %% Variable Arguments
 if nargin < 9
