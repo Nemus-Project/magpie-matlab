@@ -1,7 +1,7 @@
 %% MAGPIE Modal analysis of 2D Plates with Generalised Elastic Boundary Conditions
 %   [Om,Q,Nx,Ny,biHarm,Dm] = MAGPIE (density, Youngs, poisson, dim, h, BCs, Number_of_modes, plot_type, normalisation)
 %
-%   Arguments:
+%%   Arguments:
 %       rho          %-- density [kg/m^3]
 %       E            %-- Young's mod [Pa]
 %       nu           %-- poisson's ratio
@@ -31,7 +31,7 @@
 %       normalisation %-- boolean which dictates wether eigen vectors are
 %       normalised
 %
-%    Which returns:
+%% Returns:
 %           Om      : Angular modal frequencies
 %           Q       : A matrix of column eigenvector(s)
 %           Nx      : Grid points along the x-axis
@@ -39,22 +39,24 @@
 %           biHarm  : Biharmonic Matrix for the plate
 %           Dm      : the eigenvalues of the biharmonic matrix
 %
-%       Example:
+%% Example:
 %
 %           %% physical and elastic parameters
 %           Lx = 0.10; Ly = 0.08; Lz = 0.81e-3;
-%           ldim = [Lx Ly Lz];   % plate dimensions [x, y, z] in metres
-%           E       = 1.01e+11 ;        %-- Young's mod [Pa]
-%           rho     = 8765 ;            %-- density [kg/m^3]
-%           nu      = 0.3 ;             %-- poisson's ratio
-%           Nm  = 16;               %-- number of modes to compute
-%           h       = sqrt(Lx*Ly)*0.01; %--
-%           BCs = ones(4,2) * 1e15      %-- elastic constants around the edges
+%           ldim = [Lx Ly Lz];       % plate dimensions [x, y, z] in metres
+%           E    = 1.01e+11 ;        %-- Young's mod [Pa]
+%           rho  = 8765 ;            %-- density [kg/m^3]
+%           nu   = 0.3 ;             %-- poisson's ratio
+%           Nm   = 16;               %-- number of modes to compute
+%           h    = sqrt(Lx*Ly)*0.01; %-- Grid Spacing
+%           BCs = ones(4,2) * 1e15   %-- elastic constants around the edges
 %
 %           [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho, E, nu, ldim, h, BCs, Nm,'none');
+%
 function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,shouldNormalise)
+%
 
-%% Varargs
+%% Variable Arguments
 if nargin < 9
     shouldNormalise = false;
 end
@@ -64,28 +66,26 @@ end
 if nargin < 7
     Nm = 0;
 end
-%% Validation
-validateattributes(rho,      {'double'}, {'nonempty'});
-validateattributes(E,        {'double'}, {'nonempty'});
-validateattributes(nu,       {'double'}, {'nonempty'});
-validateattributes(ldim,     {'double'}, {'numel', 3});
-validateattributes(h,        {'double'}, {'nonempty'});
-validateattributes(BCs,      {'double'}, {'size', [4,2]});
-validateattributes(Nm,   {'numeric'}, {'integer','nonnegative'});
+%% Argument Validation
+validateattributes(rho,  {'double'}, {'nonempty','positive'},'magpie.m','Density (rho)',1);
+validateattributes(E,    {'double'}, {'nonempty','positive'},'magpie.m','Young`s Modulus (E)', 2);
+validateattributes(nu,   {'double'}, {'nonempty','positive'},'magpie.m','Poisson Number (nu)',3);
+validateattributes(ldim, {'double'}, {'numel', 3, 'positive'},'magpie.m','Plate Dimensions (ldim)',4);
+validateattributes(h,    {'double'}, {'nonempty','positive'},'magpie.m','Grid Spacing (h)',5);
+validateattributes(BCs,  {'double'}, {'size', [4,2], 'nonnegative'},'magpie.m','Boundary Conditions (BCs)',6);
+validateattributes(Nm,   {'numeric'}, {'integer','nonnegative'},'magpie.m','Number of Modes (Nm)',7);
 validatestring(plot_type,["chladni","3D","none"]);
 
 %% Unpack array variables
 pack_ldim = num2cell(ldim);
-pack_BCs = num2cell(BCs);
 [Lx, Ly, Lz] = pack_ldim{:};
-[K0y, Kx0, KLy, KxL, R0y, Rx0, RLy, RxL] = pack_BCs{:};
 
 %%--- derived parameters (don't change here)
 D = E * Lz^3 / 12 / (1-nu^2);
 Nx      = floor(Lx/h) ;
 Ny      = floor(Ly/h) ;
-%%----------------------------
-%% Build BiHarmonic
+
+%% Build Biharmonic
 biHarm = bhmat(BCs,[Nx Ny], h, Lz, E, nu);
 
 %% EIGENVALUES
@@ -100,7 +100,6 @@ Q = Q(:,indSort) ;
 
 Dm    = diag(Dm) ;
 Om    = sqrt(abs(Dm))*sqrt(D/rho/Lz) ;
-%freqs = Om/2/pi ;
 
 if shouldNormalise
     for nQ = 1 : Nmodes
@@ -111,6 +110,7 @@ if shouldNormalise
     end
 end
 
+%% Plotting
 
 switch plot_type
     case 'chladni'
