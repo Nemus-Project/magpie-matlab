@@ -1,29 +1,51 @@
-function biHarm = bhmat(BCs,Nxy,h,Lz,E,nu,method)
-% biHarm = BHMAT(BCs,Nxy,h,D,nu) compute a biharmonic for a Thin Plate
-% of size [Nx Ny]
+%% BHMAT Generate 2D Biharmonic Operator
+%   biHarm = BHMAT(BCs,Nxy,h,Lz,E,nu) % compute a biharmonic for a  2D Thin Plate 
 %
-%   Arguments:
+%% Arguments:
+%   
 %       BCS          %-- density [kg/m^3]
+%
+% Boundary condition columns represent a different elastic stiffness
+% contant for each side of the plate
+%
+%  - Column 1 flexural constant
+%  - Column 2 rotational constant
+%
+%       BCs = [K0y, R0y;
+%              Kx0, Rx0;
+%              KLy, RLy;
+%              KxL, RxL];
+%
 %       Nxy          %-- Number of grid points [Nx Ny]
 %       h            %-- Grid spacing
 %       Lz           %-- plate thickness
 %       E            %-- Young's mod [Pa]
 %       nu           %-- poisson's ratio
 %
+%% Returns
+%
+% Biharmonic operator with size [Nx Ny]
+function biHarm = bhmat(BCs,Nxy,h,Lz,E,nu,method)
+
+
+if nargin < 8
+    plot = false;
+end
 if nargin < 7
     method = 'diag';
 end
 
 %% validate
-validateattributes(BCs,      {'double'}, {'size', [4,2]});
-validateattributes(Nxy,      {'double'}, {'numel', 2, 'positive','integer'});
-validateattributes(h,        {'double'}, {'nonempty'});
-validateattributes(Lz,       {'double'}, {'nonempty'});
-validateattributes(E,        {'double'}, {'nonempty'});
-validateattributes(nu,       {'double'}, {'nonempty'});
-
+%   validateattributes(BCs,      {'double'}, {'size', [4,2]});
+%   validateattributes(Nxy,      {'double'}, {'numel', 2, 'positive','integer'});
+%   validateattributes(h,        {'double'}, {'nonempty'});
+%   validateattributes(Lz,       {'double'}, {'nonempty'});
+%   validateattributes(E,        {'double'}, {'nonempty'});
+%   validateattributes(nu,       {'double'}, {'nonempty'});
 
 %% Unpack Variables
+%
+%
 pack_BCs = num2cell(BCs);
 [K0y, Kx0, KLy, KxL, R0y, Rx0, RLy, RxL] = pack_BCs{:};
 Nx = Nxy(1);
@@ -1046,7 +1068,7 @@ switch method
 
         dn = [-(2*(Ny+1)),-(Ny+2),-(Ny+1),-(Ny), (-2:2), (Ny),(Ny+1),(Ny+2), 2*(Ny+1)];
 
-        
+
         biHarm = ((1/h)^4) * spdiags(BHdiags, dn, biHarm);
 
     case 'diag'
@@ -1335,6 +1357,8 @@ switch method
         %assert(all(abs(diag(Blk24,0) - dp2Ny1) <= eps), "d02 incorrect");
         %assert(all(abs(diag(Blk35,0) - dp2Ny2) <= eps), "d0Mm1 incorrect");
 
+
+
         %% Zero Padding
         Dm2Ny = [Dm2Ny; zeros((Ny+1)*2,1)];
 
@@ -1366,6 +1390,3 @@ switch method
         biHarm = ((1/h)^4) * spdiags(BHdiags, dn, BH);
 
 end
-
-end
-
