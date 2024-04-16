@@ -1,13 +1,5 @@
-function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,shouldNormalise)
-% MAGPIE What does this do?
-%   [Om,Q,Nx,Ny,biHarm] = MAGPIE (density, Youngs, poisson, dim, h, BCs, Number_of_modes, plot_type)
-%   A function that returns:
-%           Om      : Angular modal frequencies
-%           Q       : A matrix of column eigenvector(s)
-%           Nx      : Grid points along the x-axis
-%           Ny      : Grid points along the y-axis
-%           biHarm  : Biharmonic Matrix for the plate
-%           Dm      : the eigenvalues of the biharmonic matrix 
+%% MAGPIE Modal analysis of 2D Plates with Generalised Elastic Boundary Conditions
+%   [Om,Q,Nx,Ny,biHarm,Dm] = MAGPIE (density, Youngs, poisson, dim, h, BCs, Number_of_modes, plot_type, normalisation)
 %
 %   Arguments:
 %       rho          %-- density [kg/m^3]
@@ -24,8 +16,8 @@ function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,should
 %       2 column array of eleastic boundary constants around each edge of
 %       the plate.
 %
-%       Column 1 repesents  ...
-%       Column 2 repesents  ...
+%       Column 1 flexural constant
+%       Column 2 rotational constant
 %
 %       BCs = [K0y, R0y;
 %              Kx0, Rx0;
@@ -34,6 +26,18 @@ function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,should
 %
 %       Nm      %-- number of modes to compute
 %
+%       plot_type %-- Select from 'chladni', '3d', 'none'
+%
+%       normalisation %-- boolean which dictates wether eigen vectors are
+%       normalised
+%
+%    Which returns:
+%           Om      : Angular modal frequencies
+%           Q       : A matrix of column eigenvector(s)
+%           Nx      : Grid points along the x-axis
+%           Ny      : Grid points along the y-axis
+%           biHarm  : Biharmonic Matrix for the plate
+%           Dm      : the eigenvalues of the biharmonic matrix
 %
 %       Example:
 %
@@ -48,7 +52,12 @@ function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,should
 %           BCs = ones(4,2) * 1e15      %-- elastic constants around the edges
 %
 %           [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho, E, nu, ldim, h, BCs, Nm,'none');
+function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,shouldNormalise)
+
 %% Varargs
+if nargin < 9
+    shouldNormalise = false;
+end
 if nargin < 8
     plot_type = 'none';
 end
