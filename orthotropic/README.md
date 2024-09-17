@@ -1,13 +1,15 @@
+# m<img src="./img/magpie.svg" style="height:1ch;"/>gpie 
+
 ## About
 
-MAGPIE is an open-source framework for working with thin plates with generalized elastic boundary conditions. The plate equation is derived from the orthotropic Kirchhoff-Love plate theory. It can then effectively simulate the dynamics of moderately thin orthotropic plates. The geometry is restricted to rectangular, and the thickness is assumed constant. These limitations may be overcome in future releases. MAGPIE can simulate boundary conditions of classic type (free, simply-supported and clamped), as well as generally elastic boundary support, controlling the flexural displacement and boundary rotation through applied elastic forces and moments. 
+MAGPIE is an open-source framework for working with thin plates with generalized elastic boundary conditions. The plate equation is derived from the orthotropic Kirchhoff-Love plate theory. It can then effectively simulate the dynamics of moderately thin orthotropic plates. The geometry is restricted to rectangular, and the thickness is assumed constant. These limitations may be overcome in future releases. MAGPIE can simulate boundary conditions of classic type (free, simply-supported and clamped) and generally elastic boundary support, controlling the flexural displacement and boundary rotation through applied elastic forces and moments. 
 
-MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotropic sheet materials, such as wood and composites displaying orthotropic behaviour. Note that the isotropic case can be recovered as a special case. 
+MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotropic sheet materials, such as wood and composites, displaying orthotropic behaviour. Note that the isotropic case can be recovered as a special case. 
 
-Direct modelling consists of supplying MAGPIE with the appropriate elastic parameters (two Young's moduli, one shear modulus and one Poisson ratio), material parameters (density) and geometric parameters (edge lengths and thickness) plus the values of the elastic boundary constants. 
+Direct modelling consists of supplying MAGPIE with the appropriate elastic parameters (two Young's moduli, one shear modulus and one Poisson ratio), material parameters (density) and geometric parameters (edge lengths and thickness) plus the values of the elastic boundary constants. The output of the direct modelling can be:
 
-1. Orthotropic wave propagation (such as in wood) in moderately thin plates
-2. Rectangular geometry
+1. Eigenvalues and eigenvectors (i.e., modal shapes)
+2. A time-domain simulation of a struck plate using a simple raised cosine input 
 3. Constant thickness
 
 
