@@ -1,5 +1,6 @@
 ## About
 
+
 MAGPIE is an open-source framework for simulating plate vibration with elastic boundary conditions. The plate equation is derived from the *orthotropic* Kirchhoff-Love plate theory. It can then effectively simulate the dynamics of moderately thin wooden and composite plates. The geometry is restricted to rectangular, and the thickness is assumed constant. These limitations may be overcome in future releases. MAGPIE can simulate boundary conditions of classic type (free, simply-supported and clamped) and generally elastic boundary support, controlling the flexural displacement and boundary rotation through applied elastic forces and moments. 
 
 MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotropic sheet materials, such as wood and composites, displaying orthotropic behaviour. Note that the isotropic case can be recovered as a special case. 
