@@ -13,38 +13,92 @@ MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotro
 
 ## The Orthotropic Kirchhoff-Love Model
 
-The vibration of an orthotropic plate can be described via the Kirchhoff-Love model. This dynamical model describes the time evolution of the flexural displacement $u = u({\bf x},t) : \mathcal{V} \times \mathbb{R}^+_0$. Here,  ${\bf x} \in \mathcal{V} := [0,L_x] \times [0,L_y]$ is the domain of definition, a rectangle with side lengths $L_x$. Here, and in what follows, $x$ denotes the longitudinal orthotropic direction, $y$ is radial, and $z$ is tangential. In quarter-sawing, $z$ is the direction along the thickness of the board. With this notation, the system reads:
+The vibration of an orthotropic plate can be described via the Kirchhoff-Love model. This dynamical model describes the time evolution of the flexural displacement $u = u(x,y,t) : \mathcal{V} \times \mathbb{R}^+_0$. Here,  ${\bf x} \in \mathcal{V} := [0,L_x] \times [0,L_y]$ is the domain of definition, a rectangle with side lengths $L_x$. Here, and in what follows, $x$ denotes the longitudinal orthotropic direction, $y$ is radial, and $z$ is tangential. In quarter-sawing, $z$ is the direction along the thickness of the board. With this notation, the system reads:
 
-$$\rho h \partial_t^2 w = -D_1\partial_x^4 w - (D_2+D_4)\partial_y^2\partial_x^2 w - D_3\partial_y^4 w$$
+$$\rho h \partial_t^2 u(x,y,t) = -D_1\partial_x^4 u(x,y,t) - (D_2+D_4)\partial_y^2\partial_x^2 u(x,y,t) - D_3\partial_y^4 u(x,y,t)$$
 
 The model depends on four rigidity constants, denoted by $D_\circ$, defined in terms of Young's moduli $E_\circ$, the shear modulus $G_{xy}$ and the Poisson's ratios $\nu_\circ$ as follows:
 
-$$ D_1 := \frac{E_xh^3}{12(1-\nu_{xy}\nu_{yx})} \quad D_3 := \frac{E_yh^3}{12(1-\nu_{xy}\nu_{yx})} \quad D_4 := \frac{G_{xy}h^3}{3} \quad D_2 := \frac{\nu_{yx}E_{x}h^3}{6(1-\nu_{xy}\nu_{yx})} $$
+$$ D_1 := \frac{E_xh^3}{12(1-\nu_{x}\nu_{y})} \quad D_3 := \frac{E_yh^3}{12(1-\nu_{x}\nu_{y})} \quad D_4 := \frac{G_{xy}h^3}{3} \quad D_2 := \frac{\nu_{yx}E_{x}h^3}{6(1-\nu_{y}\nu_{y})} $$
 
 Note that, because of the symmetry of the compliance matrix, one out of five elastic constants is fixed. Usually, one selects
 
-$$\nu_{yx} = \nu_{xy}E_{y}E_{x}^{-1}$$
+$$\nu_{y} = \nu_{x}E_{y}E_{x}^{-1}$$
 
 thus leaving the following elastic constants to be specified at the input: $E_x,E_y,G_{xy},\nu_{xy}$. Note that the model also depends on the thickness $h$ (assumed constant throughout $\mathcal V$), the side lengths $L_x,L_y$ and the density $\rho$ (also assumed constant).
 
 
 ```
-Bottom-left corner: 
-                 |
-                 |
- [K_{0y},R_{0y}] |
-                 |
-                 |
-                 |
-                 |
-                  ---------------------
-                      [K_{x0},R_{x0}]
+
+                          [K_{xL_y},R_{xL_y}]
+                  ---------------------                       ^
+                 |                     |                      |
+                 |                     |                      | 
+ [K_{0y},R_{0y}] |                     |                      |
+                 |                     |                       L_y
+                 |                     |[K_{L_xy},R_{L_xy}]   |
+                 |                     |                      |
+                 |                     |                      |
+                  ---------------------                       ˇ
+               [K_{x0},R_{x0}]
+
+                 <-------- L_x -------->
+
 ```
 
-The equation must be supplied with appropriate boundary conditions. Here, conditions of elastic-type are assumed. The boundary force balance is expressed as:
+The equation must be supplied with appropriate boundary conditions. Here, conditions of elastic type are assumed. Referring to the diagram above, the boundary conditions are:
+
+ $x = 0$
+* Balance of Forces:      $$K_{0y} u = -D_1 \left( \partial_x^3 u + \left( \frac{D_4}{D_1} + \nu_{y} \right) \partial_x\partial_y^2 u\right)$$
+* Balance of Moments:     $$R_{0y} \partial_x u = D_1 \left(\partial_x^2 u + \nu_y \partial_y u \right)$$
+
+ $x = L_x$
+* Balance of Forces:      $$K_{L_x y} u = D_1 \left( \partial_x^3 u + \left( \frac{D_4}{D_1} + \nu_{y} \right) \partial_x\partial_y^2 u\right)$$
+* Balance of Moments:     $$R_{L_x y} \partial_x u = -D_1 \left(\partial_x^2 u + \nu_y \partial_y u \right)$$
+
+  $y = 0$
+* Balance of Forces:      $$K_{x0} u = -D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
+* Balance of Moments:     $$R_{x0} \partial_y u = D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
+
+  $y = L_y$
+* Balance of Forces:      $$K_{x L_y} u = D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
+* Balance of Moments:     $$R_{x L_y} \partial_y u = -D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
+
+Note a clamped edge is recovered by setting $(K_\circ,R_\circ)$ to very large values, yielding $u \approx 0, \partial_n u \approx 0$, where $n$ is the direction normal to the boundary. A simply-supported edge is recovered by setting $K_\circ$ to a large value, and $R_\circ$ to zero (vanishing applied moment). A free edge is obtained by setting $K_\circ = R_\circ = 0$ (vanishing applied force and moment). 
+
+A further condition arises at the corners, namely
+
+$$\partial_x\partial_y u = 0$$  at a corner. 
+
+## Discretisation
+
+Discretisation of the equation of motion is performed on a two-dimensional grid of points. Let $h_x$ be the grid spacing along $x$, and let $h_y$ be the grid spacing along $y$. One may approximate the continuous function $u(x,y)$ using the grid function $u_{l,m} \approx u(lh_x,mh_y)$. Then, the following are used:
+
+$$\delta_{x\cdot} u(x,y) := (2h_x)^{-1}(u(x+h_x,y)-u(x-h_x,y)) \approx \partial_x u(x,y)$$
+
+$$\delta_{xx} u(x,y) := (h_x)^{-2}(u(x+h_x,y)-2u(x,y) + u(x-h_x,y)) \approx \partial^2_{x} u(x,y)$$
+
+$$\delta_{xxxx} u(x,y) := \delta_{xx}\delta_{xx} u(x,y) \approx \partial^4_{x} u(x,y)$$
+
+When applied to the grid function $u_{l,m}$, the difference operators become:
+
+$$\delta_{x\cdot} u_{l,m} := (2h_x)^{-1}(u_{l+1,m}-u_{l-1,m}) $$
+
+$$\delta_{xx} u_{l,m} := (h_x)^{-2}(u_{l+1,m}-2u_{l,m} + u_{l-1,m}) $$
+
+$$\delta_{xxxx} u_{l,m} := (h_x)^{-4}(u_{l+2,m}-4u_{l+1,m} + 6u_{l,m} -4u_{l-1,m} + u_{l-2,m}) $$
+
+Similar definitions are used for the differences along the $y$ direction. A discrete version of the equation of motion and the boundary conditions is given in terms of the difference operators as:
 
 
+$$\rho h \partial_t^2 u_{l,m}(t) = -D_1\delta_{xxxx} u_{l,m}(t) - (D_2+D_4)\delta_{xx}\delta_{yy} u_{l,m} - D_3\delta_{yyyy} u_{l,m}(t)$$
 
+$l = 0$
+* Balance of Forces:      $$K_{0y} w_{0,m} = -D_1 \left( \delta_{x\cdot}\delta_{xx} u_{0,m} + \left( \frac{D_4}{D_1} + \nu_{y} \right) \delta_{x\cdot}\delta_{yy} u_{0,m}\right)$$
+* Balance of Moments:     $$R_{0y} \delta_{x\cdot} u_{0,m} = D_1 \left(\delta_{xx} u_{0,m} + \nu_y \delta_{y\cdot} u_{0,m} \right)$$
+
+with analogous discretisations holding for the boundary conditions along the other edges. 
+ 
 ## Structure
 
 All source code is found in the `src/` directory of the repository. In `src/` you can find a directory for each supported language as well as a `data/` directory which contains any datasets shared across implementations.
