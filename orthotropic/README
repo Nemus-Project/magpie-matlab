@@ -1,9 +1,17 @@
-# m<img src="./img/magpie.svg" style="height:1ch;"/>gpie 
-
-
 ## About
 
-Magpie is an open source framework for working with thin plates with generalized elastic boundary conditions. The framework is designed around two key use cases
+MAGPIE is an open-source framework for working with thin plates with generalized elastic boundary conditions. The plate equation is derived from the orthotropic Kirchhoff-Love plate theory. It can then effectively simulate the dynamics of moderately thin orthotropic plates. The geometry is restricted to rectangular, and the thickness is assumed constant. These limitations may be overcome in future releases. MAGPIE can simulate boundary conditions of classic type (free, simply-supported and clamped), as well as generally elastic boundary support, controlling the flexural displacement and boundary rotation through applied elastic forces and moments. 
+
+MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotropic sheet materials, such as wood and composites displaying orthotropic behaviour. Note that the isotropic case can be recovered as a special case. 
+
+Direct modelling consists of supplying MAGPIE with the appropriate elastic parameters (two Young's moduli, one shear modulus and one Poisson ratio), material parameters (density) and geometric parameters (edge lengths and thickness) plus the values of the elastic boundary constants. 
+
+1. Orthotropic wave propagation (such as in wood) in moderately thin plates
+2. Rectangular geometry
+3. Constant thickness
+
+
+
 
 1. Exploration of plates for understanding how material properties affect mode shapes and modal frequencies.
 2. Derivation of material properties from experimental data.
@@ -16,17 +24,17 @@ All source code is found in the `src/` directory of the repository. In `src/` yo
 
 The magpie function accepts:
 
-- plate material properties: density, elasticity (Young's modulus), poisson ratio
+- plate material properties: density, elasticity (Young's modulus), Poisson ratio
 - plate constraints: dimensions, boundary conditions
 
 The user can stipulate an accuracy coefficient and how many modes they wish to calculate.
 
 The output from `magpie` is:
 
-- `Q`: A list of eigen vectors, one for each mode. This can be used to visualize the mode shape.
-- `Om`: The angular frequency for the corresponding eigen vector.
+- `Q`: A list of eigenvectors, one for each mode. This can be used to visualize the mode shape.
+- `Om`: The angular frequency for the corresponding eigenvector.
 - `N`:  Number of grid points in the $x$ and $y$ dimensions for the plate. A smaller `h` value will result in a larger number of grid points
-- `biharm`: The biharmonic used for deriving eigen vectors and modal frequencies. The biharmonic can also be used for a finite difference difference time domain scheme of the plate.
+- `biharm`: The biharmonic used for deriving eigenvectors and modal frequencies. The biharmonic can also be used for a finite difference difference time domain scheme of the plate.
 
 ## References
 
