@@ -135,7 +135,9 @@ $$\delta_{x\cdot}\delta_{y\cdot}u_{\circ,\circ} = 0$$ at a corner.
 
 The semidiscrete system above may be recast in a convenient matrix-vector form. To that end, a state vector  $\mathbf{u}$ is constructed by stacking consecutive strips of points as per the image below.
 
-<img src="/img/stackedGrid1.png" width="400" />
+<p align="center">
+<img src="/img/stackedGrid1.png" width="300" />
+</p>
 
 Each coloured strip is composed of $N_y+1$ points. The vector is then of size $(N_x+1)(N_y+1)\times 1$. The semidiscrete equation of motion given above is then written compactly as:
 
@@ -143,21 +145,32 @@ $$\rho \zeta \ddot {\mathbf u}(t)  =  {\mathbf B}{\mathbf u}(t)$$
 
 where the matrix $\mathbf{B}$ is of size $(N_x+1)(N_y+1)\times (N_x+1)(N_y+1)$. The matrix is clearly sparse, since this represents the "locality" of the difference operators. A sparsity pattern is given in the figure below. 
 
-<img src="/img/sparsitypattern.png" width="400" />
+<p align="center">
+<img src="/img/sparsitypattern.png" width="200" />
+</p>
 
 At a generic inner point in the domain $(l,m)$ such that $(l\pm 2,m\pm 2)$ are all within the domain or on the boundary, the difference operator takes on the particular stencil below, a 13-point stencil generalising the biharmonic difference operator in the isotropic case:
 
-<img src="/img/OrthoGrid1.png" width="400" />
-
+<p align="center">
+<img src="/img/OrthoGrid1.png" width="500" />
+</p>
 
 In the above: $$a_x := \frac{D_1}{h_x^4}$$, $$a_y := \frac{D_3}{h_y^4}$$, $$a_{xy} := \frac{(D_2+D_4)}{h_x^2h_y^2}$$. Note that, in the above, the grid spacings $h_x$, $h_y$ are chosen equal, but this need not be the case in general. When the difference operator acts on points nearby the boundary, the stencil looks outside the plate grid. An example is represented by corners, such as in the image below.
 
-<img src="/img/BCs.png" width="400" />
+<p align="center">
+<img src="/img/BCs.png" width="300" />
+</p>
 
 The values of the points in shaded "ghost" region must be set according to the numerical boundary conditions above, including the important corner condition. Doing so, one is able to revert the value of the difference operator at each point on the domain using points defined on the plate grid. 
 
 **The expressions for the resulting coefficients are cumbersome**. They appear in the appropriate Matlab functions. 
 
+
+
+The block form of the matrix is as per the image below. Blocks of the same colour have the same structure. All middle blocks, represented by a shaded blue area, have the same structure. 
+<p align="center">
+<img  width="600" src="/img/BiharmStructure.png" />
+</p>
 
 ## Structure
 
