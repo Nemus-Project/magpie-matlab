@@ -131,6 +131,9 @@ with analogous discretisations holding for the boundary conditions along the oth
 
 ### Semidiscrete equatio
 
+
+<img src="/img/OrthoGrid.png" width="400" />
+
 <img src="/img/BCs.png" width="400" />
 
 
