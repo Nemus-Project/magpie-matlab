@@ -23,7 +23,7 @@ MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotro
 
 ## The Orthotropic Kirchhoff-Love Model
 
-The vibration of an orthotropic plate can be described via the Kirchhoff-Love model. This dynamical model describes the time evolution of the flexural displacement $u = u(x,y,t) : \mathcal{V} \times \mathbb{R}^+_0$. Here,  ${\bf x} \in \mathcal{V} := [0,L_x] \times [0,L_y]$ is the domain of definition, a rectangle with side lengths $L_x$. Here, and in what follows, $x$ denotes the longitudinal orthotropic direction, $y$ is radial, and $z$ is tangential. In quarter-sawing, $z$ is the direction along the thickness of the board. With this notation, the system reads:
+The vibration of an orthotropic plate can be described via the Kirchhoff-Love model. This dynamical model describes the time evolution of the flexural displacement $u = u(x,y,t) : \mathcal{V} \times \mathbb{R}^+_0$. Here,  ${\bf x} \in \mathcal{V} := [0,L_x] \times [0,L_y]$ is the domain of definition, a rectangle with side lengths $L_x, L_y$. Here, and in what follows, $x$ denotes the longitudinal orthotropic direction, $y$ is radial, and $z$ is tangential. In quarter-sawing, $z$ is the direction along the thickness of the board. With this notation, the system reads:
 
 $$\rho h \partial_t^2 u(x,y,t) = -D_1\partial_x^4 u(x,y,t) - (D_2+D_4)\partial_y^2\partial_x^2 u(x,y,t) - D_3\partial_y^4 u(x,y,t)$$
 
@@ -117,6 +117,15 @@ Boundary conditions follow as a direct discretisation of the continuous conditio
 - at $l = N_x$
   * Balance of Forces:      $$K_{L_x y} w_{N_x,m} = -D_1 \left( \delta_{x\cdot}\delta_{xx} u_{N_x,m} + \left( \frac{D_4}{D_1} + \nu_{y} \right) \delta_{x\cdot}\delta_{yy} u_{N_x,m}\right)$$
   * Balance of Moments:     $$R_{L_x y} \delta_{x\cdot} u_{N_x,m} = D_1 \left(\delta_{xx} u_{N_x,m} + \nu_y \delta_{y\cdot} u_{N_x,m} \right)$$
+ 
+- at  $m = 0$
+  * Balance of Forces:      $$K_{x0} u = -D_3 \left( \delta_{y\cdot}\delta_{yy} u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \delta_{y\cdot}\delta_{xx} u\right)$$
+  * Balance of Moments:     $$R_{x0} \delta_{y\cdot} u = D_3 \left(\delta_{yy} u + \nu_x \delta_{xx} u \right)$$
+
+
+- at  $y = L_y$
+  * Balance of Forces:      $$K_{x L_y} u = D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
+  * Balance of Moments:     $$R_{x L_y} \partial_y u = -D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
 
 with analogous discretisations holding for the boundary conditions along the other edges. 
  
