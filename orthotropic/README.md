@@ -128,6 +128,13 @@ Boundary conditions follow as a direct discretisation of the continuous conditio
   * Balance of Moments:     $$R_{x L_y} \delta_{y\cdot} u_{l,N_y} = -D_3 \left(\delta_{yy} u_{l,N_y} + \nu_x \delta_{xx} u_{l,N_y} \right)$$
 
 with analogous discretisations holding for the boundary conditions along the other edges. 
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="img/plateBCs1.pdf">
+</picture>
+
+
+
  
 ## Structure
 
