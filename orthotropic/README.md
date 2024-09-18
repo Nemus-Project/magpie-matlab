@@ -131,7 +131,9 @@ with analogous discretisations holding for the boundary conditions along the oth
 
 ### Stencil 
 
-<img src="/img/stackedGrid.png" width="400" />
+The semidiscrete system above may be recast in a convenient matrix-vector form. To that end, form the 
+
+<img src="/img/stackedGrid1.png" width="400" />
 
 <img src="/img/OrthoGrid.png" width="400" />
 
