@@ -127,7 +127,9 @@ Boundary conditions follow as a direct discretisation of the continuous conditio
   * Balance of Forces:      $$K_{x L_y} u_{l,N_y} = D_3 \left( \delta_{y\cdot}\delta_{yy} u_{l,N_y} + \left( \frac{D_4}{D_3} + \nu_{x} \right) \delta_{y\cdot}\delta_{xx} u_{l,N_y}\right)$$
   * Balance of Moments:     $$R_{x L_y} \delta_{y\cdot} u_{l,N_y} = -D_3 \left(\delta_{yy} u_{l,N_y} + \nu_x \delta_{xx} u_{l,N_y} \right)$$
 
-with analogous discretisations holding for the boundary conditions along the other edges. 
+with analogous discretisations holding for the boundary conditions along the other edges. An important condition arises at the corners, as:
+
+$$\delta_{x\cdot}\delta_{y\cdot}u_{\circ,\circ} = 0$$ at a corner.
 
 ### Stencil 
 
@@ -145,13 +147,16 @@ where the matrix $\mathbf{B}$ is of size $(N_x+1)(N_y+1)\times (N_x+1)(N_y+1)$. 
 
 At a generic inner point in the domain $(l,m)$ such that $(l\pm 2,m\pm 2)$ are all within the domain or on the boundary, the difference operator takes on the particular stencil below, a 13-point stencil generalising the biharmonic difference operator in the isotropic case:
 
-<img src="/img/OrthoGrid.png" width="400" />
+<img src="/img/OrthoGrid1.png" width="400" />
 
 
+Note that, in the above, the grid spacings $h_x$, $h_y$ are chosen equal, but this need not be the case in general. When the difference operator acts on points nearby the boundary, the stencil looks outside the plate grid. An example is represented by corners, such as in the image below.
 
 <img src="/img/BCs.png" width="400" />
 
+The values of the points in shaded "ghost" region must be set according to the numerical boundary conditions above, including the important corner condition. Doing so, one is able to revert the value of the difference operator at each point on the domain using points defined on the plate grid. 
 
+**The expressions for the resulting coefficients are cumbersome**. They appear in the appropriate Matlab functions. 
 
 
 ## Structure
