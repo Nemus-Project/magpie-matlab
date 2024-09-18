@@ -130,10 +130,12 @@ Boundary conditions follow as a direct discretisation of the continuous conditio
 with analogous discretisations holding for the boundary conditions along the other edges. 
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="img/plateBCs1.pdf">
+  <source srcset="orthotropic/img/BCs.png">
 </picture>
 
-![]([magpie-matlab/img/plateBCs1.pdf](https://github.com/Nemus-Project/magpie-matlab/blob/b505f5980a970319211afdcf859e7b1dc65353b2/orthotropic/img/plateBCs1.pdf)?raw=true)
+![Cacca](/img/BCs.png?raw=true "Dio Cane")
+
+![Alt text](relative%20path/to/img.jpg?raw=true "Title")
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="[magpie-matlab/img/plateBCs1.pdf](https://github.com/Nemus-Project/magpie-matlab/blob/b505f5980a970319211afdcf859e7b1dc65353b2/orthotropic/img/plateBCs1.pdf)">
