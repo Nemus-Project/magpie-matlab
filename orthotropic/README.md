@@ -141,6 +141,7 @@ $$\rho \zeta \ddot {\mathbf u}(t)  =  {\mathbf B}{\mathbf u}(t)$$
 
 where the matrix $\mathbf{B}$ is of size $(N_x+1)(N_y+1)\times (N_x+1)(N_y+1)$. 
 
+<img src="img/sparsitypattern.png" width="400" />
 
 <img src="/img/OrthoGrid.png" width="400" />
 
