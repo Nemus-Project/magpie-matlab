@@ -60,22 +60,22 @@ The equation must be supplied with appropriate boundary conditions. Here, condit
 
 - at $x = 0$
   * Balance of Forces:      $$K_{0y} u = -D_1 \left( \partial_x^3 u + \left( \frac{D_4}{D_1} + \nu_{y} \right) \partial_x\partial_y^2 u\right)$$
-  * Balance of Moments:     $$R_{0y} \partial_x u = D_1 \left(\partial_x^2 u + \nu_y \partial_y u \right)$$
+  * Balance of Moments:     $$R_{0y} \partial_x u = D_1 \left(\partial_x^2 u + \nu_y \partial_{yy} u \right)$$
 
 
 - at $x = L_x$
   * Balance of Forces:      $$K_{L_x y} u = D_1 \left( \partial_x^3 u + \left( \frac{D_4}{D_1} + \nu_{y} \right) \partial_x\partial_y^2 u\right)$$
-  * Balance of Moments:     $$R_{L_x y} \partial_x u = -D_1 \left(\partial_x^2 u + \nu_y \partial_y u \right)$$
+  * Balance of Moments:     $$R_{L_x y} \partial_x u = -D_1 \left(\partial_x^2 u + \nu_y \partial_{yy} u \right)$$
 
 
 - at  $y = 0$
   * Balance of Forces:      $$K_{x0} u = -D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
-  * Balance of Moments:     $$R_{x0} \partial_y u = D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
+  * Balance of Moments:     $$R_{x0} \partial_y u = D_3 \left(\partial_y^2 u + \nu_x \partial_{xx} u \right)$$
 
 
 - at  $y = L_y$
   * Balance of Forces:      $$K_{x L_y} u = D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
-  * Balance of Moments:     $$R_{x L_y} \partial_y u = -D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
+  * Balance of Moments:     $$R_{x L_y} \partial_y u = -D_3 \left(\partial_y^2 u + \nu_x \partial_{xx} u \right)$$
 
 Note a clamped edge is recovered by setting $(K_\circ,R_\circ)$ to very large values, yielding $u \approx 0, \partial_n u \approx 0$, where $n$ is the direction normal to the boundary. A simply-supported edge is recovered by setting $K_\circ$ to a large value, and $R_\circ$ to zero (vanishing applied moment). A free edge is obtained by setting $K_\circ = R_\circ = 0$ (vanishing applied force and moment). 
 
@@ -112,20 +112,20 @@ Boundary conditions follow as a direct discretisation of the continuous conditio
 
 - at $l = 0$
   * Balance of Forces:      $$K_{0y} w_{0,m} = -D_1 \left( \delta_{x\cdot}\delta_{xx} u_{0,m} + \left( \frac{D_4}{D_1} + \nu_{y} \right) \delta_{x\cdot}\delta_{yy} u_{0,m}\right)$$
-  * Balance of Moments:     $$R_{0y} \delta_{x\cdot} u_{0,m} = D_1 \left(\delta_{xx} u_{0,m} + \nu_y \delta_{y\cdot} u_{0,m} \right)$$
+  * Balance of Moments:     $$R_{0y} \delta_{x\cdot} u_{0,m} = D_1 \left(\delta_{xx} u_{0,m} + \nu_y \delta_{yy} u_{0,m} \right)$$
  
 - at $l = N_x$
   * Balance of Forces:      $$K_{L_x y} w_{N_x,m} = -D_1 \left( \delta_{x\cdot}\delta_{xx} u_{N_x,m} + \left( \frac{D_4}{D_1} + \nu_{y} \right) \delta_{x\cdot}\delta_{yy} u_{N_x,m}\right)$$
-  * Balance of Moments:     $$R_{L_x y} \delta_{x\cdot} u_{N_x,m} = D_1 \left(\delta_{xx} u_{N_x,m} + \nu_y \delta_{y\cdot} u_{N_x,m} \right)$$
+  * Balance of Moments:     $$R_{L_x y} \delta_{x\cdot} u_{N_x,m} = D_1 \left(\delta_{xx} u_{N_x,m} + \nu_y \delta_{yy} u_{N_x,m} \right)$$
  
 - at  $m = 0$
-  * Balance of Forces:      $$K_{x0} u = -D_3 \left( \delta_{y\cdot}\delta_{yy} u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \delta_{y\cdot}\delta_{xx} u\right)$$
-  * Balance of Moments:     $$R_{x0} \delta_{y\cdot} u = D_3 \left(\delta_{yy} u + \nu_x \delta_{xx} u \right)$$
+  * Balance of Forces:      $$K_{x0} u_{l,0} = -D_3 \left( \delta_{y\cdot}\delta_{yy} u_{l,0} + \left( \frac{D_4}{D_3} + \nu_{x} \right) \delta_{y\cdot}\delta_{xx} u_{l,0}\right)$$
+  * Balance of Moments:     $$R_{x0} \delta_{y\cdot} u_{l,0} = D_3 \left(\delta_{yy} u_{l,0} + \nu_x \delta_{xx} u_{l,0} \right)$$
 
 
 - at  $y = L_y$
-  * Balance of Forces:      $$K_{x L_y} u = D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
-  * Balance of Moments:     $$R_{x L_y} \partial_y u = -D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
+  * Balance of Forces:      $$K_{x L_y} u_{l,N_y} = D_3 \left( \delta_{y\cdot}\delta_{yy} u_{l,N_y} + \left( \frac{D_4}{D_3} + \nu_{x} \right) \delta_{y\cdot}\delta_{xx} u_{l,N_y}\right)$$
+  * Balance of Moments:     $$R_{x L_y} \delta_{y\cdot} u_{l,N_y} = -D_3 \left(\delta_{yy} u_{l,N_y} + \nu_x \delta_{xx} u_{l,N_y} \right)$$
 
 with analogous discretisations holding for the boundary conditions along the other edges. 
  
