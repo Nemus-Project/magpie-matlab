@@ -1,5 +1,11 @@
 # MAGPIE
-> *An open-source plate vibration and analysis package*
+> *An open-source plate vibration simulation and analysis package*
+
+M. Ducceschi`*`, M. Hamilton`*`, A. Mousseau`^`, S. Duran`*`
+
+`*` NEMUS Lab - University of Bologna
+
+`^` LAUM - Laboratoire d'Acoustique de l'Université du Mans
 
 
 ## About
@@ -100,12 +106,17 @@ Similar definitions are used for the differences along the $y$ direction. A disc
 
 $$\rho h \partial_t^2 u_{l,m}(t) = -D_1\delta_{xxxx} u_{l,m}(t) - (D_2+D_4)\delta_{xx}\delta_{yy} u_{l,m} - D_3\delta_{yyyy} u_{l,m}(t)$$
 
-Note that the spatial indices are integer numbers restricted to the intervals $0 \leq l \leq N_x = \frac{L_x}{h_x}$, $0 \leq m \leq N_y = \frac{L_y}{h_y}$, yielding $N_x+1$ points along $x$, and $N_y+1$ points along $y$, including grid point on the boundary. 
+Note that the spatial indices are integer numbers restricted to the intervals $0 \leq l \leq N_x = \frac{L_x}{h_x}$ and $0 \leq m \leq N_y = \frac{L_y}{h_y}$, yielding $N_x+1$ points along $x$, and $N_y+1$ points along $y$, including grid point on the boundary. 
 
+Boundary conditions follow as a direct discretisation of the continuous conditions above. Thus
 
-$l = 0$
-* Balance of Forces:      $$K_{0y} w_{0,m} = -D_1 \left( \delta_{x\cdot}\delta_{xx} u_{0,m} + \left( \frac{D_4}{D_1} + \nu_{y} \right) \delta_{x\cdot}\delta_{yy} u_{0,m}\right)$$
-* Balance of Moments:     $$R_{0y} \delta_{x\cdot} u_{0,m} = D_1 \left(\delta_{xx} u_{0,m} + \nu_y \delta_{y\cdot} u_{0,m} \right)$$
+- at $l = 0$
+  * Balance of Forces:      $$K_{0y} w_{0,m} = -D_1 \left( \delta_{x\cdot}\delta_{xx} u_{0,m} + \left( \frac{D_4}{D_1} + \nu_{y} \right) \delta_{x\cdot}\delta_{yy} u_{0,m}\right)$$
+  * Balance of Moments:     $$R_{0y} \delta_{x\cdot} u_{0,m} = D_1 \left(\delta_{xx} u_{0,m} + \nu_y \delta_{y\cdot} u_{0,m} \right)$$
+ 
+- at $l = N_x$
+  * Balance of Forces:      $$K_{L_x y} w_{N_x,m} = -D_1 \left( \delta_{x\cdot}\delta_{xx} u_{N_x,m} + \left( \frac{D_4}{D_1} + \nu_{y} \right) \delta_{x\cdot}\delta_{yy} u_{N_x,m}\right)$$
+  * Balance of Moments:     $$R_{L_x y} \delta_{x\cdot} u_{N_x,m} = D_1 \left(\delta_{xx} u_{N_x,m} + \nu_y \delta_{y\cdot} u_{N_x,m} \right)$$
 
 with analogous discretisations holding for the boundary conditions along the other edges. 
  
