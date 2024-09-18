@@ -129,7 +129,7 @@ Boundary conditions follow as a direct discretisation of the continuous conditio
 
 with analogous discretisations holding for the boundary conditions along the other edges. 
 
-### Semidiscrete equatio
+### Stencil 
 
 
 <img src="/img/OrthoGrid.png" width="400" />
