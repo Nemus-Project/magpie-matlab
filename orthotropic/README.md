@@ -1,5 +1,5 @@
 # MAGPIE
-> *An open-source plate vibration simulation and analysis package*
+> *An open-source plate vibration simulation and analysis framework*
 
 M. Ducceschi`*`, M. Hamilton`*`, A. Mousseau`^`, S. Duran`*`
 
