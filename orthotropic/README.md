@@ -10,7 +10,7 @@ M. Ducceschi`*`, M. Hamilton`*`, A. Mousseau`^`, S. Duran`*`
 
 ## About
 
-MAGPIE is an open-source framework for simulating plate vibration with elastic boundary conditions. The plate equation is derived from the *orthotropic* Kirchhoff-Love plate theory. It can then effectively simulate the dynamics of moderately thin wooden and composite plates. The geometry is restricted to rectangular, and the thickness is assumed constant. These limitations may be overcome in future releases. MAGPIE can simulate boundary conditions of classic type (free, simply-supported and clamped) and generally elastic boundary support, controlling the flexural displacement and boundary rotation through applied elastic forces and moments. 
+MAGPIE is an open-source framework for simulating the dynamics of elastic plates. The plate equation is derived from the *orthotropic* Kirchhoff-Love plate theory. It can then effectively simulate the dynamics of moderately thin wooden and composite plates. The geometry is restricted to rectangular, and the thickness is assumed constant. These limitations may be overcome in future releases. MAGPIE can simulate boundary conditions of classic type (free, simply-supported and clamped) and generally elastic boundary support, controlling the flexural displacement and boundary rotation through applied elastic forces and moments. 
 
 MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotropic sheet materials, such as wood and composites, displaying orthotropic behaviour. Note that the isotropic case can be recovered as a special case. 
 
@@ -25,17 +25,17 @@ MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotro
 
 The vibration of an orthotropic plate can be described via the Kirchhoff-Love model. This dynamical model describes the time evolution of the flexural displacement $u = u(x,y,t) : \mathcal{V} \times \mathbb{R}^+_0$. Here,  ${\bf x} \in \mathcal{V} := [0,L_x] \times [0,L_y]$ is the domain of definition, a rectangle with side lengths $L_x, L_y$. Here, and in what follows, $x$ denotes the longitudinal orthotropic direction, $y$ is radial, and $z$ is tangential. In quarter-sawing, $z$ is the direction along the thickness of the board. With this notation, the system reads:
 
-$$\rho h \partial_t^2 u(x,y,t) = -D_1\partial_x^4 u(x,y,t) - (D_2+D_4)\partial_y^2\partial_x^2 u(x,y,t) - D_3\partial_y^4 u(x,y,t)$$
+$$\rho \zeta \partial_t^2 u(x,y,t) = -D_1\partial_x^4 u(x,y,t) - (D_2+D_4)\partial_y^2\partial_x^2 u(x,y,t) - D_3\partial_y^4 u(x,y,t)$$
 
 The model depends on four rigidity constants, denoted by $D_\circ$, defined in terms of Young's moduli $E_\circ$, the shear modulus $G_{xy}$ and the Poisson's ratios $\nu_\circ$ as follows:
 
-$$ D_1 := \frac{E_xh^3}{12(1-\nu_{x}\nu_{y})} \quad D_3 := \frac{E_yh^3}{12(1-\nu_{x}\nu_{y})} \quad D_4 := \frac{G_{xy}h^3}{3} \quad D_2 := \frac{\nu_{yx}E_{x}h^3}{6(1-\nu_{y}\nu_{y})} $$
+$$ D_1 := \frac{E_x\zeta^3}{12(1-\nu_{x}\nu_{y})} \quad D_3 := \frac{E_y\zeta^3}{12(1-\nu_{x}\nu_{y})} \quad D_4 := \frac{G_{xy}\zeta^3}{3} \quad D_2 := \frac{\nu_{yx}E_{x}\zeta^3}{6(1-\nu_{y}\nu_{y})} $$
 
 Note that, because of the symmetry of the compliance matrix, one out of five elastic constants is fixed. Usually, one selects
 
 $$\nu_{y} = \nu_{x}E_{y}E_{x}^{-1}$$
 
-thus leaving the following elastic constants to be specified at the input: $E_x,E_y,G_{xy},\nu_{xy}$. Note that the model also depends on the thickness $h$ (assumed constant throughout $\mathcal V$), the side lengths $L_x,L_y$ and the density $\rho$ (also assumed constant).
+thus leaving the following elastic constants to be specified at the input: $E_x,E_y,G_{xy},\nu_{xy}$. Note that the model also depends on the thickness $\zeta$ (assumed constant throughout $\mathcal V$), the side lengths $L_x,L_y$ and the density $\rho$ (also assumed constant).
 
 
 ```
@@ -104,9 +104,9 @@ $$\delta_{xxxx} u_{l,m} := (h_x)^{-4}(u_{l+2,m}-4u_{l+1,m} + 6u_{l,m} -4u_{l-1,m
 Similar definitions are used for the differences along the $y$ direction. A discrete version of the equation of motion in terms of the difference operators is obtained as:
 
 
-$$\rho h \partial_t^2 u_{l,m}(t) = -D_1\delta_{xxxx} u_{l,m}(t) - (D_2+D_4)\delta_{xx}\delta_{yy} u_{l,m} - D_3\delta_{yyyy} u_{l,m}(t)$$
+$$\rho \zeta \ddot u_{l,m}(t) = -D_1\delta_{xxxx} u_{l,m}(t) - (D_2+D_4)\delta_{xx}\delta_{yy} u_{l,m} - D_3\delta_{yyyy} u_{l,m}(t)$$
 
-Note that the spatial indices are integer numbers restricted to the intervals $0 \leq l \leq N_x = \frac{L_x}{h_x}$ and $0 \leq m \leq N_y = \frac{L_y}{h_y}$, yielding $N_x+1$ points along $x$, and $N_y+1$ points along $y$, including grid point on the boundary. 
+Note that overdots now indicate total time derivatives. Note as well that the spatial indices are integer numbers restricted to the intervals $0 \leq l \leq N_x = \frac{L_x}{h_x}$ and $0 \leq m \leq N_y = \frac{L_y}{h_y}$, yielding $N_x+1$ points along $x$, and $N_y+1$ points along $y$, including grid point on the boundary. 
 
 Boundary conditions follow as a direct discretisation of the continuous conditions above. Thus
 
@@ -131,9 +131,14 @@ with analogous discretisations holding for the boundary conditions along the oth
 
 ### Stencil 
 
-The semidiscrete system above may be recast in a convenient matrix-vector form. To that end, form the 
+The semidiscrete system above may be recast in a convenient matrix-vector form. To that end, a state vector  $\mathbf{u}$ is constructed by stacking consecutive strips of points as per the image below.
 
 <img src="/img/stackedGrid1.png" width="400" />
+
+Each coloured strip is composed of $N_y+1$ points. The vector is then of size $(N_x+1)(N_y+1)\times 1$. The semidiscrete equation of motion given above is then written compactly as:
+
+$\rho \zeta \ddot {\mathbf u}(t)  =  {\mathbf B}{\mathbf u}(t)$
+
 
 <img src="/img/OrthoGrid.png" width="400" />
 
