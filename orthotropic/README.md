@@ -1,3 +1,7 @@
+# MAGPIE
+> *An open-source plate vibration and analysis package*
+
+
 ## About
 
 MAGPIE is an open-source framework for simulating plate vibration with elastic boundary conditions. The plate equation is derived from the *orthotropic* Kirchhoff-Love plate theory. It can then effectively simulate the dynamics of moderately thin wooden and composite plates. The geometry is restricted to rectangular, and the thickness is assumed constant. These limitations may be overcome in future releases. MAGPIE can simulate boundary conditions of classic type (free, simply-supported and clamped) and generally elastic boundary support, controlling the flexural displacement and boundary rotation through applied elastic forces and moments. 
@@ -48,21 +52,24 @@ thus leaving the following elastic constants to be specified at the input: $E_x,
 
 The equation must be supplied with appropriate boundary conditions. Here, conditions of elastic type are assumed. Referring to the diagram above, the boundary conditions are:
 
- $x = 0$
-* Balance of Forces:      $$K_{0y} u = -D_1 \left( \partial_x^3 u + \left( \frac{D_4}{D_1} + \nu_{y} \right) \partial_x\partial_y^2 u\right)$$
-* Balance of Moments:     $$R_{0y} \partial_x u = D_1 \left(\partial_x^2 u + \nu_y \partial_y u \right)$$
+- at $x = 0$
+  * Balance of Forces:      $$K_{0y} u = -D_1 \left( \partial_x^3 u + \left( \frac{D_4}{D_1} + \nu_{y} \right) \partial_x\partial_y^2 u\right)$$
+  * Balance of Moments:     $$R_{0y} \partial_x u = D_1 \left(\partial_x^2 u + \nu_y \partial_y u \right)$$
 
- $x = L_x$
-* Balance of Forces:      $$K_{L_x y} u = D_1 \left( \partial_x^3 u + \left( \frac{D_4}{D_1} + \nu_{y} \right) \partial_x\partial_y^2 u\right)$$
-* Balance of Moments:     $$R_{L_x y} \partial_x u = -D_1 \left(\partial_x^2 u + \nu_y \partial_y u \right)$$
 
-  $y = 0$
-* Balance of Forces:      $$K_{x0} u = -D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
-* Balance of Moments:     $$R_{x0} \partial_y u = D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
+- at $x = L_x$
+  * Balance of Forces:      $$K_{L_x y} u = D_1 \left( \partial_x^3 u + \left( \frac{D_4}{D_1} + \nu_{y} \right) \partial_x\partial_y^2 u\right)$$
+  * Balance of Moments:     $$R_{L_x y} \partial_x u = -D_1 \left(\partial_x^2 u + \nu_y \partial_y u \right)$$
 
-  $y = L_y$
-* Balance of Forces:      $$K_{x L_y} u = D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
-* Balance of Moments:     $$R_{x L_y} \partial_y u = -D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
+
+- at  $y = 0$
+  * Balance of Forces:      $$K_{x0} u = -D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
+  * Balance of Moments:     $$R_{x0} \partial_y u = D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
+
+
+- at  $y = L_y$
+  * Balance of Forces:      $$K_{x L_y} u = D_3 \left( \partial_y^3 u + \left( \frac{D_4}{D_3} + \nu_{x} \right) \partial_y\partial_x^2 u\right)$$
+  * Balance of Moments:     $$R_{x L_y} \partial_y u = -D_3 \left(\partial_y^2 u + \nu_x \partial_x u \right)$$
 
 Note a clamped edge is recovered by setting $(K_\circ,R_\circ)$ to very large values, yielding $u \approx 0, \partial_n u \approx 0$, where $n$ is the direction normal to the boundary. A simply-supported edge is recovered by setting $K_\circ$ to a large value, and $R_\circ$ to zero (vanishing applied moment). A free edge is obtained by setting $K_\circ = R_\circ = 0$ (vanishing applied force and moment). 
 
@@ -88,10 +95,13 @@ $$\delta_{xx} u_{l,m} := (h_x)^{-2}(u_{l+1,m}-2u_{l,m} + u_{l-1,m}) $$
 
 $$\delta_{xxxx} u_{l,m} := (h_x)^{-4}(u_{l+2,m}-4u_{l+1,m} + 6u_{l,m} -4u_{l-1,m} + u_{l-2,m}) $$
 
-Similar definitions are used for the differences along the $y$ direction. A discrete version of the equation of motion and the boundary conditions is given in terms of the difference operators as:
+Similar definitions are used for the differences along the $y$ direction. A discrete version of the equation of motion in terms of the difference operators is obtained as:
 
 
 $$\rho h \partial_t^2 u_{l,m}(t) = -D_1\delta_{xxxx} u_{l,m}(t) - (D_2+D_4)\delta_{xx}\delta_{yy} u_{l,m} - D_3\delta_{yyyy} u_{l,m}(t)$$
+
+Note that the spatial indices are integer numbers restricted to the intervals $0 \leq l \leq N_x = \frac{L_x}{h_x}$, $0 \leq m \leq N_y = \frac{L_y}{h_y}$, yielding $N_x+1$ points along $x$, and $N_y+1$ points along $y$, including grid point on the boundary. 
+
 
 $l = 0$
 * Balance of Forces:      $$K_{0y} w_{0,m} = -D_1 \left( \delta_{x\cdot}\delta_{xx} u_{0,m} + \left( \frac{D_4}{D_1} + \nu_{y} \right) \delta_{x\cdot}\delta_{yy} u_{0,m}\right)$$
