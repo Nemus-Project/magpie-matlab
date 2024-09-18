@@ -150,7 +150,7 @@ At a generic inner point in the domain $(l,m)$ such that $(l\pm 2,m\pm 2)$ are a
 <img src="/img/OrthoGrid1.png" width="400" />
 
 
-Note that, in the above, the grid spacings $h_x$, $h_y$ are chosen equal, but this need not be the case in general. When the difference operator acts on points nearby the boundary, the stencil looks outside the plate grid. An example is represented by corners, such as in the image below.
+In the above: $$a_x := \frac{D_1}{h_x^4}$$, $$a_y := \frac{D_3}{h_y^4}$$, $$a_{xy} := \frac{(D_2+D_4)}{h_x^2h_y^2}$$. Note that, in the above, the grid spacings $h_x$, $h_y$ are chosen equal, but this need not be the case in general. When the difference operator acts on points nearby the boundary, the stencil looks outside the plate grid. An example is represented by corners, such as in the image below.
 
 <img src="/img/BCs.png" width="400" />
 
