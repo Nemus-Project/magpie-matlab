@@ -137,7 +137,9 @@ The semidiscrete system above may be recast in a convenient matrix-vector form. 
 
 Each coloured strip is composed of $N_y+1$ points. The vector is then of size $(N_x+1)(N_y+1)\times 1$. The semidiscrete equation of motion given above is then written compactly as:
 
-$\rho \zeta \ddot {\mathbf u}(t)  =  {\mathbf B}{\mathbf u}(t)$
+$$\rho \zeta \ddot {\mathbf u}(t)  =  {\mathbf B}{\mathbf u}(t)$$
+
+where the matrix $\mathbf{B}$ is of size $(N_x+1)(N_y+1)\times (N_x+1)(N_y+1)$. 
 
 
 <img src="/img/OrthoGrid.png" width="400" />
