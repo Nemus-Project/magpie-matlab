@@ -133,7 +133,8 @@ with analogous discretisations holding for the boundary conditions along the oth
   <source media="(prefers-color-scheme: dark)" srcset="img/plateBCs1.pdf">
 </picture>
 
-
+![gigi]
+(magpie-matlab/img/plateBCs1.pdf)
 
  
 ## Structure
