@@ -129,18 +129,11 @@ Boundary conditions follow as a direct discretisation of the continuous conditio
 
 with analogous discretisations holding for the boundary conditions along the other edges. 
 
-<picture>
-  <source srcset="orthotropic/img/BCs.png">
-</picture>
 
-![Cacca](/img/BCs.png?raw=true "Dio Cane")
 
-![Alt text](relative%20path/to/img.jpg?raw=true "Title")
+<img src="/img/BCs.png" width="400" />
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="[magpie-matlab/img/plateBCs1.pdf](https://github.com/Nemus-Project/magpie-matlab/blob/b505f5980a970319211afdcf859e7b1dc65353b2/orthotropic/img/plateBCs1.pdf)">
-</picture>
- 
+
 ## Structure
 
 All source code is found in the `src/` directory of the repository. In `src/` you can find a directory for each supported language as well as a `data/` directory which contains any datasets shared across implementations.
