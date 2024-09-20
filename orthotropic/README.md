@@ -169,8 +169,10 @@ The values of the points in shaded "ghost" region must be set according to the n
 
 The block form of the matrix is as per the image below. Blocks of the same colour have the same structure. All middle blocks, represented by a shaded blue area, have the same structure. 
 <p align="center">
-<img  width="600" src="/img/BiharmStructure.png" />
+<img  width="600" src="/img/BiharmStructure1.png" />
 </p>
+
+The diagram above shows the overall structure of the difference operator. Yellow blocks are pentadiagonal, blue blocks are tridiagonal, and red blocks are diagonal. 
 
 ## Structure
 
