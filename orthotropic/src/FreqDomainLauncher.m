@@ -81,8 +81,7 @@ Mlump  = [0.5,0.01,0.01].' ;
 
 %--------------------
 %-- plot parameters parameters
-addpath('/Users/micheleducceschi/Documents/MATLAB/DrosteEffect-BrewerMap-3.2.5.0') ; % some cool colormaps 
-cmap = brewermap(512, 'PRGn'); % colormap
+cmap = cmaps(4) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
 NN = 1 ; % first mode number to be plotted 
 Nplots = 9 ; % select 3,6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
 %--------------------
