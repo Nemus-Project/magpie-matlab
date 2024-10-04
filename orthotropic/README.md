@@ -25,9 +25,9 @@ MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotro
 
 The vibration of an orthotropic plate can be described via the Kirchhoff-Love model. This dynamical model describes the time evolution of the flexural displacement $u = u(x,y,t) : \mathcal{V} \times \mathbb{R}^+_0$. Here,  ${\bf x} \in \mathcal{V} := [0,L_x] \times [0,L_y]$ is the domain of definition, a rectangle with side lengths $L_x, L_y$. Here, and in what follows, $x$ denotes the longitudinal orthotropic direction, $y$ is radial, and $z$ is tangential. In quarter-sawing, $z$ is the direction along the thickness of the board. With this notation, the system reads:
 
-$$\rho \zeta \partial_t^2 u(x,y,t) = -D_1\partial_x^4 u(x,y,t) - (D_2+D_4)\partial_y^2\partial_x^2 u(x,y,t) - D_3\partial_y^4 u(x,y,t)$$
+$$\rho \zeta \partial_t^2 u(x,y,t) = -D_1\partial_x^4 u(x,y,t) - (D_2+D_4)\partial_y^2\partial_x^2 u(x,y,t) - D_3\partial_y^4 u(x,y,t) := -\mathcal{B}u(x,y,t)$$
 
-The model depends on four rigidity constants, denoted by $D_\circ$, defined in terms of Young's moduli $E_\circ$, the shear modulus $G_{xy}$ and the Poisson's ratios $\nu_\circ$ as follows:
+Here, $B$ denotes the orthotropic spatial differential operator generalising the biharmonic in the isotropic case. The model depends on four rigidity constants, denoted by $D_\circ$, defined in terms of Young's moduli $E_\circ$, the shear modulus $G_{xy}$ and the Poisson's ratios $\nu_\circ$ as follows:
 
 $$ D_1 := \frac{E_x\zeta^3}{12(1-\nu_{x}\nu_{y})} \quad D_3 := \frac{E_y\zeta^3}{12(1-\nu_{x}\nu_{y})} \quad D_4 := \frac{G_{xy}\zeta^3}{3} \quad D_2 := \frac{\nu_{yx}E_{x}\zeta^3}{6(1-\nu_{y}\nu_{y})} $$
 
@@ -165,14 +165,25 @@ The values of the points in shaded "ghost" region must be set according to the n
 
 **The expressions for the resulting coefficients are cumbersome**. They appear in the appropriate Matlab functions. 
 
-
-
 The block form of the matrix is as per the image below. Blocks of the same colour have the same structure. All middle blocks, represented by a shaded blue area, have the same structure. 
 <p align="center">
 <img  width="600" src="/img/BiharmStructure1.png" />
 </p>
 
 The diagram above shows the overall structure of the difference operator. Yellow blocks are pentadiagonal, blue blocks are tridiagonal, and red blocks are diagonal. 
+
+
+## Braces and static loads 
+
+MAGPIE allows the coupling of the plate structure to stiffening ribs and pointwise loads. The equations are modified as follows:
+
+$$ \rho \zeta \partial_t^2 u(x,y,t) + \sum_j M_j \delta_j(x,y) (\partial_t^2 u(x_j,y_j,t)) = -B u(x,y,t) - \sum_{i}\theta_i(x,y) f_i $$
+
+$$ \rho_i A_i \partial_t^2 w_i(z_i,t) = -E_iI_i \partial_{z_i}^4 w_i(z_i,t) + f_i $$
+
+where $j \in [1,N_l]$ and $i \in [1,N_r]$ with $N_l$ being the total number of static loads, and $N_r$ being the total number of braces. The braces are modelled as Euler-Bernoulli beams. In the above, $\delta_j := \delta(x-x_j)\delta(y-y_j)$ is a two-dimensional Dirac delta. Furthermore, $\theta_i$ is a kind of projector of $x,y$ onto $z_i$, such that $\int \theta_i g(x,y) dxdy = \int_{0}^L g(z_i) dz_i$. Besides the above equation, a further kinematic condition arises, namely that the displacement of the ribs equals the displacement of the plate along $z_i$: 
+
+$$\int \theta_i u dxdy = w_i(z_i)$$
 
 ## Structure
 
