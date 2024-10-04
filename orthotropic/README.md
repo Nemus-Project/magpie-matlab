@@ -396,5 +396,5 @@ FilmRec = 0 ; % 1= record video to file
 
 ## Inverse Modelling
 
-MAGPIE allows to estimate the elastic constants $E_x$, $E_y$, $G_{xy}$ starting from a set of measured frequencies and modal shapes. Note: **modal shapes must be known along with the corresponding frequencies**. The 
+MAGPIE allows to estimate the elastic constants $E_x$, $E_y$, $G_{xy}$ starting from a set of measured frequencies and modal shapes. Note: **modal shapes must be known along with the corresponding frequencies**. The reference script is [InverseModelling.m](https://github.com/Nemus-Project/magpie-matlab/blob/e715bbf5cf5e27d54e0c0f392357c9037e2b2cd0/orthotropic/src/InverseModelling.m). The top of the script allows setting the plate parameters
 
