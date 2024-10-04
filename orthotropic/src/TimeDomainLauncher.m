@@ -94,8 +94,7 @@ Mlump  = [0.1,0.01,0.01].' ;
 
 %--------------------
 %-- plot parameters parameters
-addpath('/Users/micheleducceschi/Documents/MATLAB/DrosteEffect-BrewerMap-3.2.5.0') ; % some cool colormaps 
-cmap = brewermap(512, 'PRGn'); % colormap
+cmap = cmaps(4) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
 LivePlot = 1 ; % 1 : live plot on
 RefreshRate = 1 ; % 1 = play all frames, 2 = play one out of two frames, etc
 absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
