@@ -185,26 +185,15 @@ where $j \in [1,N_l]$ and $i \in [1,N_r]$ with $N_l$ being the total number of s
 
 $$\int \theta_i u dxdy = w_i(z_i)$$
 
+These elements change the vibrational modes and the response of the plate to applied dynamic (i.e. time-dependent) loads. 
+
 ## Structure
 
-All source code is found in the `src/` directory of the repository. In `src/` you can find a directory for each supported language as well as a `data/` directory which contains any datasets shared across implementations.
+All source code is found in the `src/` directory of the repository. 
 
-## MAGPIE function
+### Direct Modelling
 
-The MAGPIE function accepts:
-
-- plate material properties: density, elasticity (Young's modulus), Poisson ratio
-- plate dimensions (rectangular geometry: edge lengths and thickness)
-- elastic boundary constants (2 per edge
-
-The user can stipulate an accuracy coefficient and how many modes they wish to calculate.
-
-The output from `magpie` is:
-
-- `Q`: A list of eigenvectors, one for each mode. This can be used to visualize the mode shape.
-- `Om`: The angular frequency for the corresponding eigenvector.
-- `N`:  Number of grid points in the $x$ and $y$ dimensions for the plate. A smaller `h` value will result in a larger number of grid points
-- `biharm`: The biharmonic used for deriving eigenvectors and modal frequencies. The biharmonic can also be used for a finite difference difference time domain scheme of the plate.
+Direct modelling can be run in both the frequency and the time domains. For the frequency domain, the simulation parameters are specified in the FreqDomainLauncher.m [a link](https://github.com/user/repo/blob/branch/other_file.md) 
 
 ## References
 
