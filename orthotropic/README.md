@@ -218,11 +218,11 @@ These elements change the vibrational modes and the response of the plate to app
 
 All source code is found in the `src/` directory of the repository. 
 
-### Direct Modelling
+## Direct Modelling
 
 Direct modelling can be run in both the frequency and the time domains. 
 
-#### Frequency Domain Analysis
+### Frequency Domain Analysis
 For the frequency domain, the simulation parameters are specified in the [FreqDomainLauncher.m](https://github.com/Nemus-Project/magpie-matlab/blob/b9f2f20d2ebe36d25f70e85deda9e8486661e0a5/orthotropic/src/FreqDomainLauncher.m). 
 
 User-editable parameters appear below this line 
@@ -340,7 +340,7 @@ NN = 9 ; % first mode number to be plotted
 Nplots = 9 ; % select 3,6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
 %--------------------
 ```
-#### Time Domain Analysis
+### Time Domain Analysis
 
 The file [TimeDomainLauncher.m](https://github.com/Nemus-Project/magpie-matlab/blob/30c0e8bfd3d4026de2bd9c634764ddf6f7481469/orthotropic/src/TimeDomainLauncher.m) allows setting the parameters for the time domain simulations. Most of these are analogous to the frequency domain case above. The time domain simulation requires setting extra parameters controlling the input/output locations, the forcing type and parameters, and the decay parameters. 
 
@@ -394,5 +394,7 @@ FilmRec = 0 ; % 1= record video to file
 %--------------------
 ```
 
+## Inverse Modelling
 
+MAGPIE allows to estimate the elastic constants $E_x$, $E_y$, $G_{xy}$ starting from a set of measured frequencies and modal shapes. Note: **modal shapes must be known along with the corresponding frequencies**. The 
 
