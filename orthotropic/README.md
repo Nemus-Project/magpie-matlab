@@ -53,7 +53,7 @@ Note that, because of the symmetry of the compliance matrix, one out of five ela
 
 $$\nu_{y} = \nu_{x}E_{y}E_{x}^{-1}$$
 
-thus leaving the following elastic constants to be specified at the input: $E_x,E_y,G_{xy},\nu_{xy}$. Note that the model also depends on the thickness $\zeta$ (assumed constant throughout $\mathcal V$), the side lengths $L_x,L_y$ and the density $\rho$ (also assumed constant).
+thus leaving the following elastic constants to be specified at the input: $E_x,E_y,G_{xy},\nu_{x}$. Note that the model also depends on the thickness $\zeta$ (assumed constant throughout $\mathcal V$), the side lengths $L_x,L_y$ and the density $\rho$ (also assumed constant).
 
 
 ```
@@ -319,7 +319,19 @@ Mlump  = [0.5,0.01,0.01].' ;
 %--------------------
 ```
 
-Again, these are rather self-explanatory. Note that the lengths of the rib arrays must be consistent with `Nribs`. So, the array containing the rib Young's moduli, `Eb`, must be of length `Nribs`. All ribs parameters are given in SI units (Pa for the Young's moduli, m for the thickness and widht of the braces' cross sections, Kg/m^3 for the densities). The ribs x and y coordinates are specified in two matrices, `x_beam_coord` and `y_beam_coord`, of size `(Nribs) X 2`. These are the initial and final x and y coordinates of each brace, given as fractions of `Lx` and `Ly`. Similar parameters are set for the static loads. Note that `Mlump` contains the masses (in Kg) of the loads. 
+Again, these are rather self-explanatory. Note that the lengths of the rib arrays must be consistent with `Nribs`. So, the array containing the rib Young's moduli, `Eb`, must be of length `Nribs`. All rib parameters are given in SI units (Pa for Young's moduli, m for the thickness and width of the braces' cross sections, and Kg/m^3 for the densities). The ribs' x and y coordinates are specified in two matrices, `x_beam_coord` and `y_beam_coord`, of size `(Nribs) X 2`. Each brace's initial and final x and y coordinates are given as fractions of `Lx` and `Ly`. Similar parameters are set for the static loads. Note that `Mlump` contains the loads' masses (in Kg). 
+
+Finally, the plot section completes the set of the user-editable parameters. These include the choice of the colormap and the flag `absPlot` to plot the absolute value of the modal shapes. 
+
+```
+%--------------------
+%-- plot parameters parameters
+addpath('/Users/micheleducceschi/Documents/MATLAB/DrosteEffect-BrewerMap-3.2.5.0') ; % some cool colormaps 
+cmap = brewermap(512, 'PRGn'); % colormap
+absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
+%--------------------
+```
+
 
 ## References
 
