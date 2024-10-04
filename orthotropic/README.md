@@ -213,8 +213,8 @@ All source code is found in the `src/` directory of the repository.
 
 Direct modelling can be run in both the frequency and the time domains. 
 
-
-** For the frequency domain, the simulation parameters are specified in the [FreqDomainLauncher.m](https://github.com/Nemus-Project/magpie-matlab/blob/b9f2f20d2ebe36d25f70e85deda9e8486661e0a5/orthotropic/src/FreqDomainLauncher.m). 
+#### Frequency Domain Analysis
+For the frequency domain, the simulation parameters are specified in the [FreqDomainLauncher.m](https://github.com/Nemus-Project/magpie-matlab/blob/b9f2f20d2ebe36d25f70e85deda9e8486661e0a5/orthotropic/src/FreqDomainLauncher.m). 
 
 User-editable parameters appear below this line 
 
@@ -331,7 +331,9 @@ cmap = brewermap(512, 'PRGn'); % colormap
 absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
 %--------------------
 ```
+#### Time Domain Analysis
 
+The file 
 
 ## References
 
