@@ -213,6 +213,96 @@ and up to
 %-------------------------------------------------------------------------
 ```
 
+First, global simulation parameters are set 
+
+```
+%-- general parameters
+fmax = 2000 ; % maximum frequency to be computed
+ppw  = 20 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
+Nmodes = 27 ; % select total number of modes to be computed. If Nmodes = [], all possible modes are computed
+%--------------------
+```
+
+Here `fmax` is the largest frequency to be computed. `ppw` is the number of points per wavelength at such frequency. The grid spacings in the x and y directions are set using these two parameters as 
+
+$$ h_\circ = v^\phi_\circ(\text{fmax})/\text{fmax}/\text{ppw} $$
+
+The number of grid points along x and y is set via such grid spacings, as 
+
+$$N_\circ = L_\circ / h_\circ$$
+
+with $\circ$ either x or y, and $v^{\phi}$ being the phase velocity (itself a function of frequency since waves on a plate are dispersive). Finally, `Nmodes` is the total number of modes to be computed by the eigenvalue routine. The largest mode number is `Nmax = (Nx+1)*(Ny+1)`, but in most cases one is interested in just a handful of modes given by `Nmodes` -- note that considerable speedups are so obtained. 
+
+Plate parameters, rather self-explanatory, come next:
+
+```
+%--------------------
+%-- plate parameters
+rho = 390 ; % density [kg / m^3]
+nux = 0.39 ; % poisson ratio
+Ex = 10.4e9 ; % young's mod along x [Pa]
+Ey = 0.994e9 ; % young's mod along y [Pa]
+Gxy = 0.526e9 ; % shear mod [Pa]
+Lx = 0.4 ; % edge lenght x [m]
+Ly = 0.6 ; % edge length y [m]
+Lz = 3e-3 ; % thickness [m]
+
+%-- elastic constants around the edges
+KRmat = [1e13,1e13; %Kx0 Rx0 
+    1e13, 1e13; % K0y R0y
+    1e13, 1e13; % KxL RxL
+    1e13, 1e13] ; % KLy RLy
+%--------------------
+```
+Note that, in order to simulate an "infinite" stiffness at the boundary, a rather large value must be selected. Usually, this can be set as 1e13. 
+
+Next, braces and lumped load parameters must be set:
+
+```
+%--------------------
+%-- braces parameters
+Nribs = 8 ; % number of braces 
+
+Eb = [10e9,10e9,10e9,10e9,10e9,10e9,10e9,10e9].' ; % youngs moduli
+Lzb = [3e-3,3e-3,3e-3,3e-3,3e-3,3e-3,3e-3,3e-3].' ; % thicknesses 
+bb = [3e-2,3e-2,3e-2,3e-2,3e-2,3e-2,3e-2,3e-2].' ; % width cross section
+rhob = [400,400,400,400,400,400,400,400].' ; % densities
+
+% rib coordinates along x (start and end) AS A FRACTION OF Lx
+x_beam_coord = ...
+    [0.2,0.8;
+    0.2,0.8;
+    0.2,0.8;
+    0.2,0.8;
+    0.2,0.8;
+    0.2,0.8;
+    0.2,0.8;
+    0.2,0.8] ;
+
+% rib coordinates along y (start and end) AS A FRACTION OF Ly
+y_beam_coord = ...
+    [0.1,0.2;
+    0.2,0.3;
+    0.3,0.4;
+    0.4,0.5;
+    0.5,0.6;
+    0.6,0.7;
+    0.7,0.8;
+    0.8,0.9] ;
+%--------------------
+
+%--------------------
+%-- static loads and stiffeners parameters
+
+Nlump = 3 ; % number of lumped elements
+x_lump_coord = [0.12,0.47,0.91].' ; % x coordinates of lumped elements 
+y_lump_coord = [0.75,0.4,0.38].' ; % y coordinates of lumped elements 
+Mlump  = [0.5,0.01,0.01].' ;
+%--------------------
+```
+
+Again, these are rather self-explanatory. Note that the lengths of the rib arrays must be consistent with `Nribs`. So, the array containing the rib Young's moduli, `Eb`, must be of length `Nribs`. All ribs parameters are given in SI units (Pa for the Young's moduli, m for the thickness and widht of the braces' cross sections, Kg/m^3 for the densities). The ribs x and y coordinates are specified in two matrices, `x_beam_coord` and `y_beam_coord`, of size `(Nribs) X 2`. These are the initial and final x and y coordinates of each brace, given as fractions of `Lx` and `Ly`. Similar parameters are set for the static loads. Note that `Mlump` contains the masses (in Kg) of the loads. 
+
 ## References
 
 - Howard, & Angus, J. A. S. (2009). _Acoustics and psychoacoustics_ (4th ed..).
