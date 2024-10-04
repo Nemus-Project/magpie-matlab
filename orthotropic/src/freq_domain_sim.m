@@ -1,4 +1,4 @@
-function [Om,Q] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,lumpParams,lumpCoord)
+function [Om,Q] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord)
 
 %-----------------------------------------------------------------------
 %-- unpack constants
@@ -52,8 +52,6 @@ end
 if Nlump
     % add lumped elements
     LumpDist = [] ;
-    Klump = lumpParams(:,1) ;
-    Mlump = lumpParams(:,2) ;
     for nL = 1 : Nlump
 
         x_lump = [lumpCoord(nL) ; lumpCoord(nL+Nlump)] ;
@@ -63,10 +61,7 @@ if Nlump
 
     LumpSpread = hx*hy*LumpDist.' ;
 
-
-    K = [K+LumpDist*diag(Klump)*LumpSpread, -LumpDist*diag(Klump); -diag(Klump)*LumpSpread, diag(Klump)] ;
-    K = sparse(K) ;
-    M = [M,zeros((Ny+1)*(Nx+1),Nlump); zeros(Nlump,(Ny+1)*(Nx+1)), sparse(diag(Mlump))] ;  M = sparse(M) ;
+    M = M + LumpDist*diag(Mlump)*LumpSpread ;  M = sparse(M) ;
 end
 
 
@@ -78,7 +73,6 @@ end
 [~,indSort] = sort(diag((Omsq))) ;
 Q = Q(:,indSort) ;
 Om = sqrt(abs(diag(Omsq))) ;
-
 
 
 % keep values up to fmax

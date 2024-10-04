@@ -1,4 +1,4 @@
-function [outs,stresses,fs] = time_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,T,x_f,outMat,Nribs,beamParams,beamCoord,Nlump,lumpParams,lumpCoord,dampVec,forceType,forceParams,LivePlot,RefreshRate,absPlot,FilmRec,cmap)
+function [outs,stresses,fs] = time_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,T,x_f,outMat,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord,dampVec,forceType,forceParams,LivePlot,RefreshRate,absPlot,FilmRec,cmap)
 
 
 %-----------------------------------------------------------------------
@@ -59,8 +59,6 @@ end
 if Nlump
     % add lumped elements
     LumpDist = [] ;
-    Klump = lumpParams(:,1) ;
-    Mlump = lumpParams(:,2) ;
     for nL = 1 : Nlump
 
         x_lump = [lumpCoord(nL) ; lumpCoord(nL+Nlump)] ;
@@ -70,11 +68,10 @@ if Nlump
 
     LumpSpread = hx*hy*LumpDist.' ;
 
-
-    K = [K+LumpDist*diag(Klump)*LumpSpread, -LumpDist*diag(Klump); -diag(Klump)*LumpSpread, diag(Klump)] ;
-    K = sparse(K) ;
-    M = [M,zeros((Ny+1)*(Nx+1),Nlump); zeros(Nlump,(Ny+1)*(Nx+1)), sparse(diag(Mlump))] ;  M = sparse(M) ;
+    M = M + LumpDist*diag(Mlump)*LumpSpread ;  M = sparse(M) ;
 end
+
+
 
 [Q,Omsq] = eigs(K,M,(Nx+1)*(Ny+1),'smallestabs') ;
 [~,indSort] = sort(diag((Omsq))) ;
@@ -82,19 +79,18 @@ Q = Q(:,indSort) ;
 Om = sqrt(abs(diag(Omsq))) ;
 
 
-
 % keep values up to fmax
 fCur = 0 ;
 indCur = 0 ;
-while fCur < fmax
+while fCur < fmax 
     indCur = indCur + 1 ;
     fCur = Om(indCur) / 2 / pi ;
 end
-Nmodes = indCur - 1 ;
-Om = Om(1:Nmodes) ;
+Om = Om(1:indCur) ;
 Om(end)/2/pi
-Q = Q(:,1:Nmodes) ;
-Qplate = Q(1:end-Nlump,:) ;
+Q = Q(:,1:indCur) ;
+Nmodes = indCur ;
+
 %-----------------------------------------------------------------------
 
 
@@ -155,7 +151,6 @@ sig     = alpha + beta*Om.^2 ; % loss factor
 
 %input
 Jin   = spreadinterp(x_f,Nx,Ny,hx,hy,1) ;
-Jin   = [Jin;zeros(Nlump,1)] ;
 % outputs
 Nouts = length(outMat(:,1)) ;
 Jouts = [] ;
@@ -174,10 +169,10 @@ Dxx = DxxBuild(Nx,Ny,hx,'blk') ;
 Dyy = DyyBuild(Nx,Ny,hy,'blk') ;
 Dxy = DxyBuild(Nx,Ny,hx,hy,'blk') ;
 
-interpouts = Jouts*Qplate ;  % displacement interpolator
-interpstrainx = -0.5*Lz*Jouts*Dxx*Qplate ;  % strain x interpolator
-interpstrainy = -0.5*Lz*Jouts*Dyy*Qplate ;  % strain y interpolator
-interpstrainxy = -Lz*Jouts*Dxy*Qplate ;  % strain xy interpolator
+interpouts = Jouts*Q ;  % displacement interpolator
+interpstrainx = -0.5*Lz*Jouts*Dxx*Q ;  % strain x interpolator
+interpstrainy = -0.5*Lz*Jouts*Dyy*Q ;  % strain y interpolator
+interpstrainxy = -Lz*Jouts*Dxy*Q ;  % strain xy interpolator
 
 Jin  = Q \ (M \ Jin) ; % input dirac
 %-----------------------------------------------------------------------
@@ -237,9 +232,9 @@ for n = 1 : Ts
 
         if n == 1 || mod(n,RefreshRate) == 0
 
-            disp = Qplate*vp ;
-            vel  = Qplate*(vp-vm)/2/k ;
-            acc  = Qplate*(vp-2*v0+vm)/k^2 ;
+            disp = Q*vp ;
+            vel  = Q*(vp-vm)/2/k ;
+            acc  = Q*(vp-2*v0+vm)/k^2 ;
 
             ex  = -0.5*Lz*Dxx*disp ;
             ey  = -0.5*Lz*Dyy*disp ;

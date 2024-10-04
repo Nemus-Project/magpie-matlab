@@ -75,9 +75,8 @@ y_beam_coord = ...
 
 Nlump = 3 ; % number of lumped elements
 x_lump_coord = [0.12,0.47,0.91].' ; % x coordinates of lumped elements 
-y_lump_coord = [0.25,0.4,0.38].' ; % y coordinates of lumped elements 
-KLump  = [1e3,3e5,1.2e2].' ;
-MLump  = [0.01,0.01,0.01].' ;
+y_lump_coord = [0.75,0.4,0.38].' ; % y coordinates of lumped elements 
+Mlump  = [0.5,0.01,0.01].' ;
 %--------------------
 
 %--------------------
@@ -85,7 +84,7 @@ MLump  = [0.01,0.01,0.01].' ;
 addpath('/Users/micheleducceschi/Documents/MATLAB/DrosteEffect-BrewerMap-3.2.5.0') ; % some cool colormaps 
 cmap = brewermap(512, 'PRGn'); % colormap
 NN = 1 ; % first mode number to be plotted 
-Nplots = 6 ; % select 3,6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
+Nplots = 9 ; % select 3,6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
 %--------------------
 
 % END CUSTOM PARAMETERS 
@@ -121,7 +120,6 @@ beamCoord = [x_beam_coord; y_beam_coord] ;
 
 
 %-- lumped elements parameters
-lumpParams = [KLump,MLump] ;
 lumpCoord = [x_lump_coord; y_lump_coord] ;
 
 
@@ -135,11 +133,10 @@ yax = linspace(0,Ly,Ny+1) ;
 
 %-------------------------------------------------------------------------
 % EIGENVALUE PROBLEM
-[Om,Q] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,lumpParams,lumpCoord) ;
-Qplate = Q(1:end-Nlump,:) ;
+[Om,Q] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord) ;
 %-------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------
 % PLOT RESULTS
-modal_plotter(cmap,Nplots,NN,X,Y,Qplate,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
+modal_plotter(cmap,Nplots,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
 %-------------------------------------------------------------------------

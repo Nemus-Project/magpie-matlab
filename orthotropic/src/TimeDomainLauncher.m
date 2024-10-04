@@ -89,8 +89,7 @@ y_beam_coord = ...
 Nlump = 3 ; % number of lumped elements
 x_lump_coord = [0.1, 0.4, 0.7].' ; % x coordinates of lumped elements 
 y_lump_coord = [0.9,0.8,0.7].' ; % y coordinates of lumped elements 
-KLump  = [1e3,1e4,1e5].' ;
-MLump  = [0.01,0.01,0.01].' ;
+Mlump  = [0.1,0.01,0.01].' ;
 %--------------------
 
 %--------------------
@@ -136,7 +135,6 @@ beamCoord = [x_beam_coord; y_beam_coord] ;
 
 
 %-- lumped elements parameters
-lumpParams = [KLump,MLump] ;
 lumpCoord = [x_lump_coord; y_lump_coord] ;
 
 
@@ -152,7 +150,7 @@ yax = linspace(0,Ly,Ny+1) ;
 
 %-------------------------------------------------------------------------
 % EIGENVALUE PROBLEM
-[outs,stresses,fs] = time_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,T,x_p,outMat,Nribs,beamParams,beamCoord,Nlump,lumpParams,lumpCoord,dampVec,forceType,forceParams,LivePlot,RefreshRate,absPlot,FilmRec,cmap) ;
+[outs,stresses,fs] = time_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,T,x_p,outMat,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord,dampVec,forceType,forceParams,LivePlot,RefreshRate,absPlot,FilmRec,cmap) ;
 %-------------------------------------------------------------------------
 
 
