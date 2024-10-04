@@ -335,9 +335,9 @@ Finally, the plot section completes the set of the user-editable parameters. The
 ```
 %--------------------
 %-- plot parameters parameters
-addpath('/Users/micheleducceschi/Documents/MATLAB/DrosteEffect-BrewerMap-3.2.5.0') ; % some cool colormaps 
-cmap = brewermap(512, 'PRGn'); % colormap
-absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
+cmap = cmaps(4) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
+NN = 9 ; % first mode number to be plotted 
+Nplots = 9 ; % select 3,6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
 %--------------------
 ```
 #### Time Domain Analysis
@@ -386,8 +386,7 @@ Finally, there are extra plot parameters compared to the frequency domain. The `
 ```
 %--------------------
 %-- plot parameters parameters
-addpath('/Users/micheleducceschi/Documents/MATLAB/DrosteEffect-BrewerMap-3.2.5.0') ; % some cool colormaps 
-cmap = brewermap(512, 'PRGn'); % colormap
+cmap = cmaps(4) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
 LivePlot = 1 ; % 1 : live plot on
 RefreshRate = 1 ; % 1 = play all frames, 2 = play one out of two frames, etc
 absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
