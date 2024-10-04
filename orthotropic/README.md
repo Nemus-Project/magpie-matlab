@@ -21,6 +21,24 @@ MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotro
 
 ** Inverse modelling consists of supplying MAGPIE with a number of measured modal frequencies from an experimental plate, along with the plate's known material and geometric constants (density, edge lengths, thickness) to compute the elastic constants.
 
+### Features
+
+Here is a list of features currently supported by MAGPIE:
+
+1. orthotropic wave propagation (includes isotropic as a special case)
+2. rectangular geometry
+3. constant thickness
+4. generally elastic boundary conditions
+5. possibility of adding ribs (Euler-Bernoulli beams)
+6. possibility of adding lumped static loads and stiffeners
+7. frequency domain analysis
+8. time domain simulation using two input forces: impulse and sines
+9. arbitrary amount of output points
+10. stress computation, plus output displacement, velocity and acceleration
+11. Rayleigh damping
+12. sound synthesis of displacement, velocity and acceleration at output points
+13. Inverse modelling to compute the elastic constants from a set of measured experimental frequencies
+
 ## The Orthotropic Kirchhoff-Love Model
 
 The vibration of an orthotropic plate can be described via the Kirchhoff-Love model. This dynamical model describes the time evolution of the flexural displacement $u = u(x,y,t) : \mathcal{V} \times \mathbb{R}^+_0$. Here,  ${\bf x} \in \mathcal{V} := [0,L_x] \times [0,L_y]$ is the domain of definition, a rectangle with side lengths $L_x, L_y$. Here, and in what follows, $x$ denotes the longitudinal orthotropic direction, $y$ is radial, and $z$ is tangential. In quarter-sawing, $z$ is the direction along the thickness of the board. With this notation, the system reads:
