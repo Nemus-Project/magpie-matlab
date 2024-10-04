@@ -16,7 +16,7 @@ clc
 %--------------------
 %-- general parameters
 fmax = 5000 ; % maximum frequency to be computed
-ppw  = 4 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
+ppw  = 5 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
 T = 0.020 ; % total simulation time [s]
 %--------------------
 
@@ -87,14 +87,15 @@ y_beam_coord = ...
 %-- static loads and stiffeners parameters
 
 Nlump = 3 ; % number of lumped elements
-x_lump_coord = [0.1, 0.4, 0.7].' ; % x coordinates of lumped elements 
-y_lump_coord = [0.9,0.8,0.7].' ; % y coordinates of lumped elements 
-Mlump  = [0.1,0.01,0.01].' ;
+x_lump_coord = [0.2,0.4,0.6 ].' ; % x coordinates of lumped elements 
+y_lump_coord = [0.8,0.73,0.7].' ; % y coordinates of lumped elements 
+%Mlump  = [0.1,0.01,0.01].' ;
+Mlump  = [0.01,0.02,0.05] ;
 %--------------------
 
 %--------------------
 %-- plot parameters parameters
-cmap = cmaps(4) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
+cmap = cmaps(2) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = 4
 LivePlot = 1 ; % 1 : live plot on
 RefreshRate = 1 ; % 1 = play all frames, 2 = play one out of two frames, etc
 absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
