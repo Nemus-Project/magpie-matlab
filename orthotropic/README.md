@@ -333,9 +333,58 @@ absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
 ```
 #### Time Domain Analysis
 
-The file 
+The file [TimeDomainLauncher.m](https://github.com/Nemus-Project/magpie-matlab/blob/30c0e8bfd3d4026de2bd9c634764ddf6f7481469/orthotropic/src/TimeDomainLauncher.m) allows setting the parameters for the time domain simulations. Most of these are analogous to the frequency domain case above. The time domain simulation requires setting extra parameters controlling the input/output locations, the forcing type and parameters, and the decay parameters. 
 
-## References
+The I/O setup is straightforward: the input `x_f` is a one-by-two vector including the x and y coordinates (again, scaled by the side lengths). The output `outMat` is similar, but it can contain an arbitrary amount of rows each representing an virtual contact microphone on the plate's surface.  
 
-- Howard, & Angus, J. A. S. (2009). _Acoustics and psychoacoustics_ (4th ed..).
-- Ashby, (October 2021) [_Material property data for engineering materials_](https://www.ansys.com/content/dam/amp/2021/august/webpage-requests/education-resources-dam-upload-batch-2/material-property-data-for-eng-materials-BOKENGEN21.pdf) Department of Engineering, University of Cambridge (5th edition)
+```
+%--------------------
+%-- input / output locations
+x_f = [0.513,0.678] ; % frac of Lx Ly 
+outMat = [0.51,0.52; 0.12,0.76] ; % frac of Lx Ly, each row represents an output point
+%--------------------
+```
+
+The forcing parameters consist of a flag `forceType` and a one-by-three vector. Currently, MAGPIE supports two force types: a raised cosine simulating an impulse and a sinusoid. When the raised cosine is selected, the three parameters appearing in the `forceParams` array correspond to contact duration (in seconds), the largest forcing amplitude (in Newtons) and a noise modulation parameter (this can be useful to give the resulting synthesis a brighter tone).  In sinusoidal mode, the three forcing parameters are the sinusoidal input frequency, peak amplitude, and noise modulation. 
+
+```
+%--------------------
+%-- forcing
+forceType = 1 ; % 1 = impulse , 2 = sinusoid
+if forceType == 1 
+forceParams = [0.0007,50,0.5] ; % [time of contact (s), max Amplitude (N), noise modulation]
+else
+    forceParams = [100,50,0.2] ; % [frequency of sine (Hz), max Amplitude (N), noise modulation]
+end
+%--------------------
+```
+
+The decay-time parameters are expressed via another one-by-three array. Currently, MAGPIE handles a Rayleigh-type decay profile, such that the damping matrix is 
+
+$$C = \alpha M + \beta K$$
+
+where $M$ and $K$ are the mass and stiffness matrices of the system. Two free positive parameters $\alpha$ and $\beta$ are available to the user. In the frequency domain, Rayleigh's damping is quadratic in frequency, with $\alpha$ controlling the decay time at DC and $\beta$ multiplying the quadratic term (there is no linear term). Rather than setting the two parameters as are, it is more convenient to set the decay times $\tau_{60}$ at two known frequencies. One is fixed at DC, and the second is user-selectable. These compose the three parameters in the `dampVec` array.
+
+```
+%--------------------
+%-- loss parameters
+dampVec = [0.9, 0.4, 500] ; %[t60_0Hz (s),t60_f1 (s), f1 (Hz)] NB you MUST use t60_f1 < t60_0Hz for stability
+%--------------------
+```
+
+Finally, there are extra plot parameters compared to the frequency domain. The `LivePlot` flag allows plotting the animations in real-time. If selected, six plots are updated at a rate corresponding to `Refreshrate`. Finally, `FilmRec` allows recording to file the resulting animation. 
+
+```
+%--------------------
+%-- plot parameters parameters
+addpath('/Users/micheleducceschi/Documents/MATLAB/DrosteEffect-BrewerMap-3.2.5.0') ; % some cool colormaps 
+cmap = brewermap(512, 'PRGn'); % colormap
+LivePlot = 1 ; % 1 : live plot on
+RefreshRate = 1 ; % 1 = play all frames, 2 = play one out of two frames, etc
+absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
+FilmRec = 0 ; % 1= record video to file
+%--------------------
+```
+
+
+
