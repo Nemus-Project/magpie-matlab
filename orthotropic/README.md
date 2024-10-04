@@ -193,7 +193,25 @@ All source code is found in the `src/` directory of the repository.
 
 ### Direct Modelling
 
-Direct modelling can be run in both the frequency and the time domains. For the frequency domain, the simulation parameters are specified in the  [FreqDomainLauncher.m]([https://github.com/user/repo/blob/branch/other_file.md](https://github.com/Nemus-Project/magpie-matlab/blob/b9f2f20d2ebe36d25f70e85deda9e8486661e0a5/orthotropic/src/FreqDomainLauncher.m)) 
+Direct modelling can be run in both the frequency and the time domains. 
+
+
+** For the frequency domain, the simulation parameters are specified in the [FreqDomainLauncher.m](https://github.com/Nemus-Project/magpie-matlab/blob/b9f2f20d2ebe36d25f70e85deda9e8486661e0a5/orthotropic/src/FreqDomainLauncher.m). 
+
+User-editable parameters appear below this line 
+
+```
+%-------------------------------------------------------------------------
+% CUSTOM PARAMETERS (user can change these)
+
+```
+
+and up to 
+
+```
+% END CUSTOM PARAMETERS 
+%-------------------------------------------------------------------------
+```
 
 ## References
 
