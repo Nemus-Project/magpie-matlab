@@ -396,5 +396,93 @@ FilmRec = 0 ; % 1= record video to file
 
 ## Inverse Modelling
 
-MAGPIE allows to estimate the elastic constants $E_x$, $E_y$, $G_{xy}$ starting from a set of measured frequencies and modal shapes. Note: **modal shapes must be known along with the corresponding frequencies**. The reference script is [InverseModelling.m](https://github.com/Nemus-Project/magpie-matlab/blob/e715bbf5cf5e27d54e0c0f392357c9037e2b2cd0/orthotropic/src/InverseModelling.m). The top of the script allows setting the plate parameters
+MAGPIE allows the estimation of the elastic constants $E_x$, $E_y$, and $G_{xy}$ of a real orthotropic plate starting from a set of $N_{meas}$ measured frequencies and modal shapes. Note: **the $N_{meas}$ modal shapes must be known along with the corresponding frequencies**. The reference script is [InverseModelling.m](https://github.com/Nemus-Project/magpie-matlab/blob/e715bbf5cf5e27d54e0c0f392357c9037e2b2cd0/orthotropic/src/InverseModelling.m). The top of the script allows setting the plate parameters. 
 
+```
+%--------------------
+%-- plate parameters
+rho      = 473.9 ;
+Lx       = 0.223 ;
+Ly       = 0.114 ;
+Lz       = 0.003 ;
+
+%-- ballpark values 
+Ex0      = 10.7e9 ;   
+Ey0      = 716e6 ;
+Gxy0     = 500e6 ;
+nux0     = 0.51 ;
+
+%-- elastic constants around the edges
+KRmat = [0e13,0e13; %Kx0 Rx0
+    1e13, 1e13; % K0y R0y
+    0e13, 0e13; % KxL RxL
+    0e13, 0e13] ; % KLy RLy
+
+%-- measured experimental frequencies (Hz)
+ExpFreqs = [52
+    98
+    311
+    337
+    398
+    637] ;
+%--------------------
+```
+
+The plate parameters here are drawn from the experimental plate. Of course, the values of the elastic constants are unknown at this stage. 
+**The only requirement here is that the first $N_{meas}$ modal shapes correspond to the numerical eigenshapes returned by MAGPIE using the ballpark elastic constant values**. Checking that the experimental boundary conditions are correctly implemented is also fundamental at this stage (if one or more sides are clamped, you must ensure that sufficient pressure is applied on the plate's edges by the clamps). The experimentalist must ensure that these requirements are met before estimating the elastic constants via MAGPIE. 
+
+Note that the $N_{meas}$ experimental frequencies corresponding to the first $N_{meas}$ mode shapes appear here in the preamble. 
+
+The rest of the preamble is self-explanatory. 
+
+```
+%--------------------
+%-- general parameters
+fmax = 2000 ; %-- maximum frequency to be computed
+ppw  = 100 ; % points per wavelength at maximum frequency. Choose 3 <= ppw
+Nmeas = 6 ; % total number of modes required
+%--------------------
+
+%--------------------
+%-- braces parameters
+Nribs = 0 ; % number of braces
+Eb = [].' ; % youngs moduli
+Lzb = [].' ; % thicknesses
+bb = [].' ; % width cross section
+rhob = [].' ; % densities
+
+% rib coordinates along x (start and end) AS A FRACTION OF Lx
+x_beam_coord = ...
+    [] ;
+
+% rib coordinates along y (start and end) AS A FRACTION OF Ly
+y_beam_coord = ...
+    [] ;
+
+%--------------------
+%-- static loads and stiffeners parameters
+
+Nlump = 0 ; % number of lumped elements
+x_lump_coord = [].' ; % x coordinates of lumped elements
+y_lump_coord = [].' ; % y coordinates of lumped elements
+KLump  = [].' ;
+MLump  = [].' ;
+%--------------------
+
+%--------------------
+%-- plot parameters parameters
+cmap = cmaps(1) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
+absPlot = 0 ;
+NN = 1 ; % mode number to plot (plot will display modes between NN and NN + 8)
+%--------------------
+
+%--------------------
+%-- MAC parameters
+MAC_threshold = 0.99 ;
+%--------------------
+
+% END CUSTOM PARAMETERS
+%-------------------------------------------------------------------------
+```
+
+The only new parameter to set here is `MAC_threshold`. MAGPIE performs modal identification by computing the MAC (modal assurance criterion). A batch of "training" numerical plates is computed, and the modal shapes are assessed against the reference modal shapes computed using the ballpark elastic constants. When the average MAC across all $N_{meas}$ is below `MAC_threshold`, the training plate is excluded. This ensures that the training is operated only on a batch of plates returning consistent modal shapes. 
