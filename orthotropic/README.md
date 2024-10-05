@@ -28,6 +28,7 @@ MAGPIE is a framework allowing both *direct* and *inverse modelling* of orthotro
 **[Braces and static loads ](#braces-and-static-loads)**<br>
 **[Structure](#structure)**<br>
 **[Direct Modelling](#direct-modelling)**<br>
+**[Inverse Modelling](#inverse-modelling)**<br>
 
 
 ## Features
