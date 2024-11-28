@@ -15,46 +15,42 @@ clc
 
 %--------------------
 %-- general parameters
-fmax = 2000 ; % maximum frequency to be computed
-ppw  = 5 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
-Nmodes = [] ; % select total number of modes to be computed. If Nmodes = [], all possible modes are computed
+fmax = 5000 ; % maximum frequency to be computed
+ppw  = 3 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
+Nmodes = 6 ; % select total number of modes to be computed. If Nmodes = [], all available modes are computed
 %--------------------
 
 %--------------------
-% to make isotropic, select: ----- 
 %-- plate parameters
-rho = 390 ; % density [kg / m^3]
-nux = 0.39 ; % poisson ratio
-Ex = 10.4e9 ; % young's mod along x [Pa]
-Ey = 0.994e9 ; % young's mod along y [Pa]
-Gxy = 0.526e9 ; % shear mod [Pa]
-Lx = 0.4 ; % edge lenght x [m]
-Ly = 0.6 ; % edge length y [m]
-Lz = 3e-3 ; % thickness [m]
+rho   = 390 ;    % density [kg / m^3]
+nux   = 0.39 ;   % poisson ratio
+Ex    = 10.9e9 ; % young's mod along x [Pa]
+Ey    = 0.64e9 ; % young's mod along y [Pa]
+Gxy   = 0.58e9 ; % shear mod [Pa]
+Lx    = 0.6 ;    % edge lenght x [m]
+Ly    = 0.6 ;    % edge length y [m]
+Lz    = 1.0e-3 ; % thickness [m]
+
 
 %-- elastic constants around the edges
-KRmat = [1e13,1e13; %Kx0 Rx0 
-    1e13, 1e13; % K0y R0y
-    1e13, 1e13; % KxL RxL
-    1e13, 1e13] ; % KLy RLy
+KRmat = [1e10,1e10; % Kx0 Rx0 
+    1e10, 1e10;     % K0y R0y
+    1e10, 1e10;   % KxL RxL
+    1e10, 1e10] ; % KLy RLy
 %--------------------
 
 %--------------------
 %-- braces parameters
-Nribs = 8 ; % number of braces 
+Nribs = 0 ; % number of braces 
 
-Eb = [10e9,10e9,10e9,10e9,10e9,10e9,10e9,10e9].' ; % youngs moduli
-Lzb = [3e-3,3e-3,3e-3,3e-3,3e-3,3e-3,3e-3,3e-3].' ; % thicknesses 
-bb = [3e-2,3e-2,3e-2,3e-2,3e-2,3e-2,3e-2,3e-2].' ; % width cross section
-rhob = [400,400,400,400,400,400,400,400].' ; % densities
+Eb = [10e9, 11e9, 10.2e9, 200e9].' ; % youngs moduli
+Lzb = [3e-3,2e-3,2e-3,1e-3].' ; % thicknesses 
+bb = [3e-2,2e-2,2e-2,1e-2].' ; % width cross section
+rhob = [400,390,410,8000].' ; % densities
 
 % rib coordinates along x (start and end) AS A FRACTION OF Lx
 x_beam_coord = ...
     [0.2,0.8;
-    0.2,0.8;
-    0.2,0.8;
-    0.2,0.8;
-    0.2,0.8;
     0.2,0.8;
     0.2,0.8;
     0.2,0.8] ;
@@ -62,29 +58,24 @@ x_beam_coord = ...
 % rib coordinates along y (start and end) AS A FRACTION OF Ly
 y_beam_coord = ...
     [0.1,0.2;
-    0.2,0.3;
-    0.3,0.4;
-    0.4,0.5;
-    0.5,0.6;
-    0.6,0.7;
-    0.7,0.8;
-    0.8,0.9] ;
+    0.2,0.3
+    0.3,0.4
+    0.4,0.5] ;
 %--------------------
 
 %--------------------
 %-- static loads and stiffeners parameters
-
-Nlump = 3 ; % number of lumped elements
-x_lump_coord = [0.12,0.47,0.91].' ; % x coordinates of lumped elements 
-y_lump_coord = [0.75,0.4,0.38].' ; % y coordinates of lumped elements 
-Mlump  = [0.5,0.01,0.01].' ; %in Kg
+Nlump        = 0 ;                  % number of lumped elements
+x_lump_coord = [0.2,0.4].'  ;       % x coordinates of lumped elements AS A FRACTION OF Lx
+y_lump_coord = [0.7,0.87].' ;       % y coordinates of lumped elements AS A FRACTION OF Ly
+Mlump        = [0.2,0.01].' ;  % masses [kg]
 %--------------------
 
 %--------------------
 %-- plot parameters parameters
 cmap = cmaps(4) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
 NN = 1 ; % first mode number to be plotted 
-Nplots = 9 ; % select 3, 6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
+Nplots = 6 ; % select 3,6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
 %--------------------
 
 % END CUSTOM PARAMETERS 
@@ -102,7 +93,7 @@ facy = sqrt(2*pi)*sqrt(sqrt(Evec(2)*Lvec(3)^2/12/rho)) ;
 hx = facx/ppw/sqrt(fmax) ; % this applies the formula hx*ppw = cx/fmax (\lambda f = c)
 hy = facy/ppw/sqrt(fmax) ; % this applies the formula hy*ppw = cy/fmax (\lambda f = c)
 Nx   = round(Lvec(1)/hx) ; Ny = round(Lvec(2)/hy) ;
-Nvec = [Nx,Ny] ; % grid points
+Nvec = [Nx,Ny]  % grid points
 hvec = [Lvec(1)/Nvec(1), Lvec(2)/Nvec(2)] ; % grid spacings 
 
 
@@ -133,10 +124,13 @@ yax = linspace(0,Ly,Ny+1) ;
 
 %-------------------------------------------------------------------------
 % EIGENVALUE PROBLEM
-[Om,Q] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord) ;
+[Om,Q,K,M,Qtot,OmTot] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord) ;
 %-------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------
 % PLOT RESULTS
 modal_plotter(cmap,Nplots,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
 %-------------------------------------------------------------------------
+
+Om/2/pi
+digits(3); vpa(ans)

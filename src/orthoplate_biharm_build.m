@@ -6,8 +6,6 @@ function orthoBiHarm = orthoplate_biharm_build(Evec,nux,Lvec,hvec,Nvec,KRmat)
 Ex = Evec(1) ;
 Ey = Evec(2) ;
 Gxy = Evec(3) ;
-Lx = Lvec(1) ;
-Ly = Lvec(2) ;
 Lz = Lvec(3) ;
 hx = hvec(1) ;
 hy = hvec(2) ;
@@ -368,7 +366,7 @@ BlkMm1Mm3(end,end)      = D1Nu3N ;
 BlkMm1Mm3(end-1,end-1)  = D1Nm1u3Nm1 ;
 
 
-orthoBiHarm = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+orthoBiHarm = spalloc((Nx+1)*(Ny+1),(Nx+1)*(Ny+1),20*(Nx+1)*(Ny+1)) ;
 
 
 for m = 3 : Nx - 1

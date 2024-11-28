@@ -1,4 +1,4 @@
-function [Om,Q] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord)
+function [Om,Q,K,M,Qtot,OmTot] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord)
 
 %-----------------------------------------------------------------------
 %-- unpack constants
@@ -69,11 +69,18 @@ if isempty(Nmodes)
     Nmodes = (Nx+1)*(Ny+1) ;
 end
 
+% quick trick to improve the matrices' numerical accuracy
+M = 0.5*(M+M') ;
+symK = 0.5*(K+K') ; 
+skewK = 0.5*(K-K') ;
+K = symK + skewK ;
+
 [Q,Omsq] = eigs(K,M,Nmodes,'smallestabs') ;
 [~,indSort] = sort(diag((Omsq))) ;
 Q = Q(:,indSort) ;
 Om = sqrt(abs(diag(Omsq))) ;
-
+Qtot = Q ;
+OmTot = Om ;
 
 % keep values up to fmax
 fCur = 0 ;

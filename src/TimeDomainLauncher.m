@@ -16,57 +16,61 @@ clc
 %--------------------
 %-- general parameters
 fmax = 5000 ; % maximum frequency to be computed
-ppw  = 5 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
-T = 0.020 ; % total simulation time [s]
+ppw  = 3 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
+T    = 0.5 ; % total simulation time [s]
 %--------------------
 
 %--------------------
 %-- plate parameters
-rho = 390 ; % density [kg / m^3]
-nux = 0.39 ; % poisson ratio
-Ex = 10.4e9 ; % young's mod along x [Pa]
-Ey = 0.994e9 ; % young's mod along y [Pa]
-Gxy = 0.526e9 ; % shear mod [Pa]
-Lx = 0.4 ; % edge lenght x [m]
-Ly = 0.6 ; % edge length y [m]
-Lz = 3e-3 ; % thickness [m]
+rho   = 390 ;    % density [kg / m^3]
+nux   = 0.39 ;   % poisson ratio
+Ex    = 10.9e9 ; % young's mod along x [Pa]
+Ey    = 0.64e9 ; % young's mod along y [Pa]
+Gxy   = 0.58e9 ; % shear mod [Pa]
+Lx    = 0.6 ;    % edge lenght x [m]
+Ly    = 0.6 ;    % edge length y [m]
+Lz    = 1.0e-3 ; % thickness [m]
 
 %-- elastic constants around the edges
-KRmat = [1e12,1e12; %Kx0 Rx0 
-    1e12, 1e12; % K0y R0y
-    1e12, 1e12; % KxL RxL
-    1e12, 1e12] ; % KLy RLy
+KRmat = [1e4,1e5; % Kx0 Rx0 
+    1e4, 1e4;     % K0y R0y
+    0e10, 0e10;   % KxL RxL
+    0e10, 0e10] ; % KLy RLy
 %--------------------
 
 %--------------------
 %-- input / output locations
-x_p = [0.513,0.678] ; % frac of Lx Ly 
-outMat = [0.51,0.52; 0.12,0.76] ; % frac of Lx Ly, each row represents an output point
+x_p = [0.57,0.608] ; % frac of Lx Ly 
+outMat = [0.57,0.86;
+    0.57,0.27] ; % frac of Lx Ly, each row represents an output point
 %--------------------
 
 %--------------------
 %-- forcing
-forceType = 1 ; % 1 = impulse , 2 = sinusoid
+forceType = 1 ; % 1 = impulse, 2 = sinusoid, 3 = input_file
 if forceType == 1 
-forceParams = [0.0007,50,0.5] ; % [time of contact (s), max Amplitude (N), noise modulation]
-else
+forceParams = [0.0007,5,0.5] ; % [time of contact (s), max Amplitude (N), noise modulation]
+elseif forceType == 2
     forceParams = [100,50,0.2] ; % [frequency of sine (Hz), max Amplitude (N), noise modulation]
+elseif forceType == 3
+    forceParams = 'testInput.wav' ;
 end
 %--------------------
 
 %--------------------
 %-- loss parameters
-dampVec = [0.9, 0.4, 500] ; %[t60_0Hz (s),t60_f1 (s), f1 (Hz)] NB you MUST use t60_f1 < t60_0Hz for stability
+dampVec = [0.3, 0.23, 500] ; %[t60_0Hz (s),t60_f1 (s), f1 (Hz)] NB you MUST use t60_f1 < t60_0Hz for stability
 %--------------------
+
 
 %--------------------
 %-- braces parameters
 Nribs = 4 ; % number of braces 
 
-Eb = [10e9,10e9,10e9,10e9].' ; % youngs moduli
-Lzb = [3e-3,3e-3,3e-3,3e-3].' ; % thicknesses 
-bb = [3e-2,3e-2,3e-2,3e-2].' ; % width cross section
-rhob = [400,400,400,400].' ; % densities
+Eb = [10e9, 11e9, 10.2e9, 200e9].' ; % youngs moduli
+Lzb = [3e-3,2e-3,2e-3,1e-3].' ; % thicknesses 
+bb = [3e-2,2e-2,2e-2,1e-2].' ; % width cross section
+rhob = [400,390,410,8000].' ; % densities
 
 % rib coordinates along x (start and end) AS A FRACTION OF Lx
 x_beam_coord = ...
@@ -78,26 +82,24 @@ x_beam_coord = ...
 % rib coordinates along y (start and end) AS A FRACTION OF Ly
 y_beam_coord = ...
     [0.1,0.2;
-    0.2,0.3;
-    0.3,0.4;
+    0.2,0.3
+    0.3,0.4
     0.4,0.5] ;
 %--------------------
 
 %--------------------
 %-- static loads and stiffeners parameters
-
-Nlump = 3 ; % number of lumped elements
-x_lump_coord = [0.2,0.4,0.6 ].' ; % x coordinates of lumped elements 
-y_lump_coord = [0.8,0.73,0.7].' ; % y coordinates of lumped elements 
-%Mlump  = [0.1,0.01,0.01].' ;
-Mlump  = [0.01,0.02,0.05] ;
+Nlump        = 2 ;                  % number of lumped elements
+x_lump_coord = [0.2,0.4].'  ;       % x coordinates of lumped elements AS A FRACTION OF Lx
+y_lump_coord = [0.7,0.87].' ;       % y coordinates of lumped elements AS A FRACTION OF Ly
+Mlump        = [0.2,0.01].' ;  % masses [kg]
 %--------------------
 
 %--------------------
 %-- plot parameters parameters
-cmap = cmaps(2) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
+cmap = cmaps(2) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = OrangePurple
 LivePlot = 1 ; % 1 : live plot on
-RefreshRate = 1 ; % 1 = play all frames, 2 = play one out of two frames, etc
+RefreshRate = 5 ; % 1 = play all frames, 2 = play one out of two frames, etc
 absPlot = 0 ; % 1 = plots absolute value (colormap will adjust accordingly)
 FilmRec = 0 ; % 1= record video to file
 %--------------------
@@ -150,7 +152,7 @@ yax = linspace(0,Ly,Ny+1) ;
 
 %-------------------------------------------------------------------------
 % EIGENVALUE PROBLEM
-[outs,stresses,fs] = time_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,T,x_p,outMat,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord,dampVec,forceType,forceParams,LivePlot,RefreshRate,absPlot,FilmRec,cmap) ;
+[outs,stresses,fs,fin] = time_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,T,x_p,outMat,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord,dampVec,forceType,forceParams,LivePlot,RefreshRate,absPlot,FilmRec,cmap) ;
 %-------------------------------------------------------------------------
 
 

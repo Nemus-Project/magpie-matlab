@@ -1,4 +1,4 @@
-function [outs,stresses,fs] = time_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,T,x_f,outMat,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord,dampVec,forceType,forceParams,LivePlot,RefreshRate,absPlot,FilmRec,cmap)
+function [outs,stresses,fs,fin] = time_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,T,x_f,outMat,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord,dampVec,forceType,forceParams,LivePlot,RefreshRate,absPlot,FilmRec,cmap)
 
 
 %-----------------------------------------------------------------------
@@ -71,7 +71,11 @@ if Nlump
     M = M + LumpDist*diag(Mlump)*LumpSpread ;  M = sparse(M) ;
 end
 
-
+% quick trick to improve the matrices' numerical accuracy
+M = 0.5*(M+M') ;
+symK = 0.5*(K+K') ; 
+skewK = 0.5*(K-K') ;
+K = symK + skewK ;
 
 [Q,Omsq] = eigs(K,M,(Nx+1)*(Ny+1),'smallestabs') ;
 [~,indSort] = sort(diag((Omsq))) ;
@@ -80,15 +84,27 @@ Om = sqrt(abs(diag(Omsq))) ;
 
 
 % keep values up to fmax
-fCur = 0 ;
+fCur = -10 ;
 indCur = 0 ;
+
+while fCur < 0
+        indCur = indCur + 1 ;
+    fCur = Om(indCur) / 2 / pi ;
+end
+Om = Om(indCur + 1:end) ;
+Q = Q(:,indCur + 1:end) ;
+
+fCur = -10 ;
+indCur = 0 ;
+
 while fCur < fmax 
     indCur = indCur + 1 ;
     fCur = Om(indCur) / 2 / pi ;
 end
 Om = Om(1:indCur) ;
-Om(end)/2/pi
 Q = Q(:,1:indCur) ;
+
+
 Nmodes = indCur ;
 
 %-----------------------------------------------------------------------
@@ -120,7 +136,7 @@ if forceType == 1
     rc  = zeros(1,Ts) ;
     rc(1:tws) = 0.5*F0*(1 - cos(2*pi*(0:tws-1)/tws)) ;
     fin   = rc.*(1+b*noise) ;
-else
+elseif forceType == 2
     forceFreq = forceParams(1) ;  % total contact time [s]
     F0 = forceParams(2) ;  % largest forcing amp [N]
     b = forceParams(3) ;   % noise modulation
@@ -130,6 +146,12 @@ else
     % raised cosine
     fin = F0*sin(2*pi*forceFreq*(0:Ts-1)*k);
     fin   = fin.*(1+b*noise) ;
+else
+    [fin,fsIn] = audioread(forceParams) ;
+    fin = resample(fin,fs,fsIn) ;
+    if Ts > length(fin) 
+    fin = [fin; zeros(Ts-length(fin),1)] ;
+    end
 end
 %-----------------------------------------------------------------------
 
@@ -243,6 +265,9 @@ for n = 1 : Ts
             sigx = Ex/(1-nux*nuy)*(ex+nuy*ey) ;
             sigy = Ey/(1-nux*nuy)*(ey+nux*ex) ;
             tau  = Gxy*gm ;
+
+            figure; colormap(cmap) ;
+
 
             subplot(2,3,1)
             animated_plot(sigx,1e6,xax,yax,Nvec,Lvec,absPlot,'$\sigma_x$ (Mpa)',Nribs,beamCoord,beamParams,Nlump,lumpCoord,Nouts,outMat,x_f) ;

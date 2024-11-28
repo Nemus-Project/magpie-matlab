@@ -15,16 +15,25 @@ Lx       = 0.223 ;
 Ly       = 0.114 ;
 Lz       = 0.003 ;
 
-Ex0      = 10.7e9 ;
+%-- guessed values 
+Ex0      = 10.7e9 ;   
 Ey0      = 716e6 ;
 Gxy0     = 500e6 ;
 nux0     = 0.51 ;
 
 %-- elastic constants around the edges
-KRmat = [0e13,0e13; %Kx0 Rx0
+KRmat = [0e1,0e13; %Kx0 Rx0
     1e13, 1e13; % K0y R0y
     0e13, 0e13; % KxL RxL
     0e13, 0e13] ; % KLy RLy
+
+%-- measured experimental frequencies (Hz)
+ExpFreqs = [52
+    98
+    311
+    337
+    398
+    637] ;
 %--------------------
 
 
@@ -32,7 +41,7 @@ KRmat = [0e13,0e13; %Kx0 Rx0
 %-- general parameters
 fmax = 2000 ; %-- maximum frequency to be computed
 ppw  = 100 ; % points per wavelength at maximum frequency. Choose 3 <= ppw
-Nmodes = 6 ; % total number of modes required
+Nmeas = 6 ; % total number of modes required
 %--------------------
 
 %--------------------
@@ -63,10 +72,14 @@ MLump  = [].' ;
 
 %--------------------
 %-- plot parameters parameters
-addpath('/Users/micheleducceschi/Documents/MATLAB/DrosteEffect-BrewerMap-3.2.5.0') ; % some cool colormaps
-cmap = brewermap(512, 'PRGn'); % colormap
+cmap = cmaps(1) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
 absPlot = 0 ;
 NN = 1 ; % mode number to plot (plot will display modes between NN and NN + 8)
+%--------------------
+
+%--------------------
+%-- MAC parameters
+MAC_threshold = 0.99 ;
 %--------------------
 
 % END CUSTOM PARAMETERS
@@ -119,20 +132,19 @@ yax = linspace(0,Ly,Ny+1) ;
 
 %-------------------------------------------------------------------------
 % EIGENVALUE PROBLEM
-[Om,Q] = freq_domain_sim(rho,Evec,nux0,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,lumpParams,lumpCoord) ;
-Qplate = Q(1:end-Nlump,:) ;
+[Om,Q] = freq_domain_sim(rho,Evec,nux0,Lvec,hvec,Nvec,KRmat,fmax,Nmeas,Nribs,beamParams,beamCoord,Nlump,lumpParams,lumpCoord) ;
 %-------------------------------------------------------------------------
 
 
 %-------------------------------------------------------------------------
 % PLOTS
-modal_plotter(cmap,6,NN,X,Y,Qplate,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
+modal_plotter(cmap,6,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
 %-------------------------------------------------------------------------
 
-QplateRef = Qplate ;
+QRef = Q ;
 OmRef = Om ;
 
-MAC_threshold = 0.99 ;
+
 
 scaleVec = [0.8,0.9,1,1.1,1.2] ;
 scaleMat = zeros(2,5^2) ;
@@ -146,16 +158,15 @@ for p = 1 : 5
         Ex      = Ex0*scaleVec(p) ;
         Ey      = Ey0*scaleVec(q) ;
         Evec = [Ex,Ey,Gxy0] ;
-        [Om,Q] = freq_domain_sim(rho,Evec,nux0,Lvec,hvec,Nvec,KRmat,fmax,2*Nmodes,Nribs,beamParams,beamCoord,Nlump,lumpParams,lumpCoord) ;
-        Qplate = Q(1:end-Nlump,:) ;
+        [Om,Q] = freq_domain_sim(rho,Evec,nux0,Lvec,hvec,Nvec,KRmat,fmax,2*Nmeas,Nribs,beamParams,beamCoord,Nlump,lumpParams,lumpCoord) ;
         Qtemp = [] ;
         MAC = [] ;
-        for pMAC = 1 : Nmodes
-            modeRef = QplateRef(:,pMAC) ;
+        for pMAC = 1 : Nmeas
+            modeRef = QRef(:,pMAC) ;
             maxMAC = -10 ; MAC_index = 0 ;
-            for qMAC = 1 : 2*Nmodes
+            for qMAC = 1 : 2*Nmeas
 
-                modeCur = Qplate(:,qMAC) ;
+                modeCur = Q(:,qMAC) ;
 
                 MACcur =  sqrt(abs(modeRef.' * modeCur)^2 / (modeRef.' * modeRef) / (modeCur.' * modeCur)) ;
 
@@ -166,7 +177,7 @@ for p = 1 : 5
             end
 
             OmMat(pMAC,ind) = Om(MAC_index) ;
-            Qtemp = [Qtemp,Qplate(:,MAC_index)] ;
+            Qtemp = [Qtemp,Q(:,MAC_index)] ;
             MAC = [MAC,maxMAC] ;
 
         end
@@ -177,7 +188,7 @@ for p = 1 : 5
         %-------------------------------------------------------------------------
         % PLOTS
         close all
-        modal_plotter(cmap,6,NN,X,Y,Qplate,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
+        modal_plotter(cmap,6,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
         sttit = sprintf('Test Index = %d, Avg. MAC = %1.2f',ind,mean(MAC)) ;
         sgtitle(sttit,'interpreter','latex') ;
         drawnow ; pause(0.1) ;
@@ -338,14 +349,6 @@ nux      = nux0 ;
 nuy      = Ey0/Ex0*nux ;
 
 
-ExpFreqs = [52
-    98
-    311
-    337
-    398
-    637] ;
-
-
 Om0=2*pi*ExpFreqs;
 
 for nCase = 1 : Ntot
@@ -405,20 +408,13 @@ EyLS              = [(1:Ntot)',EyLSall] ;
 GxyLS             = [(1:Ntot)',GxyLSall] ;
 
 EMat   = [ExLSall EyLSall GxyLSall] ;
-vpa(EMat)
-
 
 ExLSNeg              = find(ExLS(:,2)<0) ;   ExLS(ExLSNeg,:) = [] ;
 EyLSNeg              = find(EyLS(:,2)<0) ;   EyLS(EyLSNeg,:) = [] ;
 GxyLSNeg             = find(GxyLS(:,2)<0) ;  GxyLS(GxyLSNeg,:) = [] ;
 
-percentileFrac = 25 ; %-- MUST be below 50
-
-%gigiEx   = isoutlier(ExLS(:,2),"percentiles",[percentileFrac 100-percentileFrac]) ;
 gigiEx   = isoutlier(ExLS(:,2),"quartiles") ;
-%gigiEy   = isoutlier(EyLS(:,2),"percentiles",[percentileFrac 100-percentileFrac]) ;
 gigiEy   = isoutlier(EyLS(:,2),"quartiles") ;
-%gigiGxy  = isoutlier(GxyLS(:,2),"percentiles",[percentileFrac 100-percentileFrac]) ;
 gigiGxy  = isoutlier(GxyLS(:,2),"quartiles") ;
 
 rEx      = find(gigiEx) ;
@@ -437,9 +433,9 @@ meanEx = mean(ExLS(:,2)) ; stdEx = std(ExLS(:,2)) ;
 meanEy = mean(EyLS(:,2)) ; stdEy = std(EyLS(:,2)) ;
 meanGxy = mean(GxyLS(:,2)) ; stdGxy = std(GxyLS(:,2)) ;
 
-lengthVec = [length(ExLS), length(EyLS), length(GxyLS)]
-meanVec   = vpa([meanEx meanEy meanGxy])
-stdVec    = vpa([stdEx/meanEx*100 stdEy/meanEy*100 stdGxy/meanGxy*100])
+lengthVec = [length(ExLS), length(EyLS), length(GxyLS)] ;
+Results_ElasticConstants   = vpa([meanEx meanEy meanGxy])
+Standard_Deviations_Percent    = vpa([stdEx/meanEx*100 stdEy/meanEy*100 stdGxy/meanGxy*100])
 
 
 Nstd = 8 ;
@@ -488,21 +484,5 @@ sgtitle('Finnish Spruce Tonewood','interpreter','latex')
 
 
 
-%[1.38e+10, 8.31e+8, 6.05e+8]
-NumFreqs = [51.240
-    99.849
-    315.05
-    335.54
-    394.33
-    629.48] ;
-
-
-
-err     = NumFreqs - ExpFreqs;
-errPct  = 100 * (NumFreqs - ExpFreqs)./ExpFreqs ;
-errCent = 1200*log2(NumFreqs./ExpFreqs) ;
-
-digits(3)
-[vpa(ExpFreqs) vpa(NumFreqs) vpa(err) vpa(errPct) vpa(errCent)]
 
 
