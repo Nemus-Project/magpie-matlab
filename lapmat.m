@@ -96,6 +96,6 @@ LPdiags = [DmNy2, Dm1, D0, D1,DNy2];
 dn = [-(Ny+1),(-1:1),(Ny+1)];
 
 LP = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
-lapl = ((1/h)^2)*T * spdiags(LPdiags, dn, LP);
+lapl = ((1/h)^2)* spdiags(LPdiags, dn, LP);
 
 end

@@ -1,6 +1,6 @@
 function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,T,ldim,h,BCs,Nm,plot_type,shouldNormalise)
 % MAGPIE What does this do?
-%   [Om,Q,Nx,Ny,biHarm] = MAGPIE (density, Youngs, poisson, dim, h, BCs, Number_of_modes, plot_type)
+%   [Om,Q,Nx,Ny,biHarm] = MAGPIE (density, Youngs, poisson, tension, dim, h, BCs, Number_of_modes, plot_type)
 %   A function that returns:
 %           Om      : Angular modal frequencies
 %           Q       : A matrix of column eigenvector(s)
@@ -13,6 +13,7 @@ function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,T,ldim,h,BCs,Nm,plot_type,shou
 %       rho          %-- density [kg/m^3]
 %       E            %-- Young's mod [Pa]
 %       nu           %-- poisson's ratio
+%       T            %-- tension [Pa*m^3]
 %
 %       3 element array  representing  [x,y,z] dimensions of plate
 %       ldim = [Lx,  %-- length along x [m]
@@ -88,7 +89,7 @@ biHarm = bhmat(BCs,[Nx Ny], h, Lz, E, nu);
 lapl = lapmat([Nx Ny], h, T);
 
 %% Build full matrix
-Fulmat=biHarm-T*lapl;
+Fulmat=D*biHarm-T*lapl;
 
 %% EIGENVALUES
 
@@ -101,7 +102,7 @@ end
 Q = Q(:,indSort) ;
 
 Dm    = diag(Dm) ;
-Om    = sqrt(abs(Dm))*sqrt(D/rho/Lz) ;
+Om    = sqrt(abs(Dm))*sqrt(1/rho/Lz) ;
 %freqs = Om/2/pi ;
 
 if shouldNormalise
