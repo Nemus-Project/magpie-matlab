@@ -10,16 +10,16 @@ close all
 
 %--------------------
 %-- plate parameters
-rho      = 438.0 ;
-Lx       = 0.175 ;
-Ly       = 0.129 ;
-Lz       = 0.0038 ;
+rho   = 457 ;    % density [kg / m^3]
+Lx    = 0.212 ;  % edge lenght x [m]
+Ly    = 0.108 ;  % edge length y [m]
+Lz    = 0.0045 ; % thickness [m]
 
 %-- guessed values
-Ex0      = 10.1e9 ;
-Ey0      = 0.3e9 ; 
-Gxy0     = 0.5e9 ;
-nux0     = 0.4 ;
+Ex0    = 13.1e9 ;  % young's mod along x [Pa]
+Ey0    = 0.881e9 ; % young's mod along y [Pa]
+Gxy0   = 0.504e9 ; % shear mod [Pa]
+nux0   = 0.4 ;     % poisson ratio
 
 %-- elastic constants around the edges
 KRmat = [0e13,0e13; %Kx0 Rx0
@@ -28,20 +28,20 @@ KRmat = [0e13,0e13; %Kx0 Rx0
     0e13, 0e13] ; % KLy RLy
 
 %-- measured experimental frequencies (Hz)
-ExpFreqs = [97
+ExpFreqs = [87
     160
-    326
-    599
-    645
-    716] ;
+    540
+    616
+    651
+    1061] ;
 %--------------------
 
 
 %--------------------
 %-- general parameters
 fmax = 5000 ; %-- maximum frequency to be computed
-ppw  = 60 ; % points per wavelength at maximum frequency. Choose 3 <= ppw
-Nmeas = 6 ; % total number of modes required
+ppw  = 50 ; % points pewhr wavelength at maximum frequency. Choose 3 <= ppw
+Nmeas = length(ExpFreqs) ; % total number of modes required
 %--------------------
 
 %--------------------
@@ -287,88 +287,15 @@ end
 %------------- End Training Phase ........................................
 
 %--------------- Plate: Measured spruce plate
-
-if Nmeas == 6
-    indCell = {
-        [1 2 3]
-        [1 2 4]
-        [1 2 5 ]
-        [1 2 6 ]
-        [1 3 4 ]
-        [1 3 5 ]
-        [1 3 6 ]
-        [1 4 5 ]
-        [1 4 6 ]
-        [1 5 6 ]
-        [2 3 4]
-        [2 3 5]
-        [2 3 6]
-        [2 4 5]
-        [2 4 6]
-        [2 5 6]
-        [3 4 5]
-        [3 4 6]
-        [3 5 6]
-        [4 5 6]
-        [1 2 3 4]
-        [1 2 3 5]
-        [1 2 3 6]
-        [1 2 4 5]
-        [1 2 4 6]
-        [1 2 5 6]
-        [1 3 4 5]
-        [1 3 4 6]
-        [1 3 5 6]
-        [1 4 5 6]
-        [2 3 4 5]
-        [2 3 4 6]
-        [2 3 5 6]
-        [2 4 5 6]
-        [3 4 5 6]
-        [1 2 3 4 5]
-        [1 2 3 4 6]
-        [1 2 3 5 6]
-        [1 2 4 5 6]
-        [1 3 4 5 6]
-        [2 3 4 5 6]
-        [1 2 3 4 5 6]} ;
-    Ntot = 42 ;
-elseif Nmeas == 5
-    indCell = {
-        [1 2 3]
-        [1 2 4]
-        [1 2 5 ]
-        [1 3 4 ]
-        [1 3 5 ]
-        [1 4 5 ]
-        [2 3 4]
-        [2 3 5]
-        [2 4 5]
-        [3 4 5]
-        [1 2 3 4]
-        [1 2 3 5]
-        [1 2 4 5]
-        [1 3 4 5]
-        [2 3 4 5]
-        [1 2 3 4 5]} ;
-    Ntot = 16 ;
-
-elseif Nmeas == 4
-    indCell = {
-        [1 2 3]
-        [1 2 4]
-        [1 3 4 ]
-        [2 3 4]
-        [1 2 3 4]} ;
-    Ntot = 5 ;
-
-elseif Nmeas == 3
-    indCell = {
-        [1 2 3]} ;
-    Ntot = 1 ;
-
+indCell = {};
+for i = 3:Nmeas
+    combs = nchoosek(1:Nmeas, i);     % Get all combinations of size k
+    Ncombs = height(combs);
+    for j = 1:Ncombs
+        indCell{end+1, 1} = combs(j, :);  % Store each row in the cell
+    end
 end
-
+Ntot = length(indCell)
 
 
 errDx = zeros(Ntot,1) ;
