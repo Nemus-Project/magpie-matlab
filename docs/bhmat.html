@@ -1,0 +1,759 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>BHMAT Generate 2D Biharmonic Operator</title>
+<meta name="generator" content="MATLAB 24.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-10-06">
+<meta name="DC.source" content="bhmat.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>BHMAT Generate 2D Biharmonic Operator</h1>
+<!--introduction-->
+<pre class="language-matlab">biHarm = BHMAT(BCs,Nxy,h,Lz,E,nu) <span class="comment">% compute a biharmonic for a  2D Thin Plate</span>
+</pre>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Arguments:</a>
+</li>
+<li>
+<a href="#2">Returns</a>
+</li>
+<li>
+<a href="#4">Argument Validation</a>
+</li>
+<li>
+<a href="#5">Unpack Variables</a>
+</li>
+<li>
+<a href="#6">Define Commonly used Variables</a>
+</li>
+<li>
+<a href="#7">Define Diagonals</a>
+</li>
+<li>
+<a href="#8">dmNym1</a>
+</li>
+<li>
+<a href="#9">dmNy</a>
+</li>
+<li>
+<a href="#10">dmNyp1 % pad zeros at the</a>
+</li>
+<li>
+<a href="#11">dm2</a>
+</li>
+<li>
+<a href="#12">dm1</a>
+</li>
+<li>
+<a href="#13">d00</a>
+</li>
+<li>
+<a href="#14">dp1</a>
+</li>
+<li>
+<a href="#15">dp2</a>
+</li>
+<li>
+<a href="#16">dpNym1</a>
+</li>
+<li>
+<a href="#17">dpNy</a>
+</li>
+<li>
+<a href="#18">dpNyp1</a>
+</li>
+<li>
+<a href="#19">dp2Ny</a>
+</li>
+<li>
+<a href="#20">Zero Padding</a>
+</li>
+<li>
+<a href="#21">Assembling Diagonals into the Biharmonic</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Arguments:</h2>
+<pre>     BCS          %-- density [kg/m^3]</pre>
+<p>Boundary condition columns represent a different elastic stiffness contant for each side of the plate</p>
+<pre>- Column 1 flexural constant
+- Column 2 rotational constant</pre>
+<pre>     BCs = [K0y, R0y;
+            Kx0, Rx0;
+            KLy, RLy;
+            KxL, RxL];</pre>
+<pre>     Nxy          %-- Number of grid points [Nx Ny]
+     h            %-- Grid spacing
+     Lz           %-- plate thickness
+     E            %-- Young's mod [Pa]
+     nu           %-- poisson's ratio</pre>
+<h2 id="2">Returns</h2>
+<p>Biharmonic operator with size [Nx Ny]</p>
+<pre class="codeinput">
+<span class="keyword">function</span> biharm = bhmat(BCs,Nxy,h,Lz,E,nu)
+</pre>
+<h2 id="4">Argument Validation</h2>
+<pre class="codeinput">validateattributes(BCs,      {<span class="string">'double'</span>}, {<span class="string">'size'</span>, [4,2]});
+validateattributes(Nxy,      {<span class="string">'double'</span>}, {<span class="string">'numel'</span>, 2, <span class="string">'positive'</span>,<span class="string">'integer'</span>});
+validateattributes(h,        {<span class="string">'double'</span>}, {<span class="string">'nonempty'</span>});
+validateattributes(Lz,       {<span class="string">'double'</span>}, {<span class="string">'nonempty'</span>});
+validateattributes(E,        {<span class="string">'double'</span>}, {<span class="string">'nonempty'</span>});
+validateattributes(nu,       {<span class="string">'double'</span>}, {<span class="string">'nonempty'</span>});
+</pre>
+<pre class="codeoutput error">Not enough input arguments.
+
+Error in bhmat (line 31)
+validateattributes(BCs,      {'double'}, {'size', [4,2]});
+</pre>
+<h2 id="5">Unpack Variables</h2>
+<pre class="codeinput">Nx = Nxy(1);
+Ny = Nxy(2);
+</pre>
+<h2 id="6">Define Commonly used Variables</h2>
+<pre class="codeinput">D = E * Lz^3 / 12 / (1-nu^2);
+
+a0 = ones(Ny+1,1) ;
+a1 = ones(Ny,1) ;
+a2 = ones(Ny-1,1) ;
+
+biharm = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+</pre>
+<h2 id="7">Define Diagonals</h2>
+<pre class="codeinput">
+<span class="comment">%%%% dm2Ny</span>
+
+[~,~,dc,dM1,dM] = biharmdiag(BCs, h, D, nu,<span class="string">'-2ny'</span>);
+
+dm2Ny0 = dc(3)*a0;
+dm2Ny0([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+
+dm2Ny1 = dM1(3)*a0;
+dm2Ny1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+
+dm2Ny2 = dM(3)*a0;
+dm2Ny2([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
+
+Dm2Ny = [repmat(dm2Ny0,Nx-3,1);dm2Ny1;dm2Ny2];
+</pre>
+<h2 id="8">dmNym1</h2>
+<pre class="codeinput">[~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,<span class="string">'-ny-1'</span>);
+
+dmNym10 = d1(2)*a1 ;
+dmNym10([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
+dmNym11 = dc(2)*a1 ;
+dmNym11([1,Ny-1,Ny]) = [dc(1), dc(end-1), dc(end)];
+dmNym1M1 = dM1(2)*a1;
+dmNym1M1([1,Ny-1,Ny]) = [dM1(1), dM1(end-1), dM1(end)];
+dmNym1M = dM(2)*a1;
+dmNym1M([1,Ny-1,Ny]) = [dM(1), dM(end-1), dM(end)];
+
+DmNym1 = [dmNym10;0;repmat([dmNym11;0],Nx-3,1);dmNym1M1;0;dmNym1M];
+</pre>
+<h2 id="9">dmNy</h2>
+<pre class="codeinput">[~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,<span class="string">'-ny'</span>);
+
+dmNy0 = d1(3)*a0;
+dmNy0([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+dmNy1 = dc(3)*a0;
+dmNy1([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+dmNyM1 = dM1(3)*a0;
+dmNyM1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+dmNyM = dM(3)*a0;
+dmNyM([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
+
+DmNy = [dmNy0;repmat(dmNy1,(Nx-3),1);dmNyM1;dmNyM];
+</pre>
+<h2 id="10">dmNyp1 % pad zeros at the</h2>
+<pre class="codeinput">[~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,<span class="string">'-ny+1'</span>);
+
+dmNy10 = d1(2)*a1 ;
+dmNy10([1,2,Ny]) = [d1(1), d1(2), d1(end)];
+dmNy11 = dc(2)*a1 ;
+dmNy11([1,2,Ny]) = [dc(1), dc(2), dc(end)];
+dmNy1M1 = dM1(2)*a1;
+dmNy1M1([1,2,Ny]) = [dM1(1), dM1(2), dM1(end)];
+dmNy1M = dM(2)*a1;
+dmNy1M([1,2,Ny]) = [dM(1), dM(2), dM(end)];
+
+DmNy1 = [0;dmNy10;repmat([0;dmNy11],Nx-3,1);0;dmNy1M1;0;dmNy1M;0];
+</pre>
+<h2 id="11">dm2</h2>
+<pre class="codeinput">[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,<span class="string">'-2'</span>);
+
+dm20 = d0(1)*a2;
+dm20([Ny-2,Ny-1]) = [d0(end-1),d0(end)];
+
+dm21 = d1(1)*a2;
+dm21([Ny-2,Ny-1]) = [d1(end-1),d1(end)];
+
+dm22 = dc(1)*a2;
+dm22([Ny-2,Ny-1]) = [dc(end-1),dc(end)];
+
+dm2M1 = dM1(1)*a2;
+dm2M1([Ny-2,Ny-1]) = [dM1(end-1),dM1(end)];
+
+dm2M = dM(1)*a2;
+dm2M([Ny-2,Ny-1]) = [dM(end-1),dM(end)];
+
+Dm2 = [dm20;0;0;dm21;0;0;repmat([dm22;0;0],Nx+1-4,1);dm2M1;0;0;dm2M];
+</pre>
+<h2 id="12">dm1</h2>
+<pre class="codeinput">[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,<span class="string">'-1'</span>);
+
+dm10 = d0(2)*a1;
+dm10([1,Ny-1,Ny]) = [d0(1),d0(end-1),d0(end)];
+dm11 = d1(2)*a1;
+dm11([1,Ny-1,Ny]) = [d1(1),d1(end-1),d1(end)];
+dm12 = dc(2)*a1;
+dm12([1,Ny-1,Ny]) = [dc(1),dc(end-1),dc(end)];
+dm1M1 = dM1(2)*a1;
+dm1M1([1,Ny-1,Ny]) = [dM1(1),dM1(end-1),dM1(end)];
+dm1M = dM(2)*a1;
+dm1M([1,Ny-1,Ny]) = [dM(1),dM(end-1),dM(end)];
+
+Dm1 = [dm10;0;dm11;0;repmat([dm12;0],Nx+1-4,1);dm1M1;0;dm1M];
+</pre>
+<h2 id="13">d00</h2>
+<pre class="codeinput">[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,<span class="string">'0'</span>);
+
+d00 = d0(3)*a0;
+d00([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
+d01 = d1(3)*a0;
+d01([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+d02 = dc(3)*a0;
+d02([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+d0M1 = dM1(3)*a0;
+d0M1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+d0M = dM(3)*a0;
+d0M([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
+
+D0 = [d00;d01;repmat(d02,(Nx+1-4),1);d0M1;d0M];
+</pre>
+<h2 id="14">dp1</h2>
+<pre class="codeinput">[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,<span class="string">'1'</span>);
+
+d10 = d0(3)*a1;
+d10([1,2,Ny]) = [d0(1),d0(2),d0(end)];
+d11 = d1(3)*a1;
+d11([1,2,Ny]) = [d1(1),d1(2),d1(end)];
+d12 = dc(3)*a1;
+d12([1,2,Ny]) = [dc(1),dc(2),dc(end)];
+d1M1 = dM1(3)*a1;
+d1M1([1,2,Ny]) = [dM1(1),dM1(2),dM1(end)];
+d1M = dM(3)*a1;
+d1M([1,2,Ny]) = [dM(1),dM(2),dM(end)];
+
+
+D1 = [d10;0;d11;0;repmat([d12;0],Nx+1-4,1);d1M1;0;d1M];
+</pre>
+<h2 id="15">dp2</h2>
+<pre class="codeinput">[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,<span class="string">'2'</span>);
+
+d20 = d0(3)*a2;
+d20([1,2,Ny-1]) = [d0(1),d0(2),d0(end)];
+
+d21 = d1(3)*a2;
+d21([1,2,Ny-1]) = [d1(1),d1(2),d1(end)];
+
+d22 = dc(3)*a2;
+d22([1,2,Ny-1]) = [dc(1),dc(2),dc(end)];
+
+d2M1 = dM1(3)*a2;
+d2M1([1,2,Ny-1]) = [dM1(1),dM1(2),dM1(end)];
+
+d2M = dM(3)*a2;
+d2M([1,2,Ny-1]) = [dM(1),dM(2),dM(end)];
+
+D2 = [d20;0;0;d21;0;0;repmat([d22;0;0],Nx+1-4,1);d2M1;0;0;d2M];
+</pre>
+<h2 id="16">dpNym1</h2>
+<pre class="codeinput">[d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,<span class="string">'ny-1'</span>);
+
+dpNym10 = d0(2)*a1 ;
+dpNym10([1,Ny-1,Ny]) = [d0(1), d0(end-1), d0(end)];
+dpNym11 = d1(2)*a1 ;
+dpNym11([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
+dpNym12 = dc(2)*a1;
+dpNym12([1,Ny-1,Ny]) = [dc(1), dc(end-1), dc(end)];
+dpNym1M = dM1(2)*a1;
+dpNym1M([1,Ny-1,Ny]) = [dM1(1), dM1(end-1), dM1(end)];
+
+DNym1 = [0;dpNym10;0;dpNym11;repmat([0;dpNym12],Nx-3,1);0;dpNym1M;0];
+</pre>
+<h2 id="17">dpNy</h2>
+<pre class="codeinput">[d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,<span class="string">'ny'</span>);
+
+dpNy0 = d0(3)*a0 ;
+dpNy0([1,2,Ny,Ny+1]) = [d0(1), d0(2), d0(end-1),d0(end)];
+dpNy1 = d1(3)*a0 ;
+dpNy1([1,2,Ny,Ny+1]) = [d1(1), d1(2), d1(end-1),d1(end)];
+dpNy2 = dc(3)*a0;
+dpNy2([1,2,Ny,Ny+1]) = [dc(1), dc(2), dc(end-1),dc(end)];
+dpNyM = dM1(3)*a0;
+dpNyM([1,2,Ny,Ny+1]) = [dM1(1), dM1(2), dM1(end-1),dM1(end)];
+
+
+DNy = [dpNy0;dpNy1;repmat(dpNy2,(Nx-3),1);dpNyM];
+</pre>
+<h2 id="18">dpNyp1</h2>
+<pre class="codeinput">[d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,<span class="string">'ny+1'</span>);
+
+dpNy10 = d0(3)*a1 ;
+dpNy10([1,2,Ny]) = [d0(1), d0(2), d0(end)];
+
+dpNy11 = d1(3)*a1 ;
+dpNy11([1,2,Ny]) = [d1(1), d1(2), d1(end)];
+
+dpNy12 = dc(3)*a1;
+dpNy12([1,2,Ny]) = [dc(1), dc(2), dc(end)];
+
+dpNy1M = dM1(3)*a1;
+dpNy1M([1,2,Ny]) = [dM1(1), dM1(2), dM1(end)];
+
+DNy1 = [dpNy10;0;dpNy11;0;repmat([dpNy12;0],Nx-3,1);dpNy1M];
+</pre>
+<h2 id="19">dp2Ny</h2>
+<pre class="codeinput">[d0,d1,dc,~,~]  =biharmdiag(BCs, h, D, nu,<span class="string">'2ny'</span>);
+
+dp2Ny0 = d0(3)*a0;
+dp2Ny0([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
+
+dp2Ny1 = d1(3)*a0;
+dp2Ny1([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+
+dp2Ny2 = dc(3)*a0;
+dp2Ny2([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+
+D2Ny = [dp2Ny0;dp2Ny1;repmat(dp2Ny2,Nx-3,1)];
+</pre>
+<h2 id="20">Zero Padding</h2>
+<p>negative diagonals pad at the end</p>
+<pre class="codeinput">Dm2Ny = [Dm2Ny; zeros((Ny+1)*2,1)];
+
+DmNym1 = [DmNym1; zeros((Ny + 2),1)];
+DmNy = [DmNy; zeros((Ny + 1),1)];
+DmNy1 = [DmNy1; zeros((Ny),1) ];
+
+Dm2 = [Dm2;0;0];
+Dm1 = [Dm1;0];
+
+<span class="comment">% While positive diagonals pad at the start</span>
+
+D1 = [0;D1];
+D2 = [0;0;D2];
+
+DNym1 = [zeros((Ny),1);DNym1];
+DNy = [zeros((Ny+1),1);DNy];
+DNy1 = [zeros((Ny+2),1);DNy1];
+
+D2Ny = [zeros((Ny+1)*2,1);D2Ny];
+</pre>
+<h2 id="21">Assembling Diagonals into the Biharmonic</h2>
+<pre class="codeinput">BHdiags = [Dm2Ny,<span class="keyword">...</span>
+    DmNym1, DmNy, DmNy1,<span class="keyword">...</span>
+    Dm2, Dm1, D0, D1, D2,<span class="keyword">...</span>
+    DNym1, DNy, DNy1,<span class="keyword">...</span>
+    D2Ny];
+
+dn = [-(2*(Ny+1)),<span class="keyword">...</span>
+      -(Ny+2):(-Ny),<span class="keyword">...</span>
+       (-2:2),<span class="keyword">...</span>
+       Ny:(Ny+2),<span class="keyword">...</span>
+       2*(Ny+1)];
+
+BH = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+biharm = ((1/h)^4) * spdiags(BHdiags, dn, BH);
+</pre>
+<pre class="codeinput">
+<span class="keyword">end</span>
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024a</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+%% BHMAT Generate 2D Biharmonic Operator
+%   biHarm = BHMAT(BCs,Nxy,h,Lz,E,nu) % compute a biharmonic for a  2D Thin Plate
+%
+%% Arguments:
+%
+%       BCS          %REPLACE_WITH_DASH_DASH density [kg/m^3]
+%
+% Boundary condition columns represent a different elastic stiffness
+% contant for each side of the plate
+%
+%  - Column 1 flexural constant
+%  - Column 2 rotational constant
+%
+%       BCs = [K0y, R0y;
+%              Kx0, Rx0;
+%              KLy, RLy;
+%              KxL, RxL];
+%
+%       Nxy          %REPLACE_WITH_DASH_DASH Number of grid points [Nx Ny]
+%       h            %REPLACE_WITH_DASH_DASH Grid spacing
+%       Lz           %REPLACE_WITH_DASH_DASH plate thickness
+%       E            %REPLACE_WITH_DASH_DASH Young's mod [Pa]
+%       nu           %REPLACE_WITH_DASH_DASH poisson's ratio
+%
+%% Returns
+%
+% Biharmonic operator with size [Nx Ny]
+function biharm = bhmat(BCs,Nxy,h,Lz,E,nu)
+
+%% Argument Validation
+validateattributes(BCs,      {'double'}, {'size', [4,2]});
+validateattributes(Nxy,      {'double'}, {'numel', 2, 'positive','integer'});
+validateattributes(h,        {'double'}, {'nonempty'});
+validateattributes(Lz,       {'double'}, {'nonempty'});
+validateattributes(E,        {'double'}, {'nonempty'});
+validateattributes(nu,       {'double'}, {'nonempty'});
+
+%% Unpack Variables
+%
+Nx = Nxy(1);
+Ny = Nxy(2);
+
+%% Define Commonly used Variables
+D = E * Lz^3 / 12 / (1-nu^2);
+
+a0 = ones(Ny+1,1) ;
+a1 = ones(Ny,1) ;
+a2 = ones(Ny-1,1) ;
+
+biharm = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+%% Define Diagonals
+%%%% dm2Ny  
+
+[~,~,dc,dM1,dM] = biharmdiag(BCs, h, D, nu,'-2ny');
+
+dm2Ny0 = dc(3)*a0;
+dm2Ny0([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+
+dm2Ny1 = dM1(3)*a0;
+dm2Ny1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+
+dm2Ny2 = dM(3)*a0;
+dm2Ny2([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
+
+Dm2Ny = [repmat(dm2Ny0,Nx-3,1);dm2Ny1;dm2Ny2];
+
+%% dmNym1 
+
+[~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny-1');
+
+dmNym10 = d1(2)*a1 ;
+dmNym10([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
+dmNym11 = dc(2)*a1 ;
+dmNym11([1,Ny-1,Ny]) = [dc(1), dc(end-1), dc(end)];
+dmNym1M1 = dM1(2)*a1;
+dmNym1M1([1,Ny-1,Ny]) = [dM1(1), dM1(end-1), dM1(end)];
+dmNym1M = dM(2)*a1;
+dmNym1M([1,Ny-1,Ny]) = [dM(1), dM(end-1), dM(end)];
+
+DmNym1 = [dmNym10;0;repmat([dmNym11;0],Nx-3,1);dmNym1M1;0;dmNym1M];
+
+%% dmNy   
+
+[~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny');
+
+dmNy0 = d1(3)*a0;
+dmNy0([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+dmNy1 = dc(3)*a0;
+dmNy1([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+dmNyM1 = dM1(3)*a0;
+dmNyM1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+dmNyM = dM(3)*a0;
+dmNyM([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
+
+DmNy = [dmNy0;repmat(dmNy1,(Nx-3),1);dmNyM1;dmNyM];
+
+%% dmNyp1 % pad zeros at the
+
+[~,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-ny+1');
+
+dmNy10 = d1(2)*a1 ;
+dmNy10([1,2,Ny]) = [d1(1), d1(2), d1(end)];
+dmNy11 = dc(2)*a1 ;
+dmNy11([1,2,Ny]) = [dc(1), dc(2), dc(end)];
+dmNy1M1 = dM1(2)*a1;
+dmNy1M1([1,2,Ny]) = [dM1(1), dM1(2), dM1(end)];
+dmNy1M = dM(2)*a1;
+dmNy1M([1,2,Ny]) = [dM(1), dM(2), dM(end)];
+
+DmNy1 = [0;dmNy10;repmat([0;dmNy11],Nx-3,1);0;dmNy1M1;0;dmNy1M;0];
+
+%% dm2   
+[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-2');
+
+dm20 = d0(1)*a2;
+dm20([Ny-2,Ny-1]) = [d0(end-1),d0(end)];
+
+dm21 = d1(1)*a2;
+dm21([Ny-2,Ny-1]) = [d1(end-1),d1(end)];
+
+dm22 = dc(1)*a2;
+dm22([Ny-2,Ny-1]) = [dc(end-1),dc(end)];
+
+dm2M1 = dM1(1)*a2;
+dm2M1([Ny-2,Ny-1]) = [dM1(end-1),dM1(end)];
+
+dm2M = dM(1)*a2;
+dm2M([Ny-2,Ny-1]) = [dM(end-1),dM(end)];
+
+Dm2 = [dm20;0;0;dm21;0;0;repmat([dm22;0;0],Nx+1-4,1);dm2M1;0;0;dm2M];
+
+%% dm1   
+
+[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'-1');
+
+dm10 = d0(2)*a1;
+dm10([1,Ny-1,Ny]) = [d0(1),d0(end-1),d0(end)];
+dm11 = d1(2)*a1;
+dm11([1,Ny-1,Ny]) = [d1(1),d1(end-1),d1(end)];
+dm12 = dc(2)*a1;
+dm12([1,Ny-1,Ny]) = [dc(1),dc(end-1),dc(end)];
+dm1M1 = dM1(2)*a1;
+dm1M1([1,Ny-1,Ny]) = [dM1(1),dM1(end-1),dM1(end)];
+dm1M = dM(2)*a1;
+dm1M([1,Ny-1,Ny]) = [dM(1),dM(end-1),dM(end)];
+
+Dm1 = [dm10;0;dm11;0;repmat([dm12;0],Nx+1-4,1);dm1M1;0;dm1M];
+
+%% d00
+[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'0');
+
+d00 = d0(3)*a0;
+d00([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
+d01 = d1(3)*a0;
+d01([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+d02 = dc(3)*a0;
+d02([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+d0M1 = dM1(3)*a0;
+d0M1([1,2,Ny,Ny+1]) = [dM1(1),dM1(2),dM1(end-1),dM1(end)];
+d0M = dM(3)*a0;
+d0M([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
+
+D0 = [d00;d01;repmat(d02,(Nx+1-4),1);d0M1;d0M];
+
+%% dp1   
+
+[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'1');
+
+d10 = d0(3)*a1;
+d10([1,2,Ny]) = [d0(1),d0(2),d0(end)];
+d11 = d1(3)*a1;
+d11([1,2,Ny]) = [d1(1),d1(2),d1(end)];
+d12 = dc(3)*a1;
+d12([1,2,Ny]) = [dc(1),dc(2),dc(end)];
+d1M1 = dM1(3)*a1;
+d1M1([1,2,Ny]) = [dM1(1),dM1(2),dM1(end)];
+d1M = dM(3)*a1;
+d1M([1,2,Ny]) = [dM(1),dM(2),dM(end)];
+
+
+D1 = [d10;0;d11;0;repmat([d12;0],Nx+1-4,1);d1M1;0;d1M];
+
+%% dp2   
+
+[d0,d1,dc,dM1,dM] =biharmdiag(BCs, h, D, nu,'2');
+
+d20 = d0(3)*a2;
+d20([1,2,Ny-1]) = [d0(1),d0(2),d0(end)];
+
+d21 = d1(3)*a2;
+d21([1,2,Ny-1]) = [d1(1),d1(2),d1(end)];
+
+d22 = dc(3)*a2;
+d22([1,2,Ny-1]) = [dc(1),dc(2),dc(end)];
+
+d2M1 = dM1(3)*a2;
+d2M1([1,2,Ny-1]) = [dM1(1),dM1(2),dM1(end)];
+
+d2M = dM(3)*a2;
+d2M([1,2,Ny-1]) = [dM(1),dM(2),dM(end)];
+
+D2 = [d20;0;0;d21;0;0;repmat([d22;0;0],Nx+1-4,1);d2M1;0;0;d2M];
+
+%% dpNym1 
+
+[d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,'ny-1');
+
+dpNym10 = d0(2)*a1 ;
+dpNym10([1,Ny-1,Ny]) = [d0(1), d0(end-1), d0(end)];
+dpNym11 = d1(2)*a1 ;
+dpNym11([1,Ny-1,Ny]) = [d1(1), d1(end-1), d1(end)];
+dpNym12 = dc(2)*a1;
+dpNym12([1,Ny-1,Ny]) = [dc(1), dc(end-1), dc(end)];
+dpNym1M = dM1(2)*a1;
+dpNym1M([1,Ny-1,Ny]) = [dM1(1), dM1(end-1), dM1(end)];
+
+DNym1 = [0;dpNym10;0;dpNym11;repmat([0;dpNym12],Nx-3,1);0;dpNym1M;0];
+
+%% dpNy   
+[d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,'ny');
+
+dpNy0 = d0(3)*a0 ;
+dpNy0([1,2,Ny,Ny+1]) = [d0(1), d0(2), d0(end-1),d0(end)];
+dpNy1 = d1(3)*a0 ;
+dpNy1([1,2,Ny,Ny+1]) = [d1(1), d1(2), d1(end-1),d1(end)];
+dpNy2 = dc(3)*a0;
+dpNy2([1,2,Ny,Ny+1]) = [dc(1), dc(2), dc(end-1),dc(end)];
+dpNyM = dM1(3)*a0;
+dpNyM([1,2,Ny,Ny+1]) = [dM1(1), dM1(2), dM1(end-1),dM1(end)];
+
+
+DNy = [dpNy0;dpNy1;repmat(dpNy2,(Nx-3),1);dpNyM];
+
+%% dpNyp1 
+[d0,d1,dc,dM1,~] =biharmdiag(BCs, h, D, nu,'ny+1');
+
+dpNy10 = d0(3)*a1 ;
+dpNy10([1,2,Ny]) = [d0(1), d0(2), d0(end)];
+
+dpNy11 = d1(3)*a1 ;
+dpNy11([1,2,Ny]) = [d1(1), d1(2), d1(end)];
+
+dpNy12 = dc(3)*a1;
+dpNy12([1,2,Ny]) = [dc(1), dc(2), dc(end)];
+
+dpNy1M = dM1(3)*a1;
+dpNy1M([1,2,Ny]) = [dM1(1), dM1(2), dM1(end)];
+
+DNy1 = [dpNy10;0;dpNy11;0;repmat([dpNy12;0],Nx-3,1);dpNy1M];
+
+%% dp2Ny  
+
+[d0,d1,dc,~,~]  =biharmdiag(BCs, h, D, nu,'2ny');
+
+dp2Ny0 = d0(3)*a0;
+dp2Ny0([1,2,Ny,Ny+1]) = [d0(1),d0(2),d0(end-1),d0(end)];
+
+dp2Ny1 = d1(3)*a0;
+dp2Ny1([1,2,Ny,Ny+1]) = [d1(1),d1(2),d1(end-1),d1(end)];
+
+dp2Ny2 = dc(3)*a0;
+dp2Ny2([1,2,Ny,Ny+1]) = [dc(1),dc(2),dc(end-1),dc(end)];
+
+D2Ny = [dp2Ny0;dp2Ny1;repmat(dp2Ny2,Nx-3,1)];
+
+%% Zero Padding
+% negative diagonals pad at the end
+Dm2Ny = [Dm2Ny; zeros((Ny+1)*2,1)];
+
+DmNym1 = [DmNym1; zeros((Ny + 2),1)];
+DmNy = [DmNy; zeros((Ny + 1),1)];
+DmNy1 = [DmNy1; zeros((Ny),1) ];
+
+Dm2 = [Dm2;0;0];
+Dm1 = [Dm1;0];
+
+% While positive diagonals pad at the start
+
+D1 = [0;D1];
+D2 = [0;0;D2];
+
+DNym1 = [zeros((Ny),1);DNym1];
+DNy = [zeros((Ny+1),1);DNy];
+DNy1 = [zeros((Ny+2),1);DNy1];
+
+D2Ny = [zeros((Ny+1)*2,1);D2Ny];
+%% Assembling Diagonals into the Biharmonic
+
+BHdiags = [Dm2Ny,...
+    DmNym1, DmNy, DmNy1,...
+    Dm2, Dm1, D0, D1, D2,...
+    DNym1, DNy, DNy1,...
+    D2Ny];
+
+dn = [-(2*(Ny+1)),...
+      -(Ny+2):(-Ny),... 
+       (-2:2),...
+       Ny:(Ny+2),...
+       2*(Ny+1)];
+
+BH = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+biharm = ((1/h)^4) * spdiags(BHdiags, dn, BH);
+
+end
+
+##### SOURCE END #####
+-->
+</body>
+</html>

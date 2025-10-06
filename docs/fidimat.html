@@ -1,0 +1,727 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>FIDIMAT Generate Finite Difference Spatial Sparcity Matrices</title>
+<meta name="generator" content="MATLAB 24.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-10-06">
+<meta name="DC.source" content="fidimat.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>FIDIMAT Generate Finite Difference Spatial Sparcity Matrices</h1>
+<!--introduction-->
+<pre class="language-matlab">
+<span class="keyword">function</span> FDMat = fidimat(arg1,arg2,arg3,arg4)
+FDMat = FIDIMAT(l,ord) Generate <span class="string">stencil</span> <span class="string">FDMat</span> <span class="string">with</span> <span class="string">order</span> <span class="string">given</span> <span class="string">by</span> <span class="string">ord</span>
+        <span class="keyword">for</span> a 1D system <span class="string">length</span> <span class="string">l.</span> <span class="string">Boundary</span> <span class="string">condition</span> <span class="string">defaults</span> <span class="string">to</span> <span class="string">simply</span> <span class="string">supported</span>
+</pre>
+<pre class="language-matlab">FDMat = FIDIMAT(l,m,ord) Generate <span class="string">stencil</span> <span class="string">FDMat</span> <span class="string">with</span> <span class="string">order</span> <span class="string">given</span> <span class="string">by</span> <span class="string">ord</span>
+        <span class="keyword">for</span> a 2D system <span class="string">of</span> <span class="string">size</span> <span class="string">[l m].</span> <span class="string">Boundary</span> <span class="string">condition</span> <span class="string">defaults</span> <span class="string">to</span> <span class="string">simply</span> <span class="string">supported</span>
+</pre>
+<pre class="language-matlab">FDMat = FIDIMAT(l,m,ord,bctype) Generate <span class="string">stencil</span> <span class="string">FDMat</span> <span class="string">with</span> <span class="string">order</span> <span class="string">given</span>
+        by <span class="string">ord</span> <span class="string">for</span> <span class="string">a</span> <span class="string">2D</span> <span class="string">system</span> <span class="string">of</span> <span class="string">size</span> <span class="string">[l m]</span> <span class="string">with</span> <span class="string">specified</span> <span class="string">boundary</span> <span class="string">conditions</span> <span class="string">bctype.</span>
+</pre>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Arguments</a>
+</li>
+<li>
+<a href="#2">Returns</a>
+</li>
+<li>
+<a href="#3">Source</a>
+</li>
+<li>
+<a href="#5">Variable Arguement Length Check</a>
+</li>
+<li>
+<a href="#6">Validate Arguments</a>
+</li>
+<li>
+<a href="#7">Set Identity Matrices</a>
+</li>
+<li>
+<a href="#8">1D Case</a>
+</li>
+<li>
+<a href="#10">2D Case</a>
+</li>
+<li>
+<a href="#13">Building Bi-Harmonic</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Arguments</h2>
+<pre class="language-matlab">- m       : number of <span class="string">total</span> <span class="string">grid</span> <span class="string">points</span> <span class="string">X</span> <span class="string">axis</span>
+- l       : number of <span class="string">total</span> <span class="string">grid</span> <span class="string">points</span> <span class="string">Y</span> <span class="string">axis</span>
+- ord     : order of <span class="string">the</span> <span class="string">matrix</span> <span class="string">(string)</span>
+- bctype  : boundary condition <span class="string">type:</span> <span class="string">1:</span> <span class="string">simply</span> <span class="string">supported</span>, 2: clamped
+</pre>
+<pre class="language-matlab">
+<span class="comment">% Valid order inputs</span>
+  [<span class="string">'x-'</span>,<span class="string">'x+'</span>,<span class="string">'x.'</span>,<span class="string">'xx'</span>,<span class="string">'xxxx'</span>,
+  <span class="string">'y-'</span>,<span class="string">'y+'</span>,<span class="string">'y.'</span>,<span class="string">'yy'</span>,<span class="string">'yyyy'</span>,
+  <span class="string">'grad'</span>,<span class="string">'xy'</span>,<span class="string">'xxyy'</span>,<span class="string">'laplace'</span>,<span class="string">'biharm'</span>,<span class="string">'I'</span>];
+</pre>
+<h2 id="2">Returns</h2>
+<p>Finite difference stencil matrix of the given order and coundary condition type.</p>
+<h2 id="3">Source</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> FDMat = fidimat(arg1,arg2,arg3,arg4)
+</pre>
+<h2 id="5">Variable Arguement Length Check</h2>
+<pre class="codeinput">
+<span class="keyword">if</span> nargin&lt;2
+    error(<span class="string">'Not enough input arguments'</span>)
+
+<span class="keyword">elseif</span> nargin==2
+    ord = convertCharsToStrings(arg2);
+    l = arg1;
+    m = 1;
+    bctype = 1;
+<span class="keyword">elseif</span> nargin==3
+
+    <span class="keyword">if</span> ischar(arg2) || isstring(arg2)
+        ord = convertCharsToStrings(arg2);
+        l = arg1;
+        m = 1;
+        bctype = arg3;
+    <span class="keyword">else</span>
+        ord = convertCharsToStrings(arg3);
+        l = arg1;
+        m = arg2;
+        bctype = 1;
+    <span class="keyword">end</span>
+<span class="keyword">elseif</span> nargin==4
+    l = arg1;
+    m = arg2;
+    ord = convertCharsToStrings(arg3);
+    bctype = arg4;
+
+<span class="keyword">elseif</span> nargin&gt;1
+    error(<span class="string">'Too many input arguments'</span>)
+<span class="keyword">end</span>
+</pre>
+<pre class="codeoutput error">Error using fidimat (line 29)
+Not enough input arguments
+</pre>
+<h2 id="6">Validate Arguments</h2>
+<pre class="codeinput">valid_orders = [<span class="string">"x-"</span>,<span class="string">"x+"</span>,<span class="string">"x."</span>,<span class="string">"xx"</span>,<span class="string">"xxxx"</span>, <span class="keyword">...</span>
+    <span class="string">"y-"</span>,<span class="string">"y+"</span>,<span class="string">"y."</span>,<span class="string">"yy"</span>,<span class="string">"yyyy"</span>, <span class="keyword">...</span>
+    <span class="string">"grad"</span>,<span class="string">"xy"</span>,<span class="string">"xxyy"</span>,<span class="string">"laplace"</span>,<span class="string">"biharm"</span>,<span class="string">"I"</span>];
+
+validateattributes(l,      {<span class="string">'numeric'</span>}, {<span class="string">'integer'</span>,<span class="string">'positive'</span>});
+validateattributes(m,      {<span class="string">'numeric'</span>}, {<span class="string">'integer'</span>,<span class="string">'positive'</span>});
+ord = validatestring    (ord,    valid_orders);
+validateattributes(bctype, {<span class="string">'numeric'</span>}, {<span class="string">'integer'</span>,<span class="string">'positive'</span>, <span class="string">'&lt;'</span>, 3});
+</pre>
+<h2 id="7">Set Identity Matrices</h2>
+<pre class="codeinput">Iy = speye(l); <span class="comment">% identity matrix for y axis</span>
+Ix = speye(m); <span class="comment">% identity matrix for x axis</span>
+ss = l*m;
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre>
+<h2 id="8">1D Case</h2>
+<pre class="codeinput">
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+<span class="comment">% if only one dimension is stipulated the function will return only</span>
+<span class="comment">% a 1D FD matrix. In this case input is by the letter x</span>
+
+<span class="keyword">if</span> m == 1
+</pre>
+<pre class="codeinput">    <span class="keyword">switch</span> ord
+
+        <span class="keyword">case</span> <span class="string">'x-'</span>
+            FDMat = spdiags([-ones(l,1),ones(l,1)],-1:0,speye(l));
+
+        <span class="keyword">case</span> <span class="string">'x+'</span>
+            FDMat = spdiags([-ones(l,1),ones(l,1)],0:1,speye(l));
+
+        <span class="keyword">case</span> <span class="string">'x.'</span>
+            FDMat = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
+
+        <span class="keyword">case</span> <span class="string">'xx'</span>
+            FDMat = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+
+        <span class="keyword">case</span> <span class="string">'xxxx'</span>
+            XX = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            XXXX = XX^2;
+
+            <span class="keyword">if</span> (bctype==2)
+                XXXX(1,1) = 7;
+                XXXX(end,end) = 7;
+            <span class="keyword">end</span>
+
+            FDMat = XXXX;
+
+        <span class="keyword">case</span> <span class="string">'I'</span>
+            I = speye(ss);
+            I([1 end],:) = 0;
+            FDMat = I;
+
+        <span class="keyword">case</span> {<span class="string">"grad"</span>,<span class="string">"xy"</span>,<span class="string">"xxyy"</span>,<span class="string">"laplace"</span>,<span class="string">"biharm"</span>}
+            error(<span class="string">'%s is not a valid order for a 1D scheme'</span>, ord);
+        <span class="keyword">otherwise</span>
+            error(<span class="string">'something went wrong, check your arguments'</span>);
+
+    <span class="keyword">end</span>
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre>
+<h2 id="10">2D Case</h2>
+<pre class="codeinput">    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre>
+<pre class="codeinput">
+<span class="keyword">else</span>
+    <span class="comment">% if two dimension arguements are given then the matri will out put the</span>
+    <span class="comment">% corresponding 2D Matrix.</span>
+    <span class="comment">%</span>
+    <span class="comment">% y is for columns of a matrix whilst x is for rows.</span>
+    <span class="comment">% x matrices in this case will contain 'off centre' diagonals corresponding to</span>
+    <span class="comment">% the number of elements in the row.</span>
+
+    <span class="keyword">switch</span> ord
+
+        <span class="keyword">case</span> <span class="string">'y-'</span>
+            Y = spdiags([-ones(l,1),ones(l,1)],-1:0,speye(l));
+            FDMat = kron(Ix,Y);
+
+        <span class="keyword">case</span> <span class="string">'y+'</span>
+            Y = spdiags([ones(l,1),-ones(l,1)],0:1,speye(l));
+            FDMat = kron(Ix,Y);
+
+        <span class="keyword">case</span> <span class="string">'y.'</span>
+            Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)], -1:1 ,speye(l));
+            FDMat = kron(Ix,Y);
+
+        <span class="keyword">case</span> <span class="string">'yy'</span>
+            <span class="keyword">if</span> bctype==0
+                d0=-2*ones((Nx+1)*(Ny+1),1);
+                d0([1:Ny+1:end,Ny+1:Ny+1:end])=2;
+
+                d1 = ones(Ny+1,1);
+                d1([1,end]) = [-5,0];
+                d1 = repmat(d1,Nx+1,1);
+                d1=d1(1:end-1);
+
+                d2=zeros((Nx+1)*(Ny+1)-2,1);
+                d2(1:Ny+1:end)=4;
+
+                d3=zeros((Nx+1)*(Ny+1)-3,1);
+                d3(1:Ny+1:end)=-1;
+
+
+                d=[[flipud(d3);[0;0;0]], [flipud(d2);[0;0]],<span class="keyword">...</span>
+                    [flipud(d1);[0]],<span class="keyword">...</span>
+                    d0,<span class="keyword">...</span>
+                    [[0];d1],<span class="keyword">...</span>
+                    [[0;0];d2], [[0;0;0];d3]];
+
+                dN= (-3:3);
+
+                Dyy = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+                Dyy = (1/h^2)*spdiags(d,dN,Dyy);
+
+            <span class="keyword">else</span>
+                YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+                YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+                YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+                FDMat = kron(Ix,YY);
+            <span class="keyword">end</span>
+
+        <span class="keyword">case</span> <span class="string">'yyyy'</span>
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+            FDMat = kron(Ix,YY)^2;
+
+        <span class="keyword">case</span> <span class="string">'x-'</span>
+            X = spdiags([-ones(m,1),ones(m,1)],-1:0,speye(m));
+            FDMat = kron(X,Iy);
+
+        <span class="keyword">case</span> <span class="string">'x+'</span>
+            X = spdiags([ones(m,1),-ones(m,1)],0:1,speye(m));
+            FDMat = kron(X,Iy);
+
+        <span class="keyword">case</span> <span class="string">'x.'</span>
+            X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
+            FDMat = kron(X,Iy);
+
+        <span class="keyword">case</span> <span class="string">'xx'</span>
+            <span class="keyword">if</span> bctype==0
+                d0=-2*ones((Nx+1)*(Ny+1),1);
+                d0([1:Ny+1,(end-Ny):end])=2;
+
+                dNy1=ones(Nx*(Ny+1),1);
+                dNy1(1:(Ny+1))=-5;
+
+                d2Ny1=zeros((Ny+1)*(Nx-1),1);
+                d2Ny1(1:Ny+1)=4;
+
+                d3Ny1=zeros((Ny+1)*(Nx-2),1);
+                d3Ny1(1:Ny+1)=-1;
+
+                d=[[flipud(d3Ny1);zeros(3*(Ny+1),1)], [flipud(d2Ny1);zeros(2*(Ny+1),1)],<span class="keyword">...</span>
+                    [flipud(dNy1);zeros(1*(Ny+1),1)],<span class="keyword">...</span>
+                    d0,<span class="keyword">...</span>
+                    [zeros(1*(Ny+1),1);dNy1],<span class="keyword">...</span>
+                    [zeros(2*(Ny+1),1);d2Ny1], [zeros(3*(Ny+1),1);d3Ny1]];
+
+                dN= (Ny+1)*(-3:3);
+                Dxx = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+                Dxx = spdiags(d,dN,Dxx);
+            <span class="keyword">else</span>
+                XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+                XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+                XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+                FDMat = kron(XX,Iy);
+
+            <span class="keyword">end</span>
+
+
+
+        <span class="keyword">case</span> <span class="string">'xxxx'</span>
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+            XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+            FDMat = kron(XX,Iy)^2;
+
+        <span class="keyword">case</span> <span class="string">'grad'</span>
+            Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
+            X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
+            FDMat = kron(X,Iy) + kron(Ix,Y);
+
+        <span class="keyword">case</span> <span class="string">'xy'</span>
+            Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
+            X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
+            FDMat = kron(X,Iy) * kron(Ix,Y);
+
+        <span class="keyword">case</span> <span class="string">'xxyy'</span>
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+            XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+
+            FDMat = kron(Ix,YY)*kron(XX,Iy);
+
+        <span class="keyword">case</span> <span class="string">'laplace'</span>
+
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,Ix);
+            XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,Iy);
+            YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+            LA = kron(XX,Iy) + kron(Ix,YY);
+            FDMat = LA;
+
+        <span class="keyword">case</span> <span class="string">'biharm'</span>
+</pre>
+<pre class="codeinput">            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre>
+<h2 id="13">Building Bi-Harmonic</h2>
+<pre class="codeinput">            <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,Ix);
+            XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,Iy);
+            YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+            LA = kron(XX,Iy) + kron(Ix,YY);
+            BH = LA*LA;
+            FDMat = BH;
+</pre>
+<pre class="codeinput">        <span class="keyword">case</span> <span class="string">'I'</span>
+            I = speye(ss);
+            FDMat = I;
+
+        <span class="keyword">otherwise</span>
+            error(<span class="string">'something went wrong, check your arguements'</span>);
+
+    <span class="keyword">end</span>
+
+    <span class="comment">% set the correct points to 0</span>
+    FDMat(:,[1:l+1, ss-l:ss]) = 0;FDMat([1:l+1, ss-l:ss],:) = 0;
+    FDMat(:,[2*l:l:ss, (2*l)+1:l:ss]) = 0; FDMat([2*l:l:ss, (2*l)+1:l:ss],:) = 0;
+
+<span class="keyword">end</span>
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024a</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+%% FIDIMAT Generate Finite Difference Spatial Sparcity Matrices
+%   function FDMat = fidimat(arg1,arg2,arg3,arg4)
+%   FDMat = FIDIMAT(l,ord) Generate stencil FDMat with order given by ord
+%           for a 1D system length l. Boundary condition defaults to simply supported
+%
+%   FDMat = FIDIMAT(l,m,ord) Generate stencil FDMat with order given by ord
+%           for a 2D system of size [l m]. Boundary condition defaults to simply supported
+%
+%   FDMat = FIDIMAT(l,m,ord,bctype) Generate stencil FDMat with order given
+%           by ord for a 2D system of size [l m] with specified boundary conditions bctype.
+%
+%% Arguments
+%   - m       : number of total grid points X axis
+%   - l       : number of total grid points Y axis
+%   - ord     : order of the matrix (string)
+%   - bctype  : boundary condition type: 1: simply supported, 2: clamped
+%
+%   % Valid order inputs
+%     ['x-','x+','x.','xx','xxxx',
+%     'y-','y+','y.','yy','yyyy',
+%     'grad','xy','xxyy','laplace','biharm','I'];
+%% Returns
+% Finite difference stencil matrix of the given order and coundary condition type.
+%% Source
+function FDMat = fidimat(arg1,arg2,arg3,arg4)
+
+%% Variable Arguement Length Check
+if nargin<2
+    error('Not enough input arguments')
+
+elseif nargin==2
+    ord = convertCharsToStrings(arg2);
+    l = arg1;
+    m = 1;
+    bctype = 1;
+elseif nargin==3
+
+    if ischar(arg2) || isstring(arg2)
+        ord = convertCharsToStrings(arg2);
+        l = arg1;
+        m = 1;
+        bctype = arg3;
+    else
+        ord = convertCharsToStrings(arg3);
+        l = arg1;
+        m = arg2;
+        bctype = 1;
+    end
+elseif nargin==4
+    l = arg1;
+    m = arg2;
+    ord = convertCharsToStrings(arg3);
+    bctype = arg4;
+
+elseif nargin>1
+    error('Too many input arguments')
+end
+
+%% Validate Arguments
+valid_orders = ["x-","x+","x.","xx","xxxx", ...
+    "y-","y+","y.","yy","yyyy", ...
+    "grad","xy","xxyy","laplace","biharm","I"];
+
+validateattributes(l,      {'numeric'}, {'integer','positive'});
+validateattributes(m,      {'numeric'}, {'integer','positive'});
+ord = validatestring    (ord,    valid_orders);
+validateattributes(bctype, {'numeric'}, {'integer','positive', '<', 3});
+
+%% Set Identity Matrices
+
+Iy = speye(l); % identity matrix for y axis
+Ix = speye(m); % identity matrix for x axis
+ss = l*m;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1D Case
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% if only one dimension is stipulated the function will return only
+% a 1D FD matrix. In this case input is by the letter x
+
+if m == 1
+
+    switch ord
+
+        case 'x-'
+            FDMat = spdiags([-ones(l,1),ones(l,1)],-1:0,speye(l));
+
+        case 'x+'
+            FDMat = spdiags([-ones(l,1),ones(l,1)],0:1,speye(l));
+
+        case 'x.'
+            FDMat = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
+
+        case 'xx'
+            FDMat = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+
+        case 'xxxx'
+            XX = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            XXXX = XX^2;
+
+            if (bctype==2)
+                XXXX(1,1) = 7;
+                XXXX(end,end) = 7;
+            end
+
+            FDMat = XXXX;
+
+        case 'I'
+            I = speye(ss);
+            I([1 end],:) = 0;
+            FDMat = I;
+
+        case {"grad","xy","xxyy","laplace","biharm"}
+            error('%s is not a valid order for a 1D scheme', ord);
+        otherwise
+            error('something went wrong, check your arguments');
+
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% 2D Case
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+else
+    % if two dimension arguements are given then the matri will out put the
+    % corresponding 2D Matrix.
+    %
+    % y is for columns of a matrix whilst x is for rows.
+    % x matrices in this case will contain 'off centre' diagonals corresponding to
+    % the number of elements in the row.
+
+    switch ord
+
+        case 'y-'
+            Y = spdiags([-ones(l,1),ones(l,1)],-1:0,speye(l));
+            FDMat = kron(Ix,Y);
+
+        case 'y+'
+            Y = spdiags([ones(l,1),-ones(l,1)],0:1,speye(l));
+            FDMat = kron(Ix,Y);
+
+        case 'y.'
+            Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)], -1:1 ,speye(l));
+            FDMat = kron(Ix,Y);
+
+        case 'yy'
+            if bctype==0
+                d0=-2*ones((Nx+1)*(Ny+1),1);
+                d0([1:Ny+1:end,Ny+1:Ny+1:end])=2;
+
+                d1 = ones(Ny+1,1);
+                d1([1,end]) = [-5,0];
+                d1 = repmat(d1,Nx+1,1);
+                d1=d1(1:end-1);
+
+                d2=zeros((Nx+1)*(Ny+1)-2,1);
+                d2(1:Ny+1:end)=4;
+
+                d3=zeros((Nx+1)*(Ny+1)-3,1);
+                d3(1:Ny+1:end)=-1;
+
+
+                d=[[flipud(d3);[0;0;0]], [flipud(d2);[0;0]],...
+                    [flipud(d1);[0]],...
+                    d0,...
+                    [[0];d1],...
+                    [[0;0];d2], [[0;0;0];d3]];
+
+                dN= (-3:3);
+
+                Dyy = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+                Dyy = (1/h^2)*spdiags(d,dN,Dyy);
+
+            else
+                YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+                YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+                YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+                FDMat = kron(Ix,YY);
+            end
+
+        case 'yyyy'
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+            FDMat = kron(Ix,YY)^2;
+
+        case 'x-'
+            X = spdiags([-ones(m,1),ones(m,1)],-1:0,speye(m));
+            FDMat = kron(X,Iy);
+
+        case 'x+'
+            X = spdiags([ones(m,1),-ones(m,1)],0:1,speye(m));
+            FDMat = kron(X,Iy);
+
+        case 'x.'
+            X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
+            FDMat = kron(X,Iy);
+
+        case 'xx'
+            if bctype==0
+                d0=-2*ones((Nx+1)*(Ny+1),1);
+                d0([1:Ny+1,(end-Ny):end])=2;
+
+                dNy1=ones(Nx*(Ny+1),1);
+                dNy1(1:(Ny+1))=-5;
+
+                d2Ny1=zeros((Ny+1)*(Nx-1),1);
+                d2Ny1(1:Ny+1)=4;
+
+                d3Ny1=zeros((Ny+1)*(Nx-2),1);
+                d3Ny1(1:Ny+1)=-1;
+
+                d=[[flipud(d3Ny1);zeros(3*(Ny+1),1)], [flipud(d2Ny1);zeros(2*(Ny+1),1)],...
+                    [flipud(dNy1);zeros(1*(Ny+1),1)],...
+                    d0,...
+                    [zeros(1*(Ny+1),1);dNy1],...
+                    [zeros(2*(Ny+1),1);d2Ny1], [zeros(3*(Ny+1),1);d3Ny1]];
+
+                dN= (Ny+1)*(-3:3);
+                Dxx = sparse((Nx+1)*(Ny+1),(Nx+1)*(Ny+1)) ;
+                Dxx = spdiags(d,dN,Dxx);
+            else
+                XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+                XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+                XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+                FDMat = kron(XX,Iy);
+
+            end
+
+
+
+        case 'xxxx'
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+            XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+            FDMat = kron(XX,Iy)^2;
+
+        case 'grad'
+            Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
+            X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
+            FDMat = kron(X,Iy) + kron(Ix,Y);
+
+        case 'xy'
+            Y = spdiags([-ones(l,1),zeros(l,1),ones(l,1)],[-1:1],speye(l));
+            X = spdiags([-ones(m,1),zeros(m,1),ones(m,1)],[-1:1],speye(m));
+            FDMat = kron(X,Iy) * kron(Ix,Y);
+
+        case 'xxyy'
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,speye(l));
+            YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,speye(m));
+            XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+
+            FDMat = kron(Ix,YY)*kron(XX,Iy);
+
+        case 'laplace'
+
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,Ix);
+            XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,Iy);
+            YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+            LA = kron(XX,Iy) + kron(Ix,YY);
+            FDMat = LA;
+
+        case 'biharm'
+
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %% Building Bi-Harmonic
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            XX = spdiags([ones(m,1),-2*ones(m,1),ones(m,1)],-1:1,Ix);
+            XX(1,2) = (bctype-1)*2; XX(m,m-1) = (bctype-1)*2;
+            YY = spdiags([ones(l,1),-2*ones(l,1),ones(l,1)],-1:1,Iy);
+            YY(1,2) = (bctype-1)*2; YY(l,l-1) = (bctype-1)*2;
+            LA = kron(XX,Iy) + kron(Ix,YY);
+            BH = LA*LA;
+            FDMat = BH;
+
+        case 'I'
+            I = speye(ss);
+            FDMat = I;
+
+        otherwise
+            error('something went wrong, check your arguements');
+
+    end
+
+    % set the correct points to 0
+    FDMat(:,[1:l+1, ss-l:ss]) = 0;FDMat([1:l+1, ss-l:ss],:) = 0;
+    FDMat(:,[2*l:l:ss, (2*l)+1:l:ss]) = 0; FDMat([2*l:l:ss, (2*l)+1:l:ss],:) = 0;
+
+end
+
+##### SOURCE END #####
+-->
+</body>
+</html>
