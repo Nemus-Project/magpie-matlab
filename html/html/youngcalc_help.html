@@ -1,0 +1,352 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>YOUNGCALC: Calculate Young's Modulus from measured modal frequencies</title>
+<meta name="generator" content="MATLAB 24.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-10-07">
+<meta name="DC.source" content="youngcalc_help.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>YOUNGCALC: Calculate Young's Modulus from measured modal frequencies</h1>
+<!--introduction-->
+<pre>    E  = YOUNGCALC(rho,ldim,h,BCs,ExpFreq,Ntrain)</pre>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Overview</a>
+</li>
+<li>
+<a href="#2">Input parameters</a>
+</li>
+<li>
+<a href="#3">Example Usage</a>
+</li>
+<li>
+<a href="#5">Initial Parameters</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Overview</h2>
+<p>YOUNGCALC is a function that returns Young's modulus (E) of an experimental plate starting from a batch of experimentally measured frequencies, leveraging MAGPIE</p>
+<h2 id="2">Input parameters</h2>
+<pre>         rho     : the experimental plate density
+         ldim    : a 3X1 array containing the Lx Ly Lz dimensions
+         h       : the grid spacing of the FD scheme
+         BCs     : a 4X2 array containing the rigidities of the boundary supports of the experimental plate
+         ExpFreq : an array contaning the first Nmodes measured modal frequencies
+         Ntrain  : an integer. Must be &lt;= Nmodes. It is the number of training modes out of the available batch</pre>
+<h2 id="3">Example Usage</h2>
+<pre>         ExpFreq = [73.2; 148; 376; 431; 559; 910] ;  %-- these are measured from a plate
+         rho     = 8765 ;            %-- density [kg/m^3]
+         Lx      = 0.1 ;
+         Ly      = 0.08 ;
+         Lz      = 0.00081 ;</pre>
+<p>cantilever BCs. Clamped edge along x: BCs = [0, 0; 1e15, 1e15; 0, 0; 0, 0];</p>
+<pre>         ldim    = [Lx Ly Lz] ;
+         h       = sqrt(Lx*Ly)*0.01 ;  %-- grid spacing [m]</pre>
+<pre>         E  = youngcalc(rho,ldim,h,BCs,ExpFreq,3) ;</pre>
+<pre class="codeinput">
+<span class="keyword">function</span> ELS  = youngcalc(rho,ldim,h,BCs,ExpFreq,Ntrain)
+</pre>
+<pre class="codeinput">Nmodes = length(ExpFreq) ;
+
+<span class="keyword">if</span> Ntrain &gt; Nmodes
+    disp(<span class="string">'Choose Ntrain &lt; total experimental Freqs'</span>)
+    <span class="keyword">return</span>
+<span class="keyword">end</span>
+
+TrainFreq = ExpFreq(1:Ntrain) ;
+<span class="keyword">if</span> Ntrain == Nmodes
+    TestFreq  = [] ;
+<span class="keyword">else</span>
+    TestFreq  = ExpFreq(Ntrain+1:end) ;
+<span class="keyword">end</span>
+</pre>
+<h2 id="5">Initial Parameters</h2>
+<pre class="codeinput">E0      = 2e11; <span class="comment">%-- Young's modulus [Pa] (just a number here, results shouldnt change if this changes)</span>
+nu      = 0.3;  <span class="comment">%-- poisson's ratio (average value for metals)</span>
+
+Lx      = ldim(1) ;
+Ly      = ldim(2) ;
+Lz      = ldim(3) ;
+A       = Lx*Ly ; <span class="comment">%-- area</span>
+
+D0      = E0*Lz^3/12/(1-nu^2) ;  <span class="comment">%-- zero-rigidity</span>
+
+<span class="comment">% Run magpie first to get non-dimensional frequencies</span>
+Om        = magpie(rho,E0,nu,ldim,h,BCs,Ntrain,<span class="string">"none"</span>) ;
+OmNDim    = Om ./ sqrt(D0) * sqrt(rho * A^2 * Lz) ;
+OmNDimsq  = OmNDim.^2 ;
+
+<span class="comment">% Least-square (LS) optimisation</span>
+psi       = (TrainFreq*2*pi).^2 * rho * Lz * A^2 ;
+DLS       = (OmNDimsq.'*psi) / (OmNDimsq.' * OmNDimsq) ;
+ELS       = DLS / (Lz^3/12/(1-nu^2)) ;
+
+<span class="comment">% launch a numerical simulation to get the frequencies of the numerical model</span>
+<span class="comment">% using the estimated Youngs Mod</span>
+<span class="comment">% and compare against the experimental freqs</span>
+NumOm   = magpie(rho,ELS,nu,ldim,h,BCs,Nmodes,<span class="string">"none"</span>) ;
+NumFreq = NumOm/2/pi ;
+
+<span class="keyword">if</span> Ntrain &lt; Nmodes
+
+    subplot(2,2,1)
+    Y = [TrainFreq,NumFreq(1:Ntrain)] ;
+    X = 1:Ntrain ;
+    bar(X,Y)
+    xlabel(<span class="string">'Mode Number'</span>) ;
+    ylabel(<span class="string">'f (Hz)'</span>)
+    legend(<span class="string">'Exp'</span>,<span class="string">'Num'</span>)
+    title(<span class="string">'Training Set'</span>)
+
+    subplot(2,2,3)
+    errTrain = (1-Y(:,2)./Y(:,1))*100 ;
+    bar(X,errTrain)
+    xlabel(<span class="string">'Mode Number'</span>) ;
+    ylabel(<span class="string">'rel err (%)'</span>)
+
+    subplot(2,2,2)
+    Y = [TestFreq,NumFreq(Ntrain+1:end)] ;
+    X = Ntrain+1:Nmodes ;
+    bar(X,Y)
+    xlabel(<span class="string">'Mode Number'</span>) ;
+    ylabel(<span class="string">'f (Hz)'</span>)
+    legend(<span class="string">'Exp'</span>,<span class="string">'Num'</span>)
+    title(<span class="string">'Testing Set'</span>)
+
+    subplot(2,2,4)
+    errTest = (1-Y(:,2)./Y(:,1))*100 ;
+    bar(X,errTest)
+    xlabel(<span class="string">'Mode Number'</span>) ;
+    ylabel(<span class="string">'rel err (%)'</span>)
+
+<span class="keyword">else</span>
+
+    subplot(2,1,1)
+    Y = [TrainFreq,NumFreq(1:Ntrain)] ;
+    X = 1:Ntrain ;
+    bar(X,Y)
+    xlabel(<span class="string">'Mode Number'</span>) ;
+    ylabel(<span class="string">'f (Hz)'</span>)
+    legend(<span class="string">'Exp'</span>,<span class="string">'Num'</span>)
+    title(<span class="string">'Training Set'</span>)
+
+    subplot(2,1,2)
+    errTrain = (1-Y(:,2)./Y(:,1))*100 ;
+    bar(X,errTrain)
+    xlabel(<span class="string">'Mode Number'</span>) ;
+    ylabel(<span class="string">'rel err (%)'</span>)
+
+<span class="keyword">end</span>
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024a</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+%% YOUNGCALC: Calculate Young's Modulus from measured modal frequencies 
+%      E  = YOUNGCALC(rho,ldim,h,BCs,ExpFreq,Ntrain)
+%% Overview
+% YOUNGCALC is a function that returns Young's modulus (E) of an experimental plate
+% starting from a batch of experimentally measured frequencies, leveraging MAGPIE
+%
+%% Input parameters
+%           rho     : the experimental plate density
+%           ldim    : a 3X1 array containing the Lx Ly Lz dimensions
+%           h       : the grid spacing of the FD scheme
+%           BCs     : a 4X2 array containing the rigidities of the boundary supports of the experimental plate
+%           ExpFreq : an array contaning the first Nmodes measured modal frequencies
+%           Ntrain  : an integer. Must be <= Nmodes. It is the number of training modes out of the available batch
+%
+%% Example Usage
+%
+%           ExpFreq = [73.2; 148; 376; 431; 559; 910] ;  %REPLACE_WITH_DASH_DASH these are measured from a plate 
+%           rho     = 8765 ;            %REPLACE_WITH_DASH_DASH density [kg/m^3]
+%           Lx      = 0.1 ;
+%           Ly      = 0.08 ;
+%           Lz      = 0.00081 ;
+%
+% cantilever BCs. Clamped edge along x:
+%           BCs = [0,    0;
+%                  1e15, 1e15;
+%                  0,    0;
+%                  0,    0];
+%
+%           ldim    = [Lx Ly Lz] ;
+%           h       = sqrt(Lx*Ly)*0.01 ;  %REPLACE_WITH_DASH_DASH grid spacing [m]
+%
+%           E  = youngcalc(rho,ldim,h,BCs,ExpFreq,3) ;
+%
+function ELS  = youngcalc(rho,ldim,h,BCs,ExpFreq,Ntrain)
+
+Nmodes = length(ExpFreq) ;
+
+if Ntrain > Nmodes
+    disp('Choose Ntrain < total experimental Freqs')
+    return
+end
+
+TrainFreq = ExpFreq(1:Ntrain) ;
+if Ntrain == Nmodes
+    TestFreq  = [] ;
+else
+    TestFreq  = ExpFreq(Ntrain+1:end) ;
+end
+
+%% Initial Parameters
+E0      = 2e11; %REPLACE_WITH_DASH_DASH Young's modulus [Pa] (just a number here, results shouldnt change if this changes)
+nu      = 0.3;  %REPLACE_WITH_DASH_DASH poisson's ratio (average value for metals)
+
+Lx      = ldim(1) ;
+Ly      = ldim(2) ;
+Lz      = ldim(3) ;
+A       = Lx*Ly ; %REPLACE_WITH_DASH_DASH area
+
+D0      = E0*Lz^3/12/(1-nu^2) ;  %REPLACE_WITH_DASH_DASH zero-rigidity
+
+% Run magpie first to get non-dimensional frequencies
+Om        = magpie(rho,E0,nu,ldim,h,BCs,Ntrain,"none") ;
+OmNDim    = Om ./ sqrt(D0) * sqrt(rho * A^2 * Lz) ;
+OmNDimsq  = OmNDim.^2 ;
+
+% Least-square (LS) optimisation
+psi       = (TrainFreq*2*pi).^2 * rho * Lz * A^2 ;
+DLS       = (OmNDimsq.'*psi) / (OmNDimsq.' * OmNDimsq) ;
+ELS       = DLS / (Lz^3/12/(1-nu^2)) ;
+
+% launch a numerical simulation to get the frequencies of the numerical model
+% using the estimated Youngs Mod
+% and compare against the experimental freqs
+NumOm   = magpie(rho,ELS,nu,ldim,h,BCs,Nmodes,"none") ;
+NumFreq = NumOm/2/pi ;
+
+if Ntrain < Nmodes
+
+    subplot(2,2,1)
+    Y = [TrainFreq,NumFreq(1:Ntrain)] ;
+    X = 1:Ntrain ;
+    bar(X,Y)
+    xlabel('Mode Number') ;
+    ylabel('f (Hz)')
+    legend('Exp','Num')
+    title('Training Set')
+
+    subplot(2,2,3)
+    errTrain = (1-Y(:,2)./Y(:,1))*100 ;
+    bar(X,errTrain)
+    xlabel('Mode Number') ;
+    ylabel('rel err (%)')
+
+    subplot(2,2,2)
+    Y = [TestFreq,NumFreq(Ntrain+1:end)] ;
+    X = Ntrain+1:Nmodes ;
+    bar(X,Y)
+    xlabel('Mode Number') ;
+    ylabel('f (Hz)')
+    legend('Exp','Num')
+    title('Testing Set')
+
+    subplot(2,2,4)
+    errTest = (1-Y(:,2)./Y(:,1))*100 ;
+    bar(X,errTest)
+    xlabel('Mode Number') ;
+    ylabel('rel err (%)')
+
+else
+
+    subplot(2,1,1)
+    Y = [TrainFreq,NumFreq(1:Ntrain)] ;
+    X = 1:Ntrain ;
+    bar(X,Y)
+    xlabel('Mode Number') ;
+    ylabel('f (Hz)')
+    legend('Exp','Num')
+    title('Training Set')
+
+    subplot(2,1,2)
+    errTrain = (1-Y(:,2)./Y(:,1))*100 ;
+    bar(X,errTrain)
+    xlabel('Mode Number') ;
+    ylabel('rel err (%)')
+
+end
+
+##### SOURCE END #####
+-->
+</body>
+</html>

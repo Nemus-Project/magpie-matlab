@@ -146,4 +146,18 @@ switch plot_type
         end
 end
 
+Nxy = [Nx Ny];
+
+% Only output if requested
+if nargout < 2
+    clear Q Nxy biHarm Dm;
+elseif nargout < 3
+    clear Nxy biHarm Dm;
+elseif nargout < 4
+    clear biHarm Dm;
+elseif nargout < 5
+    clear Dm;
+end
+
+
 end
