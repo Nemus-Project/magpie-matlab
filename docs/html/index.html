@@ -6,11 +6,11 @@
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
       -->
-<title>bhcoefs</title>
+<title>magpie</title>
 <meta name="generator" content="MATLAB 24.1">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
 <meta name="DC.date" content="2025-10-07">
-<meta name="DC.source" content="bhcoefs_help.m">
+<meta name="DC.source" content="index.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
@@ -76,50 +76,57 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 </head>
 <body>
 <div class="content">
-<h1>bhcoefs</h1>
+<h1>magpie</h1>
 <!--introduction-->
-<p>Biharmonic coefficients of a block order</p>
+<p>An open source MATLAB library for working with thin plates with generalized elastic boundary conditions. The framework is designed around two key use cases</p>
+<div>
+<ol>
+<li>Exploration of plates for understanding how material properties affect mode shapes and modal frequencies.</li>
+<li>Derivation of material properties from experimental data.</li>
+</ol>
+</div>
 <!--/introduction-->
 <h2>Contents</h2>
 <div>
 <ul>
 <li>
-<a href="#1">Syntax</a>
+<a href="#1">Functions</a>
 </li>
 <li>
-<a href="#2">Description</a>
+<a href="#2">References</a>
 </li>
 <li>
-<a href="#3">Input Arguments</a>
-</li>
-<li>
-<a href="#4">See Also</a>
+<a href="#3"><a href="https://github.com/Nemus-Project/magpie-matlab">Fork magpie on GitHub</a></a>
 </li>
 </ul>
 </div>
-<h2 id="1">Syntax</h2>
-<p>
-<tt>varargout = BHCOEFS(BCs,h,D,nu,order)</tt>
-</p>
-<h2 id="2">Description</h2>
-<p>
-<tt>varargout = BHCOEFS(BCs,h,D,nu,order)</tt> returns the individual coefficients of the isotropic biharmonic with elastic boundary constants for a biharmonic operator matrix with grid spacing <tt>h</tt>, stiffness coefficient <tt>D</tt> and Poisson's number <tt>nu</tt>. <tt>varargout</tt> is a variable sized list of coefficients for the given <tt>order</tt>.</p>
-<h2 id="3">Input Arguments</h2>
+<h2 id="1">Functions</h2>
 <div>
 <ul>
-<li>
-<tt>BCs</tt> : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL</li>
-<li>
-<tt>h</tt> : Grid spacing</li>
-<li>
-<tt>D</tt> : Stiffness constant <img src="bhcoefs_help_eq12762549760126468547.png" alt="$D = \frac{E * L_z^3}{12(1 - \nu^2)}$" style="width:57px;height:18px;"></li>
-<li>
-<tt>nu</tt> : Poisson's ratio</li>
-<li>
-<tt>order</tt>: Index of coefficient</li>
+<li> <a href="./magpie_help.html"><tt>magpie</tt></a>
+</li>
+<li> <a href="./bhmat_help.html"><tt>bhmat</tt></a>
+</li>
+<li> <a href="./youngcalc_help.html"><tt>youngcalc</tt></a>
+</li>
+<li> <a href="./biharmdiag_help.html"><tt>biharmdiag</tt></a>
+</li>
+<li> <a href="./fidimat_help.html"><tt>fidimat</tt></a>
+</li>
+<li> <a href="./bhcoefs_help.html"><tt>bhcoefs</tt></a>
+</li>
 </ul>
 </div>
-<h2 id="4">See Also</h2>
+<h2 id="2">References</h2>
+<div>
+<ul>
+<li>Howard, &amp; Angus, J. A. S. (2009). <i>Acoustics and psychoacoustics</i> (4th ed..).</li>
+<li>Ashby, (October 2021) [_Material property data for engineering materials_](<a href="https://www.ansys.com/content/dam/amp/2021/august/webpage-requests/education-resources-dam-upload-batch-2/material-property-data-for-eng-materials-BOKENGEN21.pdf">https://www.ansys.com/content/dam/amp/2021/august/webpage-requests/education-resources-dam-upload-batch-2/material-property-data-for-eng-materials-BOKENGEN21.pdf</a>) Department of Engineering, University of Cambridge (5th edition)</li>
+</ul>
+</div>
+<h2 id="3">
+<a href="https://github.com/Nemus-Project/magpie-matlab">Fork magpie on GitHub</a>
+</h2>
 <p class="footer">
 <br>
 <a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024a</a>
@@ -128,26 +135,28 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 </div>
 <!--
 ##### SOURCE BEGIN #####
-%% bhcoefs
-% Biharmonic coefficients of a block order
-%% Syntax
-% |varargout = BHCOEFS(BCs,h,D,nu,order)|
-%% Description
-% |varargout = BHCOEFS(BCs,h,D,nu,order)| returns the individual coefficients
-% of the isotropic biharmonic with elastic boundary constants for a biharmonic 
-% operator matrix with grid spacing |h|, stiffness coefficient |D| and Poisson's 
-% number |nu|. |varargout| is a variable sized list of coefficients for the given |order|.
+%% magpie
+% An open source MATLAB library for working with thin plates with generalized elastic boundary conditions. 
+% The framework is designed around two key use cases
+% 
+% # Exploration of plates for understanding how material properties affect mode shapes and modal frequencies.
+% # Derivation of material properties from experimental data.
+% 
+%%% Functions
 %
-%% Input Arguments
-%
-% * |BCs|  : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL
-% * |h|    : Grid spacing
-% * |D|    : Stiffness constant $D = \frac{E * L_z^3}{12(1 - \nu^2)}$
-% * |nu|   : Poisson's ratio
-% * |order|: Index of coefficient
-%
-%% See Also
-
+% * <./magpie_help.html |magpie|>
+% * <./bhmat_help.html |bhmat|>
+% * <./youngcalc_help.html |youngcalc|>
+% * <./biharmdiag_help.html |biharmdiag|>
+% * <./fidimat_help.html |fidimat|>
+% * <./bhcoefs_help.html |bhcoefs|>
+% 
+%%% References
+% 
+% * Howard, & Angus, J. A. S. (2009). _Acoustics and psychoacoustics_ (4th ed..).
+% * Ashby, (October 2021) [_Material property data for engineering materials_](https://www.ansys.com/content/dam/amp/2021/august/webpage-requests/education-resources-dam-upload-batch-2/material-property-data-for-eng-materials-BOKENGEN21.pdf) Department of Engineering, University of Cambridge (5th edition)
+%  
+%% <https://github.com/Nemus-Project/magpie-matlab Fork magpie on GitHub>
 ##### SOURCE END #####
 -->
 </body>

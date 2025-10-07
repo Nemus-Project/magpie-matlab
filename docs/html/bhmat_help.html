@@ -6,7 +6,7 @@
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
       -->
-<title>BHMAT</title>
+<title>bhmat</title>
 <meta name="generator" content="MATLAB 24.1">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
 <meta name="DC.date" content="2025-10-07">
@@ -76,9 +76,9 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 </head>
 <body>
 <div class="content">
-<h1>BHMAT</h1>
+<h1>bhmat</h1>
 <!--introduction-->
-<p>Generate 2D Biharmonic Operator</p>
+<p>Generate the 2D Biharmonic operator with elastic boundary constants.</p>
 <!--/introduction-->
 <h2>Contents</h2>
 <div>
@@ -87,32 +87,61 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <a href="#1">Syntax</a>
 </li>
 <li>
-<a href="#2">Arguments</a>
+<a href="#2">Description</a>
 </li>
 <li>
-<a href="#3">Returns</a>
+<a href="#3">Example</a>
+</li>
+<li>
+<a href="#4">Input Arguments</a>
+</li>
+<li>
+<a href="#5">See Also</a>
 </li>
 </ul>
 </div>
 <h2 id="1">Syntax</h2>
-<pre class="language-matlab">biHarm = BHMAT(BCs,Nxy,h,Lz,E,nu) <span class="comment">% compute a biharmonic for a  2D Thin Plate</span>
+<pre class="language-matlab">biharm = bhmat(BCs,Nxy,h,Lz,E,nu)
 </pre>
-<h2 id="2">Arguments</h2>
-<pre>     BCS          %-- density [kg/m^3]</pre>
-<p>Boundary condition columns represent a different elastic stiffness contant for each side of the plate</p>
-<pre>- Column 1 flexural constant
-- Column 2 rotational constant</pre>
-<pre>     BCs = [K0y, R0y;
-            Kx0, Rx0;
-            KLy, RLy;
-            KxL, RxL];</pre>
-<pre>     Nxy          %-- Number of grid points [Nx Ny]
-     h            %-- Grid spacing
-     Lz           %-- plate thickness
-     E            %-- Young's mod [Pa]
-     nu           %-- poisson's ratio</pre>
-<h2 id="3">Returns</h2>
-<p>Biharmonic operator with size [Nx Ny]</p>
+<h2 id="2">Description</h2>
+<p>
+<tt>biharm = bhmat(BCs,Nxy,h,Lz,E,nu)</tt> returns a <tt>Nxy</tt>-by-|Nxy| discrete biharmonic operator matrix <tt>biharm</tt> with elastic constants <tt>BCs</tt>, grid spacing <tt>h</tt>, plate thickness <tt>Lz</tt>, youngs Modulus <tt>E</tt> and Poisson's number  <tt>nu</tt>
+</p>
+<h2 id="3">Example</h2>
+<pre class="language-matlab">
+<span class="comment">%% physical and elastic parameters</span>
+Lz  = 0.8e-3;
+E   = 1.01e+11;
+nu  = 0.3;
+Nx  = 100;
+Ny  = 100;
+h   = 1e-2;
+BCs = 1e15 * ones(4,2) <span class="comment">%-- Clamped condition on all sides</span>
+</pre>
+<pre class="language-matlab">biharm = bhmat(BCs,[Nx Ny], h, Lz, E, nu);
+</pre>
+<h2 id="4">Input Arguments</h2>
+<div>
+<ul>
+<li>
+<tt>BCs</tt> : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL. Colun 1 is a flexural constraint and column 2 a rotational constraint</li>
+<li>
+<tt>Nxy</tt> : 2 element vector with number of gridpoints in each dimension <tt>[Nx Ny]</tt>
+</li>
+<li>
+<tt>h</tt> : Grid spacing in metres</li>
+<li>
+<tt>Lz</tt> : Plate thickness in metres</li>
+<li>
+<tt>E</tt> : Young's mod [Pa]</li>
+<li>
+<tt>nu</tt> : Poisson's number</li>
+</ul>
+</div>
+<h2 id="5">See Also</h2>
+<p>
+<tt>magpie</tt>
+</p>
 <p class="footer">
 <br>
 <a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024a</a>
@@ -121,34 +150,45 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 </div>
 <!--
 ##### SOURCE BEGIN #####
-%% BHMAT 
-% Generate 2D Biharmonic Operator
+%% bhmat 
+%
+% Generate the 2D Biharmonic operator with elastic boundary constants.
+%
 %% Syntax
-%   biHarm = BHMAT(BCs,Nxy,h,Lz,E,nu) % compute a biharmonic for a  2D Thin Plate
-%% Arguments
 %
-%       BCS          %REPLACE_WITH_DASH_DASH density [kg/m^3]
+%   biharm = bhmat(BCs,Nxy,h,Lz,E,nu)
 %
-% Boundary condition columns represent a different elastic stiffness
-% contant for each side of the plate
+%% Description
 %
-%  - Column 1 flexural constant
-%  - Column 2 rotational constant
+% |biharm = bhmat(BCs,Nxy,h,Lz,E,nu)| returns a |Nxy|-by-|Nxy|  discrete biharmonic 
+% operator matrix |biharm| with elastic constants |BCs|, grid spacing |h|, plate thickness
+% |Lz|, youngs Modulus |E| and Poisson's number  |nu|
 %
-%       BCs = [K0y, R0y;
-%              Kx0, Rx0;
-%              KLy, RLy;
-%              KxL, RxL];
+%% Example
 %
-%       Nxy          %REPLACE_WITH_DASH_DASH Number of grid points [Nx Ny]
-%       h            %REPLACE_WITH_DASH_DASH Grid spacing
-%       Lz           %REPLACE_WITH_DASH_DASH plate thickness
-%       E            %REPLACE_WITH_DASH_DASH Young's mod [Pa]
-%       nu           %REPLACE_WITH_DASH_DASH poisson's ratio
+%   %% physical and elastic parameters
+%   Lz  = 0.8e-3;
+%   E   = 1.01e+11;
+%   nu  = 0.3;
+%   Nx  = 100;
+%   Ny  = 100;
+%   h   = 1e-2;
+%   BCs = 1e15 * ones(4,2) %REPLACE_WITH_DASH_DASH Clamped condition on all sides
+%   
+%   biharm = bhmat(BCs,[Nx Ny], h, Lz, E, nu);
 %
-%% Returns
+%% Input Arguments
+% * |BCs|  : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL. Colun 1 is a flexural constraint and column 2 a rotational constraint
+% * |Nxy|  : 2 element vector with number of gridpoints in each dimension |[Nx Ny]|
+% * |h|    : Grid spacing in metres
+% * |Lz|   : Plate thickness in metres
+% * |E|    : Young's mod [Pa]
+% * |nu|   : Poisson's number
 %
-% Biharmonic operator with size [Nx Ny]
+%% See Also
+% |magpie|
+
+
 ##### SOURCE END #####
 -->
 </body>
