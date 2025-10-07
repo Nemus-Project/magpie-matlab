@@ -17,6 +17,6 @@
 %%% References
 % 
 % * Howard, & Angus, J. A. S. (2009). _Acoustics and psychoacoustics_ (4th ed..).
-% * Ashby, (October 2021) [_Material property data for engineering materials_](https://www.ansys.com/content/dam/amp/2021/august/webpage-requests/education-resources-dam-upload-batch-2/material-property-data-for-eng-materials-BOKENGEN21.pdf) Department of Engineering, University of Cambridge (5th edition)
+% * Ashby, (October 2021) <https://www.ansys.com/content/dam/amp/2021/august/webpage-requests/education-resources-dam-upload-batch-2/material-property-data-for-eng-materials-BOKENGEN21.pdf _Material property data for engineering materials_> Department of Engineering, University of Cambridge (5th edition)
 %  
 %% <https://github.com/Nemus-Project/magpie-matlab Fork magpie on GitHub>
