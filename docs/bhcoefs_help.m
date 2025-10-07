@@ -12,7 +12,7 @@
 %
 % * |BCs|  : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL
 % * |h|    : Grid spacing
-% * |D|    : Stiffness constant $D = \frac{E * L_z^3}{12(1 - \nu^2)}$
+% * |D|    : Stiffness constant $D = \frac{E L_z^3}{12(1 - \nu^2)}$
 % * |nu|   : Poisson's ratio
 % * |order|: Index of coefficient
 %

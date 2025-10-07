@@ -31,7 +31,7 @@
 %% Input Arguments
 % * |BCs|  : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL
 % * |h|    : Grid spacing
-% * |D|    : Stiffness constant $D = \frac{E * Lz^3}{(1-\nu^2)}$
+% * |D|    : Stiffness constant $D = \frac{E L_z^3}{(1-\nu^2)}$
 % * |nu|   : Poisson's ratio
 % * |dia|  : String representing the offset of the diagonal Index of coefficient. Valid diagonals are |['-2ny','-ny-1', '-ny', '-ny+1', '-2', '-1', '0', '1', '2', 'ny-1', 'ny', 'ny+1','2ny']|
 %

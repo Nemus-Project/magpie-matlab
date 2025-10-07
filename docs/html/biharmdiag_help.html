@@ -138,7 +138,7 @@ dm2Ny2([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
 <li>
 <tt>h</tt> : Grid spacing</li>
 <li>
-<tt>D</tt> : Stiffness constant <img src="biharmdiag_help_eq13194727122637504414.png" alt="$D = \frac{E * Lz^3}{(1-\nu^2)}$" style="width:49px;height:17px;"></li>
+<tt>D</tt> : Stiffness constant <img src="biharmdiag_help_eq12201781904979202770.png" alt="$D = \frac{E L_z^3}{(1-\nu^2)}$" style="width:49px;height:18px;"></li>
 <li>
 <tt>nu</tt> : Poisson's ratio</li>
 <li>
@@ -211,7 +211,7 @@ dm2Ny2([1,2,Ny,Ny+1]) = [dM(1),dM(2),dM(end-1),dM(end)];
 %% Input Arguments
 % * |BCs|  : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL
 % * |h|    : Grid spacing
-% * |D|    : Stiffness constant $D = \frac{E * Lz^3}{(1-\nu^2)}$
+% * |D|    : Stiffness constant $D = \frac{E L_z^3}{(1-\nu^2)}$
 % * |nu|   : Poisson's ratio
 % * |dia|  : String representing the offset of the diagonal Index of coefficient. Valid diagonals are |['-2ny','-ny-1', '-ny', '-ny+1', '-2', '-1', '0', '1', '2', 'ny-1', 'ny', 'ny+1','2ny']|
 %
