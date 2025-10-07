@@ -63,3 +63,4 @@
 % * |Dm|      : the eigenvalues of the biharmonic matrix
 %
 %% See Also
+% <./bhmat_help.html  |bhmat|> &#124; <./youngcalc_help.html |youngcalc|>

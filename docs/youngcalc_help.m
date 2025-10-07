@@ -33,3 +33,4 @@
 % * |Ntrain|  : an integer. Must be <= |Nmodes|. It is the number of training modes out of the available batch
 %
 %% See Also
+% <./bhmat_help.html  |bhmat|> &#124; <./magpie_help.html  |magpie|>

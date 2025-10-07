@@ -47,4 +47,4 @@
 %
 %% See Also
 %
-% * |bhmat|
+% <./bhmat_help.html |bhmat|> &#124; <./bhcoefs_help.html  |bhcoefs|>

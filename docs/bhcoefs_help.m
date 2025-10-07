@@ -17,3 +17,4 @@
 % * |order|: Index of coefficient
 %
 %% See Also
+% <./biharmdiag_help.html  |biharmdiag|> &#124; <./bhmat_help.html |bhmat|>

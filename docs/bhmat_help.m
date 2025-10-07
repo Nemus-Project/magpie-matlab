@@ -34,5 +34,5 @@
 % * |nu|   : Poisson's number
 %
 %% See Also
-% |magpie|
+% <./magpie_help.html |magpie|> &#124; <./youngcalc_help.html |youngcalc|> 
 

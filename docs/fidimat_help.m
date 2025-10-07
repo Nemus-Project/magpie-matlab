@@ -29,4 +29,4 @@
 %     'grad','xy','xxyy','laplace','biharm','I'];
 % 
 %% See Also
-% |bhmat|
+% <./bhmat_help.html  |bhmat|>
