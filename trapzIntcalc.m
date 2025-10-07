@@ -14,7 +14,7 @@
 %
 %% Input Arguments
 %
-% * |F|   : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL
+% * |F|   : ...
 % * |h|   : Grid spacing
 % * |Nxy| : 2-element array of grid points |[Nx Ny]| used for calculation. 
 %
