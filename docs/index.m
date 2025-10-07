@@ -7,12 +7,12 @@
 % 
 %%% Functions
 %
-% * <./magpie_help.html |magpie|>
-% * <./bhmat_help.html |bhmat|>
-% * <./youngcalc_help.html |youngcalc|>
-% * <./biharmdiag_help.html |biharmdiag|>
-% * <./fidimat_help.html |fidimat|>
-% * <./bhcoefs_help.html |bhcoefs|>
+% * <./magpie_help.html |magpie|: modal analysis of 2D plates with generalised elastic boundary conditions>
+% * <./bhmat_help.html |bhmat|: generate the 2D biharmonic operator with elastic boundary constants.>
+% * <./youngcalc_help.html |youngcalc|: estimate Young's modulus from measured modal frequencies >
+% * <./biharmdiag_help.html |biharmdiag|: biharmonic coefficients of a diagonal band by sublock>
+% * <./fidimat_help.html |fidimat|: generate finite difference spatial sparcity matrices>
+% * <./bhcoefs_help.html |bhcoefs|: biharmonic coefficients of a block order>
 % 
 %%% References
 % 

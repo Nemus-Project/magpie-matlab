@@ -1,5 +1,5 @@
 %% biharmdiag 
-% Biharmonic coefficients of a diagonal band and block
+% Biharmonic coefficients of a diagonal band by sublock
 %
 %% Syntax
 %   [d0,d1,dc,dM1,dM0] = biharmdiag(BCs,h,D,nu,dia)

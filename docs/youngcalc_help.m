@@ -1,5 +1,5 @@
 %% youngcalc
-% Calculate Young's Modulus from measured modal frequencies 
+% Estimate Young's Modulus from measured modal frequencies 
 %   E  = youngcalc(rho,ldim,h,BCs,ExpFreq,Ntrain)
 %% Description
 % |E  = youngcalc(rho,ldim,h,BCs,ExpFreq,Ntrain)|estimats Young's modulus |E| of a plate
