@@ -118,7 +118,19 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <p>
 <tt>Om = magpie (density, Youngs, poisson, dim, h, BCs)</tt> calculates all possible angular modal frequencies <tt>Om</tt> for the given plate parameters.</p>
 <p>
-<tt>Om = magpie (density, Youngs, poisson, dim, h, BCs)</tt> <tt>[Om,Q,Dm] = magpie (density, Youngs, poisson, dim, h, BCs)</tt> <tt>[Om,Q,Nxy] = magpie (density, Youngs, poisson, dim, h, BCs)</tt> <tt>[Om,Q,Nxy,biharm] = magpie (density, Youngs, poisson, dim, h, BCs)</tt> <tt>[Om,Q,Nxy,biharm,Dm] = magpie (density, Youngs, poisson, dim, h, BCs)</tt> optional outputs of eigenvectors <tt>Q</tt> adjusted grid size <tt>Nxy</tt>, biharmonic <tt>biharm</tt> and eigenvalues <tt>Dm</tt>.</p>
+<tt>Om = magpie (density, Youngs, poisson, dim, h, BCs)</tt>
+</p>
+<p>
+<tt>[Om,Q,Dm] = magpie (density, Youngs, poisson, dim, h, BCs)</tt>
+</p>
+<p>
+<tt>[Om,Q,Nxy] = magpie (density, Youngs, poisson, dim, h, BCs)</tt>
+</p>
+<p>
+<tt>[Om,Q,Nxy,biharm] = magpie (density, Youngs, poisson, dim, h, BCs)</tt>
+</p>
+<p>
+<tt>[Om,Q,Nxy,biharm,Dm] = magpie (density, Youngs, poisson, dim, h, BCs)</tt> optional outputs of eigenvectors <tt>Q</tt> adjusted grid size <tt>Nxy</tt>, biharmonic <tt>biharm</tt> and eigenvalues <tt>Dm</tt>.</p>
 <p>
 <tt>Om = magpie (density, Youngs, poisson, dim, h, BCs, Number_of_modes)</tt> avaialable with all the optional outputs above, but for a given number of modes. Usefull for large grids where calculating all modes is not feasible with memory constraints.</p>
 <h2 id="4">Example</h2>
@@ -197,9 +209,13 @@ BCs (:,1) = 1e15;   <span class="comment">%-- Felxural restraint high (simply su
 % frequencies |Om| for the given plate parameters.
 %%
 % |Om = magpie (density, Youngs, poisson, dim, h, BCs)|
+% 
 % |[Om,Q,Dm] = magpie (density, Youngs, poisson, dim, h, BCs)|
+% 
 % |[Om,Q,Nxy] = magpie (density, Youngs, poisson, dim, h, BCs)|
+% 
 % |[Om,Q,Nxy,biharm] = magpie (density, Youngs, poisson, dim, h, BCs)|
+% 
 % |[Om,Q,Nxy,biharm,Dm] = magpie (density, Youngs, poisson, dim, h, BCs)| optional outputs of eigenvectors |Q|
 % adjusted grid size |Nxy|, biharmonic |biharm| and eigenvalues |Dm|.
 %

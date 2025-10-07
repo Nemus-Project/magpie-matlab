@@ -18,9 +18,13 @@
 % frequencies |Om| for the given plate parameters.
 %%
 % |Om = magpie (density, Youngs, poisson, dim, h, BCs)|
+% 
 % |[Om,Q,Dm] = magpie (density, Youngs, poisson, dim, h, BCs)|
+% 
 % |[Om,Q,Nxy] = magpie (density, Youngs, poisson, dim, h, BCs)|
+% 
 % |[Om,Q,Nxy,biharm] = magpie (density, Youngs, poisson, dim, h, BCs)|
+% 
 % |[Om,Q,Nxy,biharm,Dm] = magpie (density, Youngs, poisson, dim, h, BCs)| optional outputs of eigenvectors |Q|
 % adjusted grid size |Nxy|, biharmonic |biharm| and eigenvalues |Dm|.
 %
