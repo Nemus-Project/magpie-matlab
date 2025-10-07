@@ -1,5 +1,27 @@
-function trapzInt = trapzIntcalc(F,h,Nx,Ny)
+%% TRAPZINTCALC
+% short description
+%% Syntax
+%
+% |trapzInt = trapzIntcalc(F,h,Nx,Ny)|
+%
+%% Description
+%
+% |trapzInt = trapzIntcalc(F,h,Nx,Ny)| returns....
+%
+%% Example
+%
+%
+%
+%% Input Arguments
+%
+% * |F|   : 4-by-2 matrix of elastic boundary constants, in the order y0, x0, yL, xL
+% * |h|   : Grid spacing
+% * |Nxy| : 2-element array of grid points |[Nx Ny]| used for calculation. 
+%
+function trapzInt = trapzIntcalc(F,h,Nxy)
 
+Nx = Nx(1);
+Ny = Ny(2);
 %-----------------------------------------------------------
 %--- define vector of weights
 wVec = zeros(1,(Ny+1)*(Nx+1)) ;
@@ -12,9 +34,7 @@ wEdge(1)        = 0.25  ;
 wEdge(end)      = 0.25  ;
 
 for m = 2 : Nx
-
     wVec((m-1)*(Ny+1)+1:m*(Ny+1)) = wInterior ;
-
 end
 
 wVec(1,1:Ny+1)       = wEdge ;
