@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>fidimat</title>
 <meta name="generator" content="MATLAB 24.1">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2025-10-07">
+<meta name="DC.date" content="2025-10-08">
 <meta name="DC.source" content="fidimat_help.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -114,6 +114,10 @@ fdmat = fidimat(l,m,ord,bctype)
 <p>
 <tt>fdmat = fidimat(l,m,ord,bctype)</tt> generate stencil <tt>fdmat</tt> with order given by <tt>ord</tt> for a 2D system of size <tt>l</tt>-by-|m| with specified boundary conditions bctype.</p>
 <h2 id="3">Example</h2>
+<pre class="language-matlab">Nx = 100;
+Ny = 100;
+XXYY = fidimat(Ny,Nx,<span class="string">'xxyy'</span>, 1);  <span class="comment">% 2D second order matrix</span>
+</pre>
 <h2 id="4">Input Arguments</h2>
 <div>
 <ul>
@@ -141,8 +145,11 @@ fdmat = fidimat(l,m,ord,bctype)
 <!--
 ##### SOURCE BEGIN #####
 %% fidimat 
+%
 % Generate Finite Difference Spatial Sparcity Matrices
+%
 %% Syntax
+%
 %   fdmat = fidimat(l,ord)
 %   fdmat = fidimat(l,m,ord)
 %   fdmat = fidimat(l,m,ord,bctype)
@@ -158,6 +165,10 @@ fdmat = fidimat(l,m,ord,bctype)
 % by |ord| for a 2D system of size |l|-by-|m| with specified boundary conditions bctype.
 %
 %% Example
+%
+%   Nx = 100;
+%   Ny = 100;
+%   XXYY = fidimat(Ny,Nx,'xxyy', 1);  % 2D second order matrix
 %
 %% Input Arguments
 % * m       % number of total grid points X axis

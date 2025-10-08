@@ -1,6 +1,9 @@
 %% fidimat 
+%
 % Generate Finite Difference Spatial Sparcity Matrices
+%
 %% Syntax
+%
 %   fdmat = fidimat(l,ord)
 %   fdmat = fidimat(l,m,ord)
 %   fdmat = fidimat(l,m,ord,bctype)
@@ -16,6 +19,10 @@
 % by |ord| for a 2D system of size |l|-by-|m| with specified boundary conditions bctype.
 %
 %% Example
+%
+%   Nx = 100;
+%   Ny = 100;
+%   XXYY = fidimat(Ny,Nx,'xxyy', 1);  % 2D second order matrix
 %
 %% Input Arguments
 % * m       % number of total grid points X axis
