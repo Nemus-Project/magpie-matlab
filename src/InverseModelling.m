@@ -10,38 +10,38 @@ close all
 
 %--------------------
 %-- plate parameters
-rho      = 473.9 ;
-Lx       = 0.223 ;
-Ly       = 0.114 ;
-Lz       = 0.003 ;
+rho   = 457 ;    % density [kg / m^3]
+Lx    = 0.212 ;  % edge lenght x [m]
+Ly    = 0.108 ;  % edge length y [m]
+Lz    = 0.0045 ; % thickness [m]
 
-%-- guessed values 
-Ex0      = 10.7e9 ;   
-Ey0      = 716e6 ;
-Gxy0     = 500e6 ;
-nux0     = 0.51 ;
+%-- guessed values
+Ex0    = 13.1e9 ;  % young's mod along x [Pa]
+Ey0    = 0.881e9 ; % young's mod along y [Pa]
+Gxy0   = 0.504e9 ; % shear mod [Pa]
+nux0   = 0.4 ;     % poisson ratio
 
 %-- elastic constants around the edges
-KRmat = [0e1,0e13; %Kx0 Rx0
+KRmat = [0e13,0e13; %Kx0 Rx0
     1e13, 1e13; % K0y R0y
     0e13, 0e13; % KxL RxL
     0e13, 0e13] ; % KLy RLy
 
 %-- measured experimental frequencies (Hz)
-ExpFreqs = [52
-    98
-    311
-    337
-    398
-    637] ;
+ExpFreqs = [87
+    160
+    540
+    616
+    651
+    1061] ;
 %--------------------
 
 
 %--------------------
 %-- general parameters
-fmax = 2000 ; %-- maximum frequency to be computed
-ppw  = 100 ; % points per wavelength at maximum frequency. Choose 3 <= ppw
-Nmeas = 6 ; % total number of modes required
+fmax = 5000 ; %-- maximum frequency to be computed
+ppw  = 50 ; % points pewhr wavelength at maximum frequency. Choose 3 <= ppw
+Nmeas = length(ExpFreqs) ; % total number of modes required
 %--------------------
 
 %--------------------
@@ -79,7 +79,7 @@ NN = 1 ; % mode number to plot (plot will display modes between NN and NN + 8)
 
 %--------------------
 %-- MAC parameters
-MAC_threshold = 0.99 ;
+MAC_threshold = 0.9 ;
 %--------------------
 
 % END CUSTOM PARAMETERS
@@ -138,7 +138,7 @@ yax = linspace(0,Ly,Ny+1) ;
 
 %-------------------------------------------------------------------------
 % PLOTS
-modal_plotter(cmap,6,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
+modal_plotter(cmap,Nmeas,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
 %-------------------------------------------------------------------------
 
 QRef = Q ;
@@ -188,7 +188,7 @@ for p = 1 : 5
         %-------------------------------------------------------------------------
         % PLOTS
         close all
-        modal_plotter(cmap,6,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
+        modal_plotter(cmap,Nmeas,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
         sttit = sprintf('Test Index = %d, Avg. MAC = %1.2f',ind,mean(MAC)) ;
         sgtitle(sttit,'interpreter','latex') ;
         drawnow ; pause(0.1) ;
@@ -287,51 +287,16 @@ end
 %------------- End Training Phase ........................................
 
 %--------------- Plate: Measured spruce plate
+indCell = {};
+for i = 3:Nmeas
+    combs = nchoosek(1:Nmeas, i);     % Get all combinations of size k
+    Ncombs = height(combs);
+    for j = 1:Ncombs
+        indCell{end+1, 1} = combs(j, :);  % Store each row in the cell
+    end
+end
+Ntot = length(indCell)
 
-indCell = {
-    [1 2 3]
-    [1 2 4]
-    [1 2 5 ]
-    [1 2 6 ]
-    [1 3 4 ]
-    [1 3 5 ]
-    [1 3 6 ]
-    [1 4 5 ]
-    [1 4 6 ]
-    [1 5 6 ]
-    [2 3 4]
-    [2 3 5]
-    [2 3 6]
-    [2 4 5]
-    [2 4 6]
-    [2 5 6]
-    [3 4 5]
-    [3 4 6]
-    [3 5 6]
-    [4 5 6]
-    [1 2 3 4]
-    [1 2 3 5]
-    [1 2 3 6]
-    [1 2 4 5]
-    [1 2 4 6]
-    [1 2 5 6]
-    [1 3 4 5]
-    [1 3 4 6]
-    [1 3 5 6]
-    [1 4 5 6]
-    [2 3 4 5]
-    [2 3 4 6]
-    [2 3 5 6]
-    [2 4 5 6]
-    [3 4 5 6]
-    [1 2 3 4 5]
-    [1 2 3 4 6]
-    [1 2 3 5 6]
-    [1 2 4 5 6]
-    [1 3 4 5 6]
-    [2 3 4 5 6]
-    [1 2 3 4 5 6]} ;
-Ntot = 42 ;
 
 errDx = zeros(Ntot,1) ;
 errDy = zeros(Ntot,1) ;
@@ -341,12 +306,9 @@ DyLS  = zeros(Ntot,1) ;
 DsLS  = zeros(Ntot,1) ;
 condNumb = zeros(Ntot,1) ;
 
-rho      = 473.9 ;
-Lx       = 0.223 ;
-Ly       = 0.114 ;
-Lz       = 0.003 ;
-nux      = nux0 ;
-nuy      = Ey0/Ex0*nux ;
+
+nux     = nux0 ;
+nuy     = Ey0/Ex0*nux ;
 
 
 Om0=2*pi*ExpFreqs;
@@ -441,7 +403,7 @@ Standard_Deviations_Percent    = vpa([stdEx/meanEx*100 stdEy/meanEy*100 stdGxy/m
 Nstd = 8 ;
 
 subplot(1,3,1)
-plot((0:Ntot+1),ones(Ntot+2,1)*meanEx/1e9,'--k') ; xlim([0,Ntot+1]); ylim([meanEx-Nstd*stdEx,meanEx+Nstd*stdEx]/1e9);
+plot((0:Ntot+1),ones(Ntot+2,1)*meanEx/1e9,'--k') ; xlim([0,Ntot+1]); ylim([meanEx-Nstd*(stdEx+0.1),meanEx+Nstd*Nstd*(stdEx+0.1)]/1e9);
 x = [0 Ntot+1 Ntot+1 0];
 y = [meanEx-stdEx meanEx-stdEx meanEx+stdEx meanEx+stdEx]/1e9;
 patch(x,y,'red','FaceAlpha',0.2,'LineStyle','none'); hold on ;
@@ -454,7 +416,7 @@ ylabel('$\tilde E_x$ (GPa)','interpreter','latex') ;
 xlabel('mode set','interpreter','latex') ;
 
 subplot(1,3,2)
-plot((0:Ntot+1),ones(Ntot+2,1)*meanEy/1e6,'--k') ; xlim([0,Ntot+1]); ylim([meanEy-Nstd*stdEy,meanEy+Nstd*stdEy]/1e6)
+plot((0:Ntot+1),ones(Ntot+2,1)*meanEy/1e6,'--k') ; xlim([0,Ntot+1]); ylim([meanEy-Nstd*(stdEy+0.1),meanEy+Nstd*(stdEy+0.1)]/1e6)
 x = [0 Ntot+1 Ntot+1 0];
 y = [meanEy-stdEy meanEy-stdEy meanEy+stdEy meanEy+stdEy]/1e6;
 patch(x,y,'blue','FaceAlpha',0.2,'LineStyle','none'); hold on ;
@@ -468,7 +430,7 @@ xlabel('mode set','interpreter','latex') ;
 
 
 subplot(1,3,3)
-plot((0:Ntot+1),ones(Ntot+2,1)*meanGxy/1e6,'--k') ; xlim([0,Ntot+1]); ylim([meanGxy-Nstd*stdGxy,meanGxy+Nstd*stdGxy]/1e6)
+plot((0:Ntot+1),ones(Ntot+2,1)*meanGxy/1e6,'--k') ; xlim([0,Ntot+1]); ylim([meanGxy-Nstd*(stdGxy+0.1),meanGxy+Nstd*(stdGxy+0.1)]/1e6)
 x = [0 Ntot+1 Ntot+1 0];
 y = [meanGxy-stdGxy meanGxy-stdGxy meanGxy+stdGxy meanGxy+stdGxy]/1e6;
 patch(x,y,'green','FaceAlpha',0.2,'LineStyle','none'); hold on ;

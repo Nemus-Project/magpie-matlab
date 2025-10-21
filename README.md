@@ -1,6 +1,8 @@
 # MAGPIE
 > *An open-source plate vibration simulation and analysis framework*
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15681504.svg)](https://doi.org/10.5281/zenodo.15681504)
+
 M. Ducceschi`*`, M. Hamilton`*`, A. Mousseau`^`, S. Duran`*`
 
 `*` NEMUS Lab - University of Bologna

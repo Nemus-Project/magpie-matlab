@@ -8,7 +8,7 @@
 
 clear all
 close all
-clc
+% clc
 
 %-------------------------------------------------------------------------
 % CUSTOM PARAMETERS (user can change these)
@@ -16,27 +16,29 @@ clc
 %--------------------
 %-- general parameters
 fmax = 5000 ; % maximum frequency to be computed
-ppw  = 3 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
-Nmodes = 6 ; % select total number of modes to be computed. If Nmodes = [], all available modes are computed
+ppw  = 50 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
+Nmodes = 9 ; % select total number of modes to be computed. If Nmodes = [], all available modes are computed
 %--------------------
 
 %--------------------
 %-- plate parameters
-rho   = 390 ;    % density [kg / m^3]
-nux   = 0.39 ;   % poisson ratio
-Ex    = 10.9e9 ; % young's mod along x [Pa]
-Ey    = 0.64e9 ; % young's mod along y [Pa]
-Gxy   = 0.58e9 ; % shear mod [Pa]
-Lx    = 0.6 ;    % edge lenght x [m]
-Ly    = 0.6 ;    % edge length y [m]
-Lz    = 1.0e-3 ; % thickness [m]
+rho   = 457 ;    % density [kg / m^3]
+Lx    = 0.212 ;  % edge lenght x [m]
+Ly    = 0.108 ;  % edge length y [m]
+Lz    = 0.0045 ; % thickness [m]
+
+%-- guessed values
+Ex0    = 13.1e9 ;  % young's mod along x [Pa]
+Ey0    = 0.881e9 ; % young's mod along y [Pa]
+Gxy0   = 0.504e9 ; % shear mod [Pa]
+nux0   = 0.4 ;     % poisson ratio
 
 
 %-- elastic constants around the edges
-KRmat = [1e10,1e10; % Kx0 Rx0 
+KRmat = [0e10,0e10; % Kx0 Rx0 
     1e10, 1e10;     % K0y R0y
-    1e10, 1e10;   % KxL RxL
-    1e10, 1e10] ; % KLy RLy
+    0e10, 0e10;   % KxL RxL
+    0e10, 0e10] ; % KLy RLy
 %--------------------
 
 %--------------------
@@ -75,7 +77,7 @@ Mlump        = [0.2,0.01].' ;  % masses [kg]
 %-- plot parameters parameters
 cmap = cmaps(4) ; % select colormap 1 = RedBlue, 2 = GreenPurple, 3 = OrangeGreen, 4 = PurpleOrange
 NN = 1 ; % first mode number to be plotted 
-Nplots = 6 ; % select 3,6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
+Nplots = 9 ; % select 3,6 or 9. If another number is selected, it is defaulted to 3. Displayed plots are NN + (0:Nplots - 1)
 %--------------------
 
 % END CUSTOM PARAMETERS 
@@ -86,14 +88,14 @@ Nplots = 6 ; % select 3,6 or 9. If another number is selected, it is defaulted t
 % DERIVED PARAMETERS (user cannot change these)
 
 %-- plate grid spacings and grid points
-Evec = [Ex,Ey,Gxy] ;
+Evec = [Ex0,Ey0,Gxy0] ;
 Lvec = [Lx,Ly,Lz] ;
 facx = sqrt(2*pi)*sqrt(sqrt(Evec(1)*Lvec(3)^2/12/rho)) ;
 facy = sqrt(2*pi)*sqrt(sqrt(Evec(2)*Lvec(3)^2/12/rho)) ;
 hx = facx/ppw/sqrt(fmax) ; % this applies the formula hx*ppw = cx/fmax (\lambda f = c)
 hy = facy/ppw/sqrt(fmax) ; % this applies the formula hy*ppw = cy/fmax (\lambda f = c)
 Nx   = round(Lvec(1)/hx) ; Ny = round(Lvec(2)/hy) ;
-Nvec = [Nx,Ny]  % grid points
+Nvec = [Nx,Ny];  % grid points
 hvec = [Lvec(1)/Nvec(1), Lvec(2)/Nvec(2)] ; % grid spacings 
 
 
@@ -124,13 +126,14 @@ yax = linspace(0,Ly,Ny+1) ;
 
 %-------------------------------------------------------------------------
 % EIGENVALUE PROBLEM
-[Om,Q,K,M,Qtot,OmTot] = freq_domain_sim(rho,Evec,nux,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord) ;
+[Om,Q,K,M,Qtot,OmTot] = freq_domain_sim(rho,Evec,nux0,Lvec,hvec,Nvec,KRmat,fmax,Nmodes,Nribs,beamParams,beamCoord,Nlump,Mlump,lumpCoord) ;
 %-------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------
 % PLOT RESULTS
-modal_plotter(cmap,Nplots,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord)
+modal_plotter(cmap,Nplots,NN,X,Y,Q,Lvec,Nvec,Nribs,Nlump,beamParams,beamCoord,lumpCoord);
 %-------------------------------------------------------------------------
 
-Om/2/pi
-digits(3); vpa(ans)
+ModeFrequencies = Om/2/pi;
+digits(3);
+ModeFrequencies = vpa(ModeFrequencies)

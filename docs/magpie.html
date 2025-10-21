@@ -1,0 +1,435 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>MAGPIE Modal analysis of 2D Plates with Generalised Elastic Boundary Conditions</title>
+<meta name="generator" content="MATLAB 24.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-10-06">
+<meta name="DC.source" content="magpie.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>MAGPIE Modal analysis of 2D Plates with Generalised Elastic Boundary Conditions</h1>
+<!--introduction-->
+<pre class="language-matlab">[Om,Q,Nx,Ny,biHarm,Dm] = MAGPIE (density, Youngs, poisson, dim, h, BCs, Number_of_modes, plot_type, normalisation)
+</pre>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Arguments:</a>
+</li>
+<li>
+<a href="#2">Returns:</a>
+</li>
+<li>
+<a href="#3">Example:</a>
+</li>
+<li>
+<a href="#5">Variable Arguments</a>
+</li>
+<li>
+<a href="#6">Argument Validation</a>
+</li>
+<li>
+<a href="#7">Unpack array variables</a>
+</li>
+<li>
+<a href="#8">Build Biharmonic</a>
+</li>
+<li>
+<a href="#9">EIGENVALUES</a>
+</li>
+<li>
+<a href="#10">Plotting</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Arguments:</h2>
+<pre>     rho          %-- density [kg/m^3]
+     E            %-- Young's mod [Pa]
+     nu           %-- poisson's ratio</pre>
+<pre>     3 element array  representing  [x,y,z] dimensions of plate
+     ldim = [Lx,  %-- length along x [m]
+             Ly,  %-- length along y [m]
+             Lz]  %-- thickness [m]</pre>
+<pre>     h            %-- grid spacing</pre>
+<pre>     2 column array of eleastic boundary constants around each edge of
+     the plate.</pre>
+<pre>     Column 1 flexural constant
+     Column 2 rotational constant</pre>
+<pre>     BCs = [K0y, R0y;
+            Kx0, Rx0;
+            KLy, RLy;
+            KxL, RxL];</pre>
+<pre>     Nm      %-- number of modes to compute</pre>
+<pre>     plot_type %-- Select from 'chladni', '3d', 'none'</pre>
+<pre>     normalisation %-- boolean which dictates wether eigen vectors are
+     normalised</pre>
+<h2 id="2">Returns:</h2>
+<pre>         Om      : Angular modal frequencies
+         Q       : A matrix of column eigenvector(s)
+         Nx      : Grid points along the x-axis
+         Ny      : Grid points along the y-axis
+         biHarm  : Biharmonic Matrix for the plate
+         Dm      : the eigenvalues of the biharmonic matrix</pre>
+<h2 id="3">Example:</h2>
+<pre>         %% physical and elastic parameters
+         Lx = 0.10; Ly = 0.08; Lz = 0.81e-3;
+         ldim = [Lx Ly Lz];       % plate dimensions [x, y, z] in metres
+         E    = 1.01e+11 ;        %-- Young's mod [Pa]
+         rho  = 8765 ;            %-- density [kg/m^3]
+         nu   = 0.3 ;             %-- poisson's ratio
+         Nm   = 16;               %-- number of modes to compute
+         h    = sqrt(Lx*Ly)*0.01; %-- Grid Spacing
+         BCs = ones(4,2) * 1e15   %-- elastic constants around the edges</pre>
+<pre>         [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho, E, nu, ldim, h, BCs, Nm,'none');</pre>
+<pre class="codeinput">
+<span class="keyword">function</span> [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,shouldNormalise)
+</pre>
+<pre class="codeinput">disp(<span class="string">'Magpie v0.0.2'</span>);
+</pre>
+<pre class="codeoutput">Magpie v0.0.2
+</pre>
+<h2 id="5">Variable Arguments</h2>
+<pre class="codeinput">
+<span class="keyword">if</span> nargin &lt; 9
+    shouldNormalise = false;
+<span class="keyword">end</span>
+<span class="keyword">if</span> nargin &lt; 8
+    plot_type = <span class="string">'none'</span>;
+<span class="keyword">end</span>
+<span class="keyword">if</span> nargin &lt; 7
+    Nm = 0;
+<span class="keyword">end</span>
+</pre>
+<h2 id="6">Argument Validation</h2>
+<pre class="codeinput">validateattributes(rho,  {<span class="string">'double'</span>}, {<span class="string">'nonempty'</span>,<span class="string">'positive'</span>},<span class="string">'magpie.m'</span>,<span class="string">'Density (rho)'</span>,1);
+validateattributes(E,    {<span class="string">'double'</span>}, {<span class="string">'nonempty'</span>,<span class="string">'positive'</span>},<span class="string">'magpie.m'</span>,<span class="string">'Young`s Modulus (E)'</span>, 2);
+validateattributes(nu,   {<span class="string">'double'</span>}, {<span class="string">'nonempty'</span>,<span class="string">'positive'</span>},<span class="string">'magpie.m'</span>,<span class="string">'Poisson Number (nu)'</span>,3);
+validateattributes(ldim, {<span class="string">'double'</span>}, {<span class="string">'numel'</span>, 3, <span class="string">'positive'</span>},<span class="string">'magpie.m'</span>,<span class="string">'Plate Dimensions (ldim)'</span>,4);
+validateattributes(h,    {<span class="string">'double'</span>}, {<span class="string">'nonempty'</span>,<span class="string">'positive'</span>},<span class="string">'magpie.m'</span>,<span class="string">'Grid Spacing (h)'</span>,5);
+validateattributes(BCs,  {<span class="string">'double'</span>}, {<span class="string">'size'</span>, [4,2], <span class="string">'nonnegative'</span>},<span class="string">'magpie.m'</span>,<span class="string">'Boundary Conditions (BCs)'</span>,6);
+validateattributes(Nm,   {<span class="string">'numeric'</span>}, {<span class="string">'integer'</span>,<span class="string">'nonnegative'</span>},<span class="string">'magpie.m'</span>,<span class="string">'Number of Modes (Nm)'</span>,7);
+validatestring(plot_type,[<span class="string">"chladni"</span>,<span class="string">"3D"</span>,<span class="string">"none"</span>]);
+</pre>
+<pre class="codeoutput error">Not enough input arguments.
+
+Error in magpie (line 69)
+validateattributes(rho,  {'double'}, {'nonempty','positive'},'magpie.m','Density (rho)',1);
+</pre>
+<h2 id="7">Unpack array variables</h2>
+<pre class="codeinput">pack_ldim = num2cell(ldim);
+[Lx, Ly, Lz] = pack_ldim{:};
+
+<span class="comment">%%--- derived parameters (don't change here)</span>
+D = E * Lz^3 / 12 / (1-nu^2);
+Nx      = floor(Lx/h) ;
+Ny      = floor(Ly/h) ;
+
+Nx      = floor(Lx/h) ;
+Ny      = floor(Ly/h) ;
+
+<span class="comment">% % h = Ly/Ny;</span>
+</pre>
+<h2 id="8">Build Biharmonic</h2>
+<pre class="codeinput">biHarm = bhmat(BCs,[Nx Ny], h, Lz, E, nu);
+</pre>
+<h2 id="9">EIGENVALUES</h2>
+<pre class="codeinput">Nmodes = (Nx+1)*(Ny+1) ;
+<span class="keyword">if</span> Nm
+    Nmodes = Nm ;
+<span class="keyword">end</span>
+[Q,Dm] = eigs(biHarm,Nmodes,0.0,<span class="string">'Tolerance'</span>,eps,<span class="string">'Display'</span>,true) ;
+[~,indSort] = sort(diag((Dm))) ;
+Q = Q(:,indSort) ;
+
+Dm    = diag(Dm) ;
+Om    = sqrt(abs(Dm))*sqrt(D/rho/Lz) ;
+
+<span class="keyword">if</span> shouldNormalise
+    <span class="keyword">for</span> nQ = 1 : Nmodes
+        Qtemp   = Q(:,nQ) ;
+        Qnorm   = trapzIntcalc(Qtemp.*Qtemp,h,Nx,Ny) ;
+        Qtemp   = Qtemp / sqrt(Qnorm) ;
+        Q(:,nQ) = Qtemp ;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="10">Plotting</h2>
+<pre class="codeinput">
+<span class="keyword">switch</span> plot_type
+    <span class="keyword">case</span> <span class="string">'chladni'</span>
+        subs = ceil(sqrt(Nmodes));
+
+        colormap(<span class="string">'gray'</span>) ;
+        cmp = colormap;
+        cmp = flipud(cmp);
+        colormap(cmp);
+
+        <span class="keyword">for</span> m = 1 : Nmodes
+            mdShape = reshape(Q(:,m),[(Ny+1),(Nx+1)]) ;
+            subplot(subs,subs,m)
+            mesh(3e3*real(mdShape),(abs(mdShape)),<span class="string">'FaceColor'</span>,<span class="string">'texturemap'</span>) ;
+            view(2);
+            axis <span class="string">equal</span>;
+            axis <span class="string">tight</span>;
+            <span class="comment">% axis off;</span>
+            clim([0.00000005 0.0009]);
+            set(gca, <span class="string">'box'</span>, <span class="string">'on'</span>,<span class="string">'Visible'</span>, <span class="string">'on'</span>,<span class="string">'xtick'</span>, [], <span class="string">'ytick'</span>, [])
+        <span class="keyword">end</span>
+
+    <span class="keyword">case</span> <span class="string">'3D'</span>
+
+        subs = ceil(sqrt(Nmodes));
+        colormap(<span class="string">'parula'</span>) ;
+        xax = (0:Nx)*h ;
+        yax = (0:Ny)*h ;
+        [X,Y] = meshgrid(xax,yax) ;
+
+        <span class="keyword">for</span> m = 1 : Nmodes
+            mdShape = reshape(Q(:,m),[(Ny+1),(Nx+1)]) ;
+            subplot(subs,subs,m)
+            mesh(X,Y,3000*(mdShape),(abs(mdShape)),<span class="string">'FaceColor'</span>,<span class="string">'texturemap'</span>) ;
+        <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<pre class="codeinput">
+<span class="keyword">end</span>
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024a</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+%% MAGPIE Modal analysis of 2D Plates with Generalised Elastic Boundary Conditions
+%   [Om,Q,Nx,Ny,biHarm,Dm] = MAGPIE (density, Youngs, poisson, dim, h, BCs, Number_of_modes, plot_type, normalisation)
+%
+%%   Arguments:
+%       rho          %REPLACE_WITH_DASH_DASH density [kg/m^3]
+%       E            %REPLACE_WITH_DASH_DASH Young's mod [Pa]
+%       nu           %REPLACE_WITH_DASH_DASH poisson's ratio
+%
+%       3 element array  representing  [x,y,z] dimensions of plate
+%       ldim = [Lx,  %REPLACE_WITH_DASH_DASH length along x [m]
+%               Ly,  %REPLACE_WITH_DASH_DASH length along y [m]
+%               Lz]  %REPLACE_WITH_DASH_DASH thickness [m]
+%
+%       h            %REPLACE_WITH_DASH_DASH grid spacing
+%
+%       2 column array of eleastic boundary constants around each edge of
+%       the plate.
+%
+%       Column 1 flexural constant
+%       Column 2 rotational constant
+%
+%       BCs = [K0y, R0y;
+%              Kx0, Rx0;
+%              KLy, RLy;
+%              KxL, RxL];
+%
+%       Nm      %REPLACE_WITH_DASH_DASH number of modes to compute
+%
+%       plot_type %REPLACE_WITH_DASH_DASH Select from 'chladni', '3d', 'none'
+%
+%       normalisation %REPLACE_WITH_DASH_DASH boolean which dictates wether eigen vectors are
+%       normalised
+%
+%% Returns:
+%           Om      : Angular modal frequencies
+%           Q       : A matrix of column eigenvector(s)
+%           Nx      : Grid points along the x-axis
+%           Ny      : Grid points along the y-axis
+%           biHarm  : Biharmonic Matrix for the plate
+%           Dm      : the eigenvalues of the biharmonic matrix
+%
+%% Example:
+%
+%           %% physical and elastic parameters
+%           Lx = 0.10; Ly = 0.08; Lz = 0.81e-3;
+%           ldim = [Lx Ly Lz];       % plate dimensions [x, y, z] in metres
+%           E    = 1.01e+11 ;        %REPLACE_WITH_DASH_DASH Young's mod [Pa]
+%           rho  = 8765 ;            %REPLACE_WITH_DASH_DASH density [kg/m^3]
+%           nu   = 0.3 ;             %REPLACE_WITH_DASH_DASH poisson's ratio
+%           Nm   = 16;               %REPLACE_WITH_DASH_DASH number of modes to compute
+%           h    = sqrt(Lx*Ly)*0.01; %REPLACE_WITH_DASH_DASH Grid Spacing
+%           BCs = ones(4,2) * 1e15   %REPLACE_WITH_DASH_DASH elastic constants around the edges
+%
+%           [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho, E, nu, ldim, h, BCs, Nm,'none');
+%
+function [Om,Q,Nx,Ny,biHarm,Dm] = magpie(rho,E,nu,ldim,h,BCs,Nm,plot_type,shouldNormalise)
+disp('Magpie v0.0.2');
+%% Variable Arguments
+if nargin < 9
+    shouldNormalise = false;
+end
+if nargin < 8
+    plot_type = 'none';
+end
+if nargin < 7
+    Nm = 0;
+end
+%% Argument Validation
+validateattributes(rho,  {'double'}, {'nonempty','positive'},'magpie.m','Density (rho)',1);
+validateattributes(E,    {'double'}, {'nonempty','positive'},'magpie.m','Young`s Modulus (E)', 2);
+validateattributes(nu,   {'double'}, {'nonempty','positive'},'magpie.m','Poisson Number (nu)',3);
+validateattributes(ldim, {'double'}, {'numel', 3, 'positive'},'magpie.m','Plate Dimensions (ldim)',4);
+validateattributes(h,    {'double'}, {'nonempty','positive'},'magpie.m','Grid Spacing (h)',5);
+validateattributes(BCs,  {'double'}, {'size', [4,2], 'nonnegative'},'magpie.m','Boundary Conditions (BCs)',6);
+validateattributes(Nm,   {'numeric'}, {'integer','nonnegative'},'magpie.m','Number of Modes (Nm)',7);
+validatestring(plot_type,["chladni","3D","none"]);
+
+%% Unpack array variables
+pack_ldim = num2cell(ldim);
+[Lx, Ly, Lz] = pack_ldim{:};
+
+%%REPLACE_WITH_DASH_DASH- derived parameters (don't change here)
+D = E * Lz^3 / 12 / (1-nu^2);
+Nx      = floor(Lx/h) ;
+Ny      = floor(Ly/h) ;
+
+Nx      = floor(Lx/h) ;
+Ny      = floor(Ly/h) ;
+
+% % h = Ly/Ny;
+
+%% Build Biharmonic
+biHarm = bhmat(BCs,[Nx Ny], h, Lz, E, nu);
+
+%% EIGENVALUES
+
+Nmodes = (Nx+1)*(Ny+1) ;
+if Nm
+    Nmodes = Nm ;
+end
+[Q,Dm] = eigs(biHarm,Nmodes,0.0,'Tolerance',eps,'Display',true) ;
+[~,indSort] = sort(diag((Dm))) ;
+Q = Q(:,indSort) ;
+
+Dm    = diag(Dm) ;
+Om    = sqrt(abs(Dm))*sqrt(D/rho/Lz) ;
+
+if shouldNormalise
+    for nQ = 1 : Nmodes
+        Qtemp   = Q(:,nQ) ;
+        Qnorm   = trapzIntcalc(Qtemp.*Qtemp,h,Nx,Ny) ;
+        Qtemp   = Qtemp / sqrt(Qnorm) ;
+        Q(:,nQ) = Qtemp ;
+    end
+end
+
+%% Plotting
+
+switch plot_type
+    case 'chladni'
+        subs = ceil(sqrt(Nmodes));
+
+        colormap('gray') ;
+        cmp = colormap;
+        cmp = flipud(cmp);
+        colormap(cmp);
+
+        for m = 1 : Nmodes
+            mdShape = reshape(Q(:,m),[(Ny+1),(Nx+1)]) ;
+            subplot(subs,subs,m)
+            mesh(3e3*real(mdShape),(abs(mdShape)),'FaceColor','texturemap') ;
+            view(2);
+            axis equal;
+            axis tight;
+            % axis off;
+            clim([0.00000005 0.0009]);
+            set(gca, 'box', 'on','Visible', 'on','xtick', [], 'ytick', [])
+        end
+
+    case '3D'
+
+        subs = ceil(sqrt(Nmodes));
+        colormap('parula') ;
+        xax = (0:Nx)*h ;
+        yax = (0:Ny)*h ;
+        [X,Y] = meshgrid(xax,yax) ;
+
+        for m = 1 : Nmodes
+            mdShape = reshape(Q(:,m),[(Ny+1),(Nx+1)]) ;
+            subplot(subs,subs,m)
+            mesh(X,Y,3000*(mdShape),(abs(mdShape)),'FaceColor','texturemap') ;
+        end
+end
+
+end
+
+##### SOURCE END #####
+-->
+</body>
+</html>

@@ -15,7 +15,7 @@ clc
 
 %--------------------
 %-- general parameters
-fmax = 5000 ; % maximum frequency to be computed
+fmax = 2000 ; % maximum frequency to be computed
 ppw  = 3 ; % points per wavelength at maximum frequency. Choose 3 <= ppw 
 T    = 0.5 ; % total simulation time [s]
 %--------------------
