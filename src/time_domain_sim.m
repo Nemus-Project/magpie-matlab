@@ -266,7 +266,7 @@ for n = 1 : Ts
             sigy = Ey/(1-nux*nuy)*(ey+nux*ex) ;
             tau  = Gxy*gm ;
 
-            figure; colormap(cmap) ;
+            colormap(cmap) ;
 
 
             subplot(2,3,1)
