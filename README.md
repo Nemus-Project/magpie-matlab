@@ -176,7 +176,7 @@ $$\rho \zeta \ddot {\mathbf u}(t)  =  {\mathbf B}{\mathbf u}(t)$$
 where the matrix $\mathbf{B}$ is of size $(N_x+1)(N_y+1)\times (N_x+1)(N_y+1)$. The matrix is clearly sparse, since this represents the "locality" of the difference operators. A sparsity pattern is given in the figure below. 
 
 <p align="center">
-<img src="/img/sparsitypattern.png" width="200" />
+<img src="/img/sparsitypattern1.png" width="200" />
 </p>
 
 At a generic inner point in the domain $(l,m)$ such that $(l\pm 2,m\pm 2)$ are all within the domain or on the boundary, the difference operator takes on the particular stencil below, a 13-point stencil generalising the biharmonic difference operator in the isotropic case:
